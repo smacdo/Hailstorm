@@ -25,6 +25,9 @@
     <ClCompile Include="src\pragmas.cpp">
       <Filter>VS Support</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\mainwindow.cpp">
+      <Filter>Gui Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\debugging.h">
@@ -48,9 +51,6 @@
     <ClInclude Include="src\gui\assertiondialog.h">
       <Filter>Gui Code\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\gui\mainwindow.h">
-      <Filter>Gui Code\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\Resource.h">
       <Filter>Gui Code\Headers</Filter>
     </ClInclude>
@@ -66,6 +66,7 @@
     <ClInclude Include="src\targetver.h">
       <Filter>VS Support</Filter>
     </ClInclude>
+    <ClInclude Include="src\gui\mainwindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="directx.rc" />

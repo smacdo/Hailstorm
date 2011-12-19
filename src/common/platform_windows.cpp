@@ -158,22 +158,11 @@ namespace App
     }
 }
 
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE:  Processes messages for the main window.
-//
-//  WM_COMMAND	- process the application menu
-//  WM_PAINT	- Paint the main window
-//  WM_DESTROY	- post a quit message and return
-//
-//
+/////////////////////////////////////////////////////////////////////////////
+// Application message loop
+/////////////////////////////////////////////////////////////////////////////
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    int wmId, wmEvent;
-    PAINTSTRUCT ps;
-    HDC hdc;
-
     Window * pWindow = NULL;
 
     //
@@ -187,58 +176,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // message that a newly create window will send.  Once we get it, we will
         // grab the encoded Window* pointer and use SetWindowLong to save it for
         // future use
-        pWindow = reinterpret_cast<Window*>( (LPCREATESTRUCT) lParam );
+        LPCREATESTRUCT cs = reinterpret_cast<LPCREATESTRUCT>( lParam );
+        pWindow           = reinterpret_cast<Window*>( cs->lpCreateParams );
         assert( pWindow != NULL && "Failed to find window pointer");
 
+        // Store the window pointer
         ::SetWindowLongPtr(
             hWnd,
             GWLP_USERDATA,
             reinterpret_cast<LONG_PTR>( pWindow ) );
+
+        // Also store the assigned HWND value
+        pWindow->setWindowHandle( hWnd );
     }
     else
     {
         // Try to look up the pointer that is stored in the window's userdata
         // field
-        pWindow =
-            reinterpret_cast<Window*>( ::GetWindowLongPtr( hWnd, GWLP_USERDATA ) );
+        pWindow = reinterpret_cast<Window*>( ::GetWindowLongPtr( hWnd, GWLP_USERDATA ) );
     }
 
-    AssertionDialog ad( L"true == false", L"stupid.cpp", 4514u );
-    
-
-    switch (message)
+    // Route the message to the correct window instance. If we could not decipher
+    // the instance, then just let windows perform a default action
+    if ( pWindow != NULL )
     {
-    case WM_COMMAND:
-        wmId    = LOWORD(wParam);
-        wmEvent = HIWORD(wParam);
-        // Parse the menu selections:
-        switch (wmId)
-        {
-        case IDM_ABOUT:
-            //assert( pWindow != NULL );
-            ad.show();
-  //          AboutBox aboutBox( pWindow->appInstance(), pWindow->windowHandle() );
-            break;
-
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-        break;
-    case WM_PAINT:
-        hdc = BeginPaint(hWnd, &ps);
-        // TODO: Add any drawing code here...
-        EndPaint(hWnd, &ps);
-        break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
+        return pWindow->handleMessage( message, wParam, lParam );
     }
-    return 0;
+    else
+    {
+        return DefWindowProc( hWnd, message, wParam, lParam );
+    }
+
+    
 }
 
 // Message handler for about box.

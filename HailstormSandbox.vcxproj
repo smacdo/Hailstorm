@@ -157,8 +157,8 @@
   <ItemGroup>
     <ClInclude Include="src\gui\aboutbox.h" />
     <ClInclude Include="src\gui\assertiondialog.h" />
-    <ClInclude Include="src\hailstorm_sandbox.h" />
     <ClInclude Include="src\gui\mainwindow.h" />
+    <ClInclude Include="src\hailstorm_sandbox.h" />
     <ClInclude Include="src\common\platform_windows.h" />
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\common\debugging.h" />
@@ -172,6 +172,7 @@
   <ItemGroup>
     <ClCompile Include="src\gui\aboutbox.cpp" />
     <ClCompile Include="src\gui\assertiondialog.cpp" />
+    <ClCompile Include="src\gui\mainwindow.cpp" />
     <ClCompile Include="src\hailstorm_sandbox.cpp" />
     <ClCompile Include="src\common\platform_windows.cpp" />
     <ClCompile Include="src\pragmas.cpp" />

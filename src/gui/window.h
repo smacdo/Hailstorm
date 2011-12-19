@@ -14,9 +14,12 @@ public:
     virtual ~Window();
     void create();
     void show();
+    virtual LRESULT handleMessage( UINT message, WPARAM wParam, LPARAM lParam );
 
     HWND windowHandle() const;
     HINSTANCE appInstance() const;
+
+    void setWindowHandle( HWND hWnd );
 
 private:
     const std::wstring mAppClassName;

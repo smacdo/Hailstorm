@@ -16,20 +16,17 @@
  */
 #include "stdafx.h"
 #include "hailstorm_sandbox.h"
-#include "gui/window.h"
+#include "gui/mainwindow.h"
 #include "common/logging.h"
 
-#define MAX_LOADSTRING 100
 
-// Global Variables:
-HINSTANCE hInst;								// current instance
-TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
-TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
-
-int APIENTRY _tWinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPTSTR    lpCmdLine,
-                     int       nCmdShow)
+/////////////////////////////////////////////////////////////////////////////
+// Application entry point
+/////////////////////////////////////////////////////////////////////////////
+int APIENTRY _tWinMain( HINSTANCE hInstance,
+                        HINSTANCE hPrevInstance,
+                        LPTSTR    lpCmdLine,
+                        int       nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
@@ -37,7 +34,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     LOG_NOTICE("PLATFORM") << "Application has entered WinMain";
 
     // Create a new window
-    Window mainWindow( hInstance, L"Scott's Window", 800u, 600u );
+    MainWindow mainWindow( hInstance, L"Hailstorm Tech Demo", 800u, 600u );
     
     mainWindow.create();
     mainWindow.show();

@@ -66,7 +66,7 @@ void Window::create()
     assert( result != 0 );
 
     // Now create the window
-    mWindowHandle = CreateWindowEx( WS_EX_OVERLAPPEDWINDOW,
+    HWND tempHwnd = CreateWindowEx( WS_EX_OVERLAPPEDWINDOW,
                                     mAppClassName.c_str(),
                                     mTitle.c_str(),
                                     WS_OVERLAPPEDWINDOW,
@@ -77,16 +77,20 @@ void Window::create()
                                     NULL,
                                     NULL,
                                     mAppInstance,
-                                    reinterpret_cast<LPVOID>( this )
+                                    this
     );
 
     // Verify that the window was created
+    assert( mWindowHandle == tempHwnd );
     assert( mWindowHandle != NULL );
 
     // mark as created
     mCreated = true;
 }
 
+/**
+ * Show the window
+ */
 void Window::show()
 {
     assert( mCreated == true );
@@ -100,7 +104,21 @@ HWND Window::windowHandle() const
     return mWindowHandle;
 }
 
+void Window::setWindowHandle( HWND hWnd )
+{
+    assert( mCreated != true );
+    mWindowHandle = hWnd;
+}
+
 HINSTANCE Window::appInstance() const
 {
     return mAppInstance;
+}
+
+/**
+ * Handle the window's message loop
+ */
+LRESULT Window::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )
+{
+    return DefWindowProc( windowHandle(), message, wParam, lParam );
 }
