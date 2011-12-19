@@ -147,8 +147,6 @@ namespace App
      */
     void startup()
     {
-        // Force SDL to use the direct driver
-        _putenv("SDL_VideoDriver=directx");
     }
 
     /**
