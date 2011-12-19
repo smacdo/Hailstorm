@@ -5,6 +5,9 @@
 
 class Window;
 
+/**
+ * Its an about box! What more could you possibly want?
+ */
 class AboutBox : boost::noncopyable
 {
 public:
