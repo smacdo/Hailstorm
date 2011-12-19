@@ -28,6 +28,9 @@
     <ClCompile Include="src\gui\mainwindow.cpp">
       <Filter>Gui Code</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\errordialog.cpp">
+      <Filter>Gui Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\debugging.h">
@@ -67,6 +70,9 @@
       <Filter>VS Support</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\mainwindow.h" />
+    <ClInclude Include="src\gui\errordialog.h">
+      <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="directx.rc" />

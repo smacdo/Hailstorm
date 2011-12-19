@@ -21,12 +21,13 @@
 #include "gui/window.h"
 #include "gui/aboutbox.h"
 #include "gui/assertiondialog.h"
+#include "gui/errordialog.h"
 
 #include "resource.h"
 
 #include <cassert>
 
-namespace
+namespace WinApp
 {
     /**
      * Converts an STL string into a WindowsNT wchar* wrapped inside of a
@@ -35,7 +36,7 @@ namespace
      * \param  str  The STL string you want to convert
      * \return A wstring representing the input
      */
-    std::wstring WinNTStringToWideString( const std::string& str )
+    std::wstring ToWideString( const std::string& str )
     {
         // Find the length of the soon to be allocated wstring
         size_t slen = str.length();
@@ -86,12 +87,12 @@ namespace App
         //  (so long as the character pointers are not null)
         if ( pExpression != NULL )
         {
-            expression = WinNTStringToWideString( pExpression );
+            expression = WinApp::ToWideString( pExpression );
         }
         
         if ( pFilename != NULL )
         {
-            filename = WinNTStringToWideString( pFilename );
+            filename = WinApp::ToWideString( pFilename );
         }
 
         // Configure the assertion dialog before displaying it
@@ -99,7 +100,7 @@ namespace App
         
         if ( pMessage != NULL )
         {
-            dialog.setMessage( WinNTStringToWideString( pMessage ) );
+            dialog.setMessage( WinApp::ToWideString( pMessage ) );
         }
 
         // Display the assertion to the user, and deal with their returned action
@@ -125,7 +126,13 @@ namespace App
     void raiseError( const std::string& message,
                      const std::string& details )
     {
+        ErrorDialog error( message, details );
+        error.show();
 
+        if ( error.didUserPressQuit() )
+        {
+            App::quit( EPROGRAM_USER_ERROR, "User quit in response to error" );
+        }
     }
 
     /**
