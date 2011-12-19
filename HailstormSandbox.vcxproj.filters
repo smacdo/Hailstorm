@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\gui\aboutbox.cpp">
+      <Filter>Gui Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\assertiondialog.cpp">
+      <Filter>Gui Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hailstorm_sandbox.cpp">
+      <Filter>Sandbox Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\logging.cpp">
+      <Filter>Common Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\platform_windows.cpp">
+      <Filter>Common Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\window.cpp">
+      <Filter>Gui Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stdafx.cpp">
+      <Filter>VS Support</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pragmas.cpp">
+      <Filter>VS Support</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\common\debugging.h">
+      <Filter>Common Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\logging.h">
+      <Filter>Common Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\platform.h">
+      <Filter>Common Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\platform_windows.h">
+      <Filter>Common Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\delete.h">
+      <Filter>Common Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\aboutbox.h">
+      <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\assertiondialog.h">
+      <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\mainwindow.h">
+      <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Resource.h">
+      <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\window.h">
+      <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hailstorm_sandbox.h">
+      <Filter>Sandbox Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stdafx.h">
+      <Filter>VS Support</Filter>
+    </ClInclude>
+    <ClInclude Include="src\targetver.h">
+      <Filter>VS Support</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="directx.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="directx.ico" />
+    <None Include="ReadMe.txt" />
+    <None Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Common Code">
+      <UniqueIdentifier>{6794295c-f3e7-4a72-91ca-335c787c1685}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common Code\Headers">
+      <UniqueIdentifier>{d8702c79-beef-4a5d-a4b4-562e2f13b04b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui Code">
+      <UniqueIdentifier>{eff35f61-11cd-4e4f-9f35-a15dd3145c5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui Code\Headers">
+      <UniqueIdentifier>{49086ab8-ff02-456f-a577-1e0bfb89f0b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="VS Support">
+      <UniqueIdentifier>{de0fb035-0c01-4ecb-adcb-4ff41e923ea7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sandbox Code">
+      <UniqueIdentifier>{59898411-75ec-4d6a-a3e4-f89ed3355c3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sandbox Code\Headers">
+      <UniqueIdentifier>{34b551ec-5661-4151-9c32-3f59305834ac}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
