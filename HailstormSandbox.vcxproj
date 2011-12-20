@@ -65,10 +65,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\src;$(BOOST_ROOT);$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\src;$(BOOST_ROOT);$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)game\bin32</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)-debug</TargetName>
+    <LibraryPath>$(DXSDK_DIR)\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -99,7 +100,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>COMCTL32.LIB;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>COMCTL32.LIB;d3d10.lib;d3dx10.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -155,6 +156,10 @@
     <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\graphics\dxrenderer.h" />
+    <ClInclude Include="src\graphics\dxutils.h" />
+    <ClInclude Include="src\graphics\irenderer.h" />
+    <ClInclude Include="src\gameclient.h" />
     <ClInclude Include="src\gui\aboutbox.h" />
     <ClInclude Include="src\gui\assertiondialog.h" />
     <ClInclude Include="src\gui\errordialog.h" />
@@ -169,8 +174,12 @@
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\targetver.h" />
     <ClInclude Include="src\gui\window.h" />
+    <ClInclude Include="src\version.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\graphics\dxrenderer.cpp" />
+    <ClCompile Include="src\graphics\irenderer.cpp" />
+    <ClCompile Include="src\gameclient.cpp" />
     <ClCompile Include="src\gui\aboutbox.cpp" />
     <ClCompile Include="src\gui\assertiondialog.cpp" />
     <ClCompile Include="src\gui\errordialog.cpp" />

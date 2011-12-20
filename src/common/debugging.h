@@ -49,7 +49,7 @@
             }                               \
         } while( 0 )
 
-#   define assert2(msg,expr) scott_assert(msg,expr)
+#   define assert2(expr,msg) scott_assert(msg,expr)
 #   define assert_null(var) scott_assert("Pointer was expected to be null",#var##" == NULL")
 #   define assert_notNull(var) scott_assert("Pointer was expected to be non-null",#var##" != NULL")
 

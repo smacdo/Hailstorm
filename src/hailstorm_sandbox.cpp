@@ -38,26 +38,7 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
     MainWindow mainWindow( hInstance, L"Hailstorm Tech Demo", 800u, 600u );
     
     mainWindow.create();
-    mainWindow.show();
-
+    
     GameClient game( &mainWindow );
     return game.run();
-
- 	// Load the menu accelerator table	
-	/*HACCEL hAccelTable =
-        LoadAccelerators( hInstance, MAKEINTRESOURCE(IDC_DIRECTX));
-
-	// Main message loop:
-    MSG msg;
-
-	while (GetMessage(&msg, NULL, 0, 0))
-	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage( &msg);
-		}
-	}
-
-	return (int) msg.wParam;*/
 }

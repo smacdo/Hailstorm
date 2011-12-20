@@ -29,9 +29,6 @@ public:
                 unsigned int height );
     ~MainWindow();
 
-    // Starts the exit process
-    void exit();
-
     // Show the message box
     void showAboutBox() const;
 

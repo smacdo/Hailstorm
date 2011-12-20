@@ -34,7 +34,8 @@ Window::Window( HINSTANCE hInstance,
       mWindowHandle( 0 ),
       mTitle( title ),
       mWidth( width ),
-      mHeight( height )
+      mHeight( height ),
+      mUserQuit( false )
 {
 }
 
@@ -89,6 +90,15 @@ void Window::create()
 }
 
 /**
+ * Starts the application exit process
+ */
+void Window::exit()
+{
+    mUserQuit = true;
+    DestroyWindow( mWindowHandle );
+}
+
+/**
  * Show the window
  */
 void Window::show()
@@ -97,6 +107,11 @@ void Window::show()
 
     ShowWindow( mWindowHandle, SW_RESTORE );
     UpdateWindow( mWindowHandle );
+}
+
+bool  Window::didUserQuit() const
+{
+    return mUserQuit;
 }
 
 HWND Window::windowHandle() const
@@ -116,24 +131,42 @@ HINSTANCE Window::appInstance() const
 }
 
 /**
+ * Returns the width of the window
+ */
+unsigned int Window::width() const
+{
+    return mWidth;
+}
+
+/**
+ * Returns the height of the window
+ */
+unsigned int Window::height() const
+{
+    return mHeight;
+}
+
+/**
  * Process any incoming window messages
  */
 bool Window::processMessages()
 {
     MSG message;
+    bool keepGoing = true;
 
-    while ( PeekMessage( &message, mWindowHandle, 0, 0, PM_REMOVE ) == TRUE )
+    while ( keepGoing && PeekMessage( &message, mWindowHandle, 0, 0, PM_REMOVE ) == TRUE )
     {
         if ( message.message == WM_QUIT )
         {
-            return false;
+            keepGoing = false;
+            mUserQuit = true;
         }
-        else
-        {
-            TranslateMessage( &message );
-            DispatchMessage( &message );
-        }
+
+        TranslateMessage( &message );
+        DispatchMessage( &message );
     }
+
+    return keepGoing;
 }
 
 /**

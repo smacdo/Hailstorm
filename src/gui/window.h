@@ -14,13 +14,19 @@ public:
     virtual ~Window();
     void create();
     void show();
+    bool didUserQuit() const;
     virtual bool processMessages();
     virtual LRESULT handleMessage( UINT message, WPARAM wParam, LPARAM lParam );
+
+    // Starts the exit process
+    void exit();
 
     HWND windowHandle() const;
     HINSTANCE appInstance() const;
 
     void setWindowHandle( HWND hWnd );
+    unsigned int width() const;
+    unsigned int height() const;
 
 private:
     const std::wstring mAppClassName;
@@ -30,6 +36,7 @@ private:
     HINSTANCE mAppInstance;
     HWND mWindowHandle;
     bool mCreated;
+    bool mUserQuit;
 };
 
 #endif

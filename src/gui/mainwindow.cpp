@@ -53,14 +53,6 @@ void MainWindow::showAboutBox() const
 }
 
 /**
- * Starts the application exit process
- */
-void MainWindow::exit()
-{
-    DestroyWindow( windowHandle() );
-}
-
-/**
  * Custom paint code
  */
 void MainWindow::onPaint()
@@ -100,6 +92,10 @@ LRESULT MainWindow::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )
                 default:
                     return DefWindowProc( hWnd, message, wParam, lParam );
             }
+            break;
+
+        case WM_CLOSE:
+            PostQuitMessage( 0 );
             break;
 
         case WM_DESTROY:

@@ -31,6 +31,15 @@
     <ClCompile Include="src\gui\errordialog.cpp">
       <Filter>Gui Code</Filter>
     </ClCompile>
+    <ClCompile Include="src\gameclient.cpp">
+      <Filter>Sandbox Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\irenderer.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\dxrenderer.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\debugging.h">
@@ -69,9 +78,26 @@
     <ClInclude Include="src\targetver.h">
       <Filter>VS Support</Filter>
     </ClInclude>
-    <ClInclude Include="src\gui\mainwindow.h" />
     <ClInclude Include="src\gui\errordialog.h">
       <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\version.h">
+      <Filter>Common Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameclient.h">
+      <Filter>Sandbox Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\irenderer.h">
+      <Filter>Graphics Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\mainwindow.h">
+      <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\dxrenderer.h">
+      <Filter>Graphics Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\dxutils.h">
+      <Filter>Graphics Code\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +129,12 @@
     </Filter>
     <Filter Include="Sandbox Code\Headers">
       <UniqueIdentifier>{34b551ec-5661-4151-9c32-3f59305834ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics Code">
+      <UniqueIdentifier>{e5c58e7a-ba74-4be4-9c27-e65a7b42ba5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics Code\Headers">
+      <UniqueIdentifier>{b4cbd2e1-0bf2-4073-8148-6f1d67822125}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
