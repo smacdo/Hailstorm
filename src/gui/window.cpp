@@ -116,6 +116,27 @@ HINSTANCE Window::appInstance() const
 }
 
 /**
+ * Process any incoming window messages
+ */
+bool Window::processMessages()
+{
+    MSG message;
+
+    while ( PeekMessage( &message, mWindowHandle, 0, 0, PM_REMOVE ) == TRUE )
+    {
+        if ( message.message == WM_QUIT )
+        {
+            return false;
+        }
+        else
+        {
+            TranslateMessage( &message );
+            DispatchMessage( &message );
+        }
+    }
+}
+
+/**
  * Handle the window's message loop
  */
 LRESULT Window::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )

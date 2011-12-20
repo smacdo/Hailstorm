@@ -1,5 +1,23 @@
+/*
+ * Copyright (C) 2011 Scott MacDonald. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "stdafx.h"
 #include "assertiondialog.h"
+#include "version.h"
+#include "common/platform_windows.h"
 #include "Resource.h"
 
 #include <string>
@@ -17,8 +35,8 @@
  * \param  filename    Name of the file where the assertion was raised
  * \param  lineNumber  The line number where the assertion was raised
  */
-AssertionDialog::AssertionDialog( const std::wstring& expression,
-                                  const std::wstring& filename,
+AssertionDialog::AssertionDialog( const std::string& expression,
+                                  const std::string& filename,
                                   unsigned int lineNumber )
     : mAppInstance( GetModuleHandle(NULL) ),
       mWindowHandle( GetActiveWindow() ),
@@ -27,7 +45,7 @@ AssertionDialog::AssertionDialog( const std::wstring& expression,
       mLineNumber( lineNumber ),
       mMessage()
 {
-    mMessage = getAssertionMessage( L"The assertion was raised" );
+    mMessage = getAssertionMessage( "The assertion was raised" );
 }
 
 /**
@@ -42,9 +60,12 @@ AssertionDialog::~AssertionDialog()
  * Sets a custom message that is displayed alongside the normal assertion
  * details
  */
-void AssertionDialog::setMessage( const std::wstring& message )
+void AssertionDialog::setMessage( const std::string& message )
 {
-    mMessage = message;
+    if ( message.size() > 0 )
+    {
+        mMessage = message;
+    }
 }
 
 /**
@@ -55,8 +76,48 @@ void AssertionDialog::setMessage( const std::wstring& message )
  * \return             True if the user wants to start debugging, or false
  *                     if they selected the option to quit
  */
-bool AssertionDialog::show()
+bool AssertionDialog::show() const
 {
+    AssertionDialog::EUserAction userAction;
+    bool shouldStartDebugging = false;
+
+    // Keep the dialog window up until the user has successfully saved the
+    // report, or chosen another action
+    bool keepGoing = true;
+
+    while ( keepGoing )
+    {
+        userAction = showDialog();
+        
+        if ( userAction == EUSERACTION_SAVE )
+        {
+            keepGoing = (! saveCrashDump() );
+        }
+        else if ( userAction == EUSERACTION_DEBUG )
+        {
+            keepGoing = false;
+            shouldStartDebugging = true;
+        }
+        else
+        {
+            keepGoing = false;
+        }
+    }
+
+    // Let the caller know if the user wanted to start the debugger
+    return shouldStartDebugging;
+}
+
+/**
+ * Presents the user with the assertion failed dialog box, and returns the
+ * action that the user chose to perform
+ */
+AssertionDialog::EUserAction AssertionDialog::showDialog() const
+{
+    // Convert our string parameters to window's wstring format
+    std::wstring expression = WinApp::ToWideString( mExpression );
+    std::wstring message    = WinApp::ToWideString( mMessage );
+
     // The buttons that will appear on the assertion dialog
     const TASKDIALOG_BUTTON cb[] =
     {
@@ -88,15 +149,16 @@ bool AssertionDialog::show()
         &tc.hFooterIcon);
 
     tc.pszWindowTitle     = L"Application Assertion";
-    tc.pszContent         = mMessage.c_str();
+    tc.pszContent         = message.c_str();
     tc.pszMainInstruction = L"An internal assertion check has failed";
-    tc.pszFooter          = mExpression.c_str();
+    tc.pszFooter          = expression.c_str();
     
     tc.cButtons           = ARRAYSIZE( cb );
     tc.pButtons           = cb;
     tc.nDefaultButton     = 0;
 
-    // Try displaying the assertion dialog
+    // After all that tedious set up work, we can finally show off our fancy
+    // shmancy assertion dialog!
     int buttonPressed        = 0;
     int commandPressed       = 0;
     BOOL verificationChecked = false;
@@ -106,24 +168,31 @@ bool AssertionDialog::show()
                                          &commandPressed,
                                          &verificationChecked );
 
-    // See what the user's response was. Should we save out a report, trigger
-    // the debugger or just exit?
-    if ( buttonPressed == 0 )
+    // Return which action was selected
+    switch ( buttonPressed )
     {
-        // Save the crash report out
-        saveCrashDump();
+        case 0:
+            return EUSERACTION_SAVE;
+        case 1:
+            return EUSERACTION_DEBUG;
+        case 2:
+            return EUSERACTION_QUIT;
+        default:
+            return EUSERACTION_QUIT;
     }
-
-    // Now return whether or not the user wanted to trigger the debugger
-    return true;
 }
 
 /**
- * Code that handles the saving of a crash dump
+ * This method handles the actual details of saving an assertion report. It will
+ * bring up the "File save as..." dialog and then write the report out to
+ * whichever file the user selects
+ *
+ * \return  True if the user saved the file, false if they aborted the action
  */
-void AssertionDialog::saveCrashDump() const
+bool AssertionDialog::saveCrashDump() const
 {
     HRESULT result;
+    bool didSaveFile = false;
 
     // Create the file save as dialog
     IFileDialog *pFileDialog = NULL;
@@ -134,7 +203,7 @@ void AssertionDialog::saveCrashDump() const
 
     if (! SUCCEEDED(result) )
     {
-        return;
+        return false;
     }
 
     // File types supported
@@ -149,10 +218,48 @@ void AssertionDialog::saveCrashDump() const
     // Show the file save as dialog
     pFileDialog->Show(NULL);
 
-    // Open up a file stream to the file the user wanted to create
+    // Find the name of the file they want to save the assertion report to.
+    // If the user didn't give an appropriate response, simply leave the filename
+    // to be null
+    IShellItem *pDialogResult = NULL;
+    PWSTR       pFilePath     = NULL;
+
+    pFileDialog->GetResult( &pDialogResult );
+
+    if ( pDialogResult != NULL )
+    {
+        pDialogResult->GetDisplayName( SIGDN_FILESYSPATH, &pFilePath );
+    }
+
+    if ( pFilePath != NULL )
+    {
+        std::string fileContents = getFileReportString();
+
+        // First we have to create the file
+        HANDLE fileHandle = CreateFile( pFilePath,
+                                        GENERIC_WRITE,
+                                        0,
+                                        NULL,
+                                        CREATE_ALWAYS,
+                                        FILE_ATTRIBUTE_NORMAL,
+                                        NULL );
+
+        // Now we can write the assertion details out to disk
+        DWORD numBytesWritten = 0;
+
+        WriteFile( fileHandle,
+                   fileContents.c_str(),
+                   fileContents.size(),
+                   &numBytesWritten,
+                   NULL );
+
+        // Remember that we wrote the file out
+        didSaveFile = true;
+    }
 
     // Now clean up. Release the dialog window and close the file stream
     pFileDialog->Release();
+    return didSaveFile;
 }
 
 /**
@@ -163,16 +270,41 @@ void AssertionDialog::saveCrashDump() const
  * \param   intro  Text to introduce the error
  * \return  A formatted assertion message to display the user
  */
-std::wstring AssertionDialog::getAssertionMessage( const std::wstring& intro ) const
+std::string AssertionDialog::getAssertionMessage( const std::string& intro ) const
 {
     // Create a string stream and format the message
     //  typedef basic_ostringstream<wchar_t>
-    std::wostringstream ss;
+    std::ostringstream ss;
 
     ss << intro       << " in "
        << mFilename   << " on line "
        << mLineNumber << ". The failed expression was:\n"
        << mExpression;
+
+    return ss.str();
+}
+
+/**
+ * Creates the assertion report string that should be written out to a file
+ * and presented to the developer
+ */
+std::string AssertionDialog::getFileReportString() const
+{
+    std::ostringstream ss;
+
+    ss << "# Application assertion report data"             << "\r\n"
+       << "APPLICATION: "       << Version::APP_NAME        << "\r\n"
+       << "VERSION    : "       << Version::VERSION_STRING  << "\r\n"
+       << "BUILDSTRING: "       << Version::BUILD_STRING    << "\r\n"
+#ifdef _WIN64
+       << "PLATFORM   : "       << "WIN64 (x64)"            << "\r\n"
+#else
+       << "PLATFORM   : "       << "WIN32 (x86)"            << "\r\n"
+#endif
+       << "MESSAGE    : "       << mMessage                 << "\r\n"
+       << "EXPRESSION : "       << mExpression              << "\r\n"
+       << "SOURCEFILE : "       << mFilename                << "\r\n"
+       << "LINENUMBER : "       << mLineNumber              << std::endl;
 
     return ss.str();
 }

@@ -18,6 +18,7 @@
 #include "hailstorm_sandbox.h"
 #include "gui/mainwindow.h"
 #include "common/logging.h"
+#include "gameclient.h"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -39,8 +40,11 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
     mainWindow.create();
     mainWindow.show();
 
+    GameClient game( &mainWindow );
+    return game.run();
+
  	// Load the menu accelerator table	
-	HACCEL hAccelTable =
+	/*HACCEL hAccelTable =
         LoadAccelerators( hInstance, MAKEINTRESOURCE(IDC_DIRECTX));
 
 	// Main message loop:
@@ -51,9 +55,9 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 		{
 			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			DispatchMessage( &msg);
 		}
 	}
 
-	return (int) msg.wParam;
+	return (int) msg.wParam;*/
 }

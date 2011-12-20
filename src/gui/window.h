@@ -14,6 +14,7 @@ public:
     virtual ~Window();
     void create();
     void show();
+    virtual bool processMessages();
     virtual LRESULT handleMessage( UINT message, WPARAM wParam, LPARAM lParam );
 
     HWND windowHandle() const;

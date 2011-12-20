@@ -80,27 +80,12 @@ namespace App
                                      const char *pFilename,
                                      unsigned int lineNumber )
     {
-        std::wstring expression = L"NULL";
-        std::wstring filename   = L"NULL";
-
-        // Convert the message and expression cstrings into STL wide strings
-        //  (so long as the character pointers are not null)
-        if ( pExpression != NULL )
-        {
-            expression = WinApp::ToWideString( pExpression );
-        }
-        
-        if ( pFilename != NULL )
-        {
-            filename = WinApp::ToWideString( pFilename );
-        }
-
         // Configure the assertion dialog before displaying it
-        AssertionDialog dialog( expression, filename, lineNumber );
+        AssertionDialog dialog( pExpression, pFilename, lineNumber );
         
         if ( pMessage != NULL )
         {
-            dialog.setMessage( WinApp::ToWideString( pMessage ) );
+            dialog.setMessage( pMessage );
         }
 
         // Display the assertion to the user, and deal with their returned action

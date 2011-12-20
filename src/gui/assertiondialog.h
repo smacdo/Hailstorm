@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 Scott MacDonald. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef SCOTT_ASSERTION_DIALOG_H
 #define SCOTT_ASSERTION_DIALOG_H
 
@@ -16,25 +32,36 @@
 class AssertionDialog : boost::noncopyable
 {
 public:
-    AssertionDialog( const std::wstring& expression,
-                     const std::wstring& filename,
+    AssertionDialog( const std::string& expression,
+                     const std::string& filename,
                      unsigned int lineNumber );
     ~AssertionDialog();
 
-    void setMessage( const std::wstring& message );
-    bool show();
+    void setMessage( const std::string& message );
+    bool show() const;
+
+private:
+    enum EUserAction
+    {
+        EUSERACTION_SAVE,
+        EUSERACTION_DEBUG,
+        EUSERACTION_QUIT
+    };
 
 protected:
-    std::wstring getAssertionMessage( const std::wstring& intro ) const;
-    void saveCrashDump() const;
+    EUserAction showDialog() const;
+    bool saveCrashDump() const;
+
+    std::string getAssertionMessage( const std::string& intro ) const;
+    std::string getFileReportString() const;
 
 private:
     HINSTANCE mAppInstance;
     HWND mWindowHandle;
-    std::wstring mExpression;
-    std::wstring mFilename;
+    std::string mExpression;
+    std::string mFilename;
     unsigned int mLineNumber;
-    std::wstring mMessage;
+    std::string mMessage;
 };
 
 #endif
