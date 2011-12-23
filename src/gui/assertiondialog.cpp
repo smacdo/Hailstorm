@@ -249,7 +249,7 @@ bool AssertionDialog::saveCrashDump() const
 
         WriteFile( fileHandle,
                    fileContents.c_str(),
-                   fileContents.size(),
+                   static_cast<DWORD>( fileContents.size() ),
                    &numBytesWritten,
                    NULL );
 
