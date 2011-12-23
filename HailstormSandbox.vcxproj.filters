@@ -99,6 +99,9 @@
     <ClInclude Include="src\graphics\dxutils.h">
       <Filter>Graphics Code\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\common\gametime.h">
+      <Filter>Common Code\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="directx.rc" />

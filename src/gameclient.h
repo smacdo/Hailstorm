@@ -19,6 +19,7 @@
 
 #include <boost/noncopyable.hpp>
 #include "common/platform.h"
+#include "common/gametime.h"
 
 class MainWindow;
 class IRenderer;
@@ -34,21 +35,42 @@ public:
     virtual ~GameClient();
 
     App::EProgramStatus run();
+    void setUpdateFrequency( int numUpdatesPerSecond );
 
 protected:
     virtual bool initialize();
-    virtual void loadContent();
+    virtual bool loadContent();
     virtual void unloadContent();
-    virtual void update( double currentTime );
-    virtual void draw( double currentTime );
+    virtual void update( TimeT simulationTime, TimeT deltaTime );
+    virtual void draw( TimeT simulationTime, float interpolation );
 
 private:
-    bool initializeEngine();
+    App::EProgramStatus runMainGameLoop();
+    TimeT getCurrentTime() const;
+    void calculateSystemTimerFrequency();
+    bool initializeClient();
 
 private:
+    /// Pointer to the main rendering window
     MainWindow * mpMainWindow;
+
+    /// Pointer to the graphics renderer
     IRenderer * mpRenderer;
-    bool mKeepRunning;
+
+    /// Flag if the game is game loop is running
+    bool mIsGameRunning;
+
+    /// Flag if the game is running slowly (needing multiple updates to catch up)
+    bool mIsRunningSlowly;
+
+    /// Windows timer frequency (number of ticks per second)
+    TimeT mTimerFrequency;
+
+    /// Number of times to run the update method per second
+    TimeT mUpdateFrequency;
+
+    /// Estimated maximum skew for the internal windows sleep command
+    TimeT mMaximumSleepSkew;
 };
 
 #endif

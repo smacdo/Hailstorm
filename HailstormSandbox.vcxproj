@@ -169,6 +169,7 @@
     <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common\gametime.h" />
     <ClInclude Include="src\graphics\dxrenderer.h" />
     <ClInclude Include="src\graphics\dxutils.h" />
     <ClInclude Include="src\graphics\irenderer.h" />
