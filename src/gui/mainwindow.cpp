@@ -46,7 +46,7 @@ MainWindow::~MainWindow()
 void MainWindow::showAboutBox() const
 {
     AboutBox about( appInstance(), windowHandle() );
-    ErrorDialog error("oh noes this is an error");;
+    about.show();
 }
 
 /**
