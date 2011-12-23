@@ -4,15 +4,15 @@
     <!--   Shared variables                                           -->
     <!-- ============================================================ -->
     <?define MergeModuleDir = "$(env.CommonProgramFiles)\Merge Modules" ?>
-    <?define DXSDKDir       = "$(env.DXSDK_DIR)\Microsoft DirectX SDK (June 2010)" ?>
+    <?define DXSDKDIR       = "$(env.DXSDK_DIR)" ?>
 
     <?if $(var.Platform) = x64 ?>
     <?define ProductName = "Hailstorm Engine Demo (64 bit)" ?>
-    <?define Win64       = "Yes" ?>
+    <?define Win64       = "yes" ?>
     <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
     <?else ?>
     <?define ProductName = "Hailstorm Engine Demo" ?>
-    <?define Win64       = "No" ?>
+    <?define Win64       = "no" ?>
     <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
     <?endif ?>
 
@@ -93,6 +93,71 @@
         </DirectoryRef>
 
         <!-- ************************************************************** -->
+        <!--   Visuall C++ Redistributable                                  -->
+        <!-- ************************************************************** -->
+        <DirectoryRef Id="TARGETDIR">
+            <?if $(var.Win64) = "yes" ?>
+                <Merge Id="VCRedist" SourceFile="$(var.MergeModuleDir)\Microsoft_VC100_CRT_x64.msm" DiskId="1" Language="0"/>
+            <?else ?>
+                <Merge Id="VCRedist" SourceFile="$(var.MergeModuleDir)\Microsoft_VC100_CRT_x86.msm" DiskId="1" Language="0"/>
+            <?endif ?>
+        </DirectoryRef>
+
+        <!-- ************************************************************** -->
+        <!--   DirectX 10 Redistributable                                   -->
+        <!-- ************************************************************** -->
+        <DirectoryRef Id="TARGETDIR">
+            <Directory Id="DirectXRedistDirectory" Name="DirectX10.1">
+                <Component Id="DirectXRedist" Guid="d35e900c-d012-4735-b032-a796df234870">
+                    <File Id="DXSETUP.exe"
+                          Name="DXSETUP.exe"
+                          Source="$(var.DXSDKDIR)\Redist\DXSETUP.exe"
+                          KeyPath="yes"
+                          Checksum="yes" />
+                    <File Id="dxupdate.cab"
+                          Source="$(var.DXSDKDIR)redist\dxupdate.cab" />
+                    <File Id="dxdllreg_x86.cab"
+                          Source="$(var.DXSDKDIR)\redist\dxdllreg_x86.cab" />
+                    <File Id="dsetup32.dll"
+                          Source="$(var.DXSDKDIR)\redist\dsetup32.dll" />
+                    <File Id="dsetup.dll"
+                          Source="$(var.DXSDKDIR)\redist\DSETUP.dll" />
+                </Component>
+                <?if $(var.Win64) = "yes" ?>
+                <Component Id="DirectXRedist_2" Guid="A7E3E414-9007-471C-B68E-50863A42E4A3">
+                    <File Id="D3DCompiler_43_x64.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_D3DCompiler_43_x64.cab" />
+                    <File Id="d3dcsx_43_x64.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_d3dcsx_43_x64.cab" />
+                    <File Id="d3dx10_43_x64.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_d3dx10_43_x64.cab" />
+                    <File Id="d3dx11_43_x64.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_d3dx11_43_x64.cab" />
+                    <File Id="XACT_x64.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_XACT_x64.cab" />
+                    <File Id="XAudio_x64.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_XAudio_x64.cab" />
+                </Component>
+                <?else ?>
+                <Component Id="DirectXRedist_2" Guid="F93F235A-032C-4809-B53F-60108444A92F">
+                    <File Id="D3DCompiler_43_x86.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_D3DCompiler_43_x64.cab" />
+                    <File Id="d3dcsx_43_x86.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_d3dcsx_43_x64.cab" />
+                    <File Id="d3dx10_43_x86.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_d3dx10_43_x64.cab" />
+                    <File Id="d3dx11_43_x86.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_d3dx11_43_x64.cab" />
+                    <File Id="XACT_x86.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_XACT_x64.cab" />
+                    <File Id="XAudio_x86.cab"
+                          Source="$(var.DXSDKDIR)\redist\Jun2010_XAudio_x64.cab" />
+                </Component>
+                <?endif ?>
+            </Directory>
+        </DirectoryRef>
+
+        <!-- ************************************************************** -->
         <!--   List of application features that can be installed           -->
         <!-- ************************************************************** -->
 		<Feature Id="ProductFeature"
@@ -110,6 +175,39 @@
 			<!-- Note: The following ComponentGroupRef is required to pull in generated authoring from project references. -->
 			<ComponentGroupRef Id="Product.Generated" />
 		</Feature>
+
+        <Feature Id="VCRedist"
+                 Title="Visual C++ 10.0 Runtime"
+                 Description="Microsoft C Runtime Shared Library (Required)"
+                 AllowAdvertise="no"
+                 Level="1">
+            <MergeRef Id="VCRedist"/>
+        </Feature>
+
+        <Feature Id="DirectXRedist" Title="Microsoft DirectX Runtime" AllowAdvertise="no" Level="1">
+            <ComponentRef Id="DirectXRedist" />
+            <ComponentRef Id="DirectXRedist_2" />
+        </Feature>
+
+        <!-- ======================================================== -->
+        <!--  Custom action to install DirectX SDK                    -->
+        <!-- ======================================================== -->
+        <CustomAction Id="InstallDirectX"
+                      FileKey="DXSETUP.exe"
+                      ExeCommand="/silent"
+                      Execute="deferred"
+                      Impersonate="no"
+                      Return="check" />
+
+        <InstallExecuteSequence>
+            <Custom Action="InstallDirectX" Before="InstallFinalize">
+                <![CDATA[NOT REMOVE]]>
+            </Custom>
+        </InstallExecuteSequence>
+
+        <UI>
+            <ProgressText Action="InstallDirectX">Updating DirectX Libraries</ProgressText>
+        </UI>        
 
         <!-- ************************************************************** -->
         <!--   The installer's user interfacfe goes here                    -->
