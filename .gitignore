@@ -3,5 +3,6 @@ build/*
 *.pdb
 *.ilk
 *.pdb
+*.aps
 Installer/bin/*
 Installer/obj/*

@@ -102,7 +102,9 @@
     <ClInclude Include="src\common\gametime.h">
       <Filter>Common Code\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="src\Resource.h">
+      <Filter>VS Support</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="directx.rc" />
@@ -110,7 +112,6 @@
   <ItemGroup>
     <None Include="directx.ico" />
     <None Include="ReadMe.txt" />
-    <None Include="small.ico" />
     <None Include="assets\rageface.bmp" />
   </ItemGroup>
   <ItemGroup>

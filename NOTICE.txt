@@ -1,0 +1,7 @@
+Hailstorm Content Packaging Tool
+Copyright (c) 2011 Scott MacDonald
+
+
+This project contains artwork from Justin Nichol
+"Death in the Snow"
+Licensed under GPL 2.0, GPL 3.0, CC-BY-SA 3.0

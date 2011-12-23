@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4B68EECE-6AF8-4A31-8E06-821F67EC3E3F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>directx</RootNamespace>
+    <RootNamespace>hailstorm</RootNamespace>
     <ProjectName>Sandbox</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -165,9 +165,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="assets\rageface.bmp" />
-    <None Include="directx.ico" />
+    <None Include="assets\hailstorm.ico" />
     <None Include="ReadMe.txt" />
-    <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\resource.h" />
@@ -213,7 +212,7 @@
     <ClCompile Include="src\gui\window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="directx.rc" />
+    <ResourceCompile Include="assets\hailstorm.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

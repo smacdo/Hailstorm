@@ -57,7 +57,7 @@ FONT 8, "Segoe UI", 0, 0, 1
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 STRINGTABLE
 {
-    IDS_APP_TITLE                 "HailstormEngine"
+    IDS_APP_TITLE                 "Hailstorm Engine"
     IDC_DIRECTX                   "DIRECTX"
 }
 
@@ -79,11 +79,11 @@ IDC_DIRECTX ACCELERATORS
 // Icon resources
 //
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-IDI_DIRECTX        ICON           "directx.ico"
+IDI_DIRECTX        ICON           "assets\\hailstorm.ico"
 
 
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-IDI_SMALL          ICON           "small.ico"
+IDI_SMALL          ICON           "assets\\hailstorm_small.ico"
 
 
 
