@@ -87,6 +87,8 @@ public:
     }
 
 private:
+    LogEntry& operator = ( const LogEntry& );
+
     std::ostream& mConsoleStream;
     std::ostream& mFileStream;
 };

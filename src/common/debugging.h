@@ -66,7 +66,7 @@
 
 #else
 #   define assert(x)          do { (void)sizeof(x); } while(0)
-#   define assert2(x)         do { (void)sizeof(x); } while(0)
+#   define assert2(x,m)       do { (void)sizeof(x); } while(0)
 #   define assert_null(x)     do { (void)sizeof(x); } while(0)
 #   define assert_notNull(x)  do { (void)sizeof(x); } while(0)
 #   define verify(x)          do { (void)sizeof(x); } while(0)

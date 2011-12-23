@@ -21,7 +21,7 @@
 
 // Forward declarations
 class MainWindow;
-struct ID3D10Device;
+struct ID3D10Device1;
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
 
@@ -40,9 +40,16 @@ protected:
     virtual void onRenderFrame( float currentTime, float deltaTime );
 
 private:
-    ID3D10Device * mpDevice;
+    HRESULT createDeviceAndSwapChain();
+    HRESULT createRenderTarget();
+    void createViewport();
+    bool verifyResult( HRESULT result, const std::string& action ) const;
+
+private:
+    MainWindow * mpMainWindow;
+    ID3D10Device1 * mpDevice;
     IDXGISwapChain * mpSwapChain;
-    ID3D10RenderTargetView * mpBackBuffer;
+    ID3D10RenderTargetView * mpRenderTargetView;
 };
 
 #endif

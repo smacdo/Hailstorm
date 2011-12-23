@@ -45,10 +45,6 @@ bool IRenderer::initialize()
     {
         mRendererCreatedAndRunning = true;
     }
-    else
-    {
-        App::raiseFatalError( "Failed to create the renderer" );
-    }
 
     // Now let the 
     return mRendererCreatedAndRunning;
