@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <!-- ============================================================ -->
+    <!--   Shared variables                                           -->
+    <!-- ============================================================ -->
+    <?define MergeModuleDir = "$(env.CommonProgramFiles)\Merge Modules" ?>
+    <?define DXSDKDir       = "$(env.DXSDK_DIR)\Microsoft DirectX SDK (June 2010)" ?>
+
+    <?if $(var.Platform) = x64 ?>
+    <?define ProductName = "Hailstorm Engine Demo (64 bit)" ?>
+    <?define Win64       = "Yes" ?>
+    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+    <?else ?>
+    <?define ProductName = "Hailstorm Engine Demo" ?>
+    <?define Win64       = "No" ?>
+    <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+    <?endif ?>
+
+    <!-- ============================================================ -->
+    <!--   Hailstorm Engine Demo Product                              -->
+    <!-- ============================================================ -->    
+	<Product Id="dc597f23-e9a3-49ab-8dc0-36296e5c072c"
+             Name="Hailstorm Tech Demo"
+             Language="1033"
+             Version="1.0.0.0"
+             Manufacturer="Scott MacDonald"
+             UpgradeCode="982c4cb0-7b9d-47c2-a04e-05bd5ddaa279">
+		<Package InstallerVersion="300" Compressed="yes" Platform="$(var.Platform)" />
+		<Media Id="1" Cabinet="hailstorm.cab" EmbedCab="yes" />
+
+        <!-- ************************************************************** -->
+        <!-- The directory structure for this application                   -->
+        <!-- ************************************************************** -->
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="$(var.PlatformProgramFilesFolder)">
+                <Directory Id="CompanyProgramFolder" Name="whitespaceconsideredharmful.com">
+				    <Directory Id="APPLICATIONROOTDIRECTORY" Name="hailstorm">
+                        <Directory Id="HailstormBinDir" Name="bin" />
+                        <Directory Id="HailstormDataDir" Name="data" />
+                    </Directory>
+				</Directory>
+			</Directory>
+            <Directory Id="ProgramMenuFolder">
+                <Directory Id="ApplicationProgramsFolder" Name="Hailstorm" />
+            </Directory>
+		</Directory>
+
+        <!-- ************************************************************** -->
+        <!-- All of the files that this application needs to have installed -->
+        <!-- ************************************************************** -->
+        <DirectoryRef Id="HailstormBinDir">
+            <?if $(var.Win64) = "yes" ?>
+                <Component Id="Sandbox.exe" Guid="eb2a53f9-0599-4684-a314-0c200de6fc96" Win64="$(var.Win64)">
+                    <File Id="Sandbox64.exe" Source="..\game\bin\Sandbox64.exe" KeyPath="yes" Checksum="yes" />
+                </Component>
+            <?else ?>
+                <Component Id="Sandbox.exe" Guid="e1bb9b75-cde9-4e6c-83f4-fada1ce10094">
+                    <File Id="Sandbox32.exe" Source="..\game\bin\Sandbox32.exe" KeyPath="yes" Checksum="yes" />
+                </Component>
+            <?endif ?>      
+        </DirectoryRef>
+
+        <DirectoryRef Id="APPLICATIONROOTDIRECTORY">
+            <Component Id="readme.txt" Guid="d045dea4-c80b-4ff7-a023-a75ec6a15e10">
+                <File Id="readme.txt" Source="..\ReadMe.txt" />
+            </Component>
+        </DirectoryRef>
+
+        <!-- ************************************************************** -->
+        <!--   Application short cuts                                       -->
+        <!-- ************************************************************** -->        
+        <DirectoryRef Id="ApplicationProgramsFolder">
+            <Component Id="HailstormShortcuts" Guid="4e2ca7c8-fa8a-4c1f-8777-a5ff95768444">
+                <RegistryValue Id="RegShortcutDesktop" Root="HKCU"
+                        Key="Software\whitespaceconsideredharmful.com\settings" Name="StartMenuShortcut" Value="1"
+                        Type="integer" KeyPath="yes" />
+
+                <?if $(var.Win64) = "yes" ?>
+                <Shortcut Id="StartMenuHailstormShortcut"
+                          Name="Hailstorm Engine Demo (x64)"
+                          Description="Run the hailstorm demo in 64 bit mode"
+                          Target="[APPLICATIONROOTDIRECTORY]bin\hailstorm64.exe"
+                          WorkingDirectory="HailstormBinDir" />
+                <?else ?>
+                <Shortcut Id="StartMenuHailstormShortcut"
+                          Name="Hailstorm Engine Demo"
+                          Description="Run the hailstorm demo in 64 bit mode"
+                          Target="[APPLICATIONROOTDIRECTORY]bin\hailstorm32.exe"
+                          WorkingDirectory="HailstormBinDir" />
+                <?endif ?>
+                <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
+            </Component>
+        </DirectoryRef>
+
+        <!-- ************************************************************** -->
+        <!--   List of application features that can be installed           -->
+        <!-- ************************************************************** -->
+		<Feature Id="ProductFeature"
+                 Title="Hailstorm Client"
+                 Description="These are the files required for Hailstorm to work correctly"
+                 Display="collapse"
+                 ConfigurableDirectory="APPLICATIONROOTDIRECTORY"
+                 AllowAdvertise="no"
+                 Absent="disallow"
+                 Level="1">
+            <ComponentRef Id="Sandbox.exe" />
+            <ComponentRef Id="readme.txt" />
+            <ComponentRef Id="HailstormShortcuts" />
+			
+			<!-- Note: The following ComponentGroupRef is required to pull in generated authoring from project references. -->
+			<ComponentGroupRef Id="Product.Generated" />
+		</Feature>
+
+        <!-- ************************************************************** -->
+        <!--   The installer's user interfacfe goes here                    -->
+        <!-- ************************************************************** -->
+        <UIRef Id="WixUI_FeatureTree" />
+        <UIRef Id="WixUI_ErrorProgressText" />
+        <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
+        <WixVariable Id="WixUIBannerBmp" Value="banner.bmp" />
+        <WixVariable Id="WixUIDialogBmp" Value="firstpage.bmp" />
+	</Product>
+</Wix>
