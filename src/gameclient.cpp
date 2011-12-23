@@ -59,19 +59,27 @@ App::EProgramStatus GameClient::run()
     // The main game loop starts here!
     while ( mKeepRunning && (!mpMainWindow->didUserQuit()) )
     {
+        mpRenderer->tick();
         mKeepRunning = mpMainWindow->processMessages();
+        SwitchToThread();
     }
 
     // Unload before exiting
     unloadContent();
+    return App::EPROGRAM_OK;
 }
 
+/**
+ * Code that initializes the game client and all required game subsystems
+ * such as rendering, resource management and sound.
+ *
+ * \return  True if all components were initialized succesfully, false otherwise
+ */
 bool GameClient::initializeEngine()
 {
     // Create the DirectX renderer
-//    mpRenderer = new DXRenderer( mpMainWindow );
-//    return mpRenderer->initialize();
-    return true;
+    mpRenderer = new DXRenderer( mpMainWindow );
+    return mpRenderer->initialize();
 }
 
 bool GameClient::initialize()
