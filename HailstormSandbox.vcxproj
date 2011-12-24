@@ -164,8 +164,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="assets\rageface.bmp" />
     <None Include="assets\hailstorm.ico" />
+    <None Include="LICENSE.txt" />
+    <None Include="NOTICE.txt" />
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>

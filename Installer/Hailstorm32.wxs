@@ -7,11 +7,11 @@
     <?define DXSDKDIR       = "$(env.DXSDK_DIR)" ?>
 
     <?if $(var.Platform) = x64 ?>
-    <?define ProductName = "Hailstorm Engine Demo (64 bit)" ?>
+    <?define ProductName = "Hailstorm Tech Demo (64 bit)" ?>
     <?define Win64       = "yes" ?>
     <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
     <?else ?>
-    <?define ProductName = "Hailstorm Engine Demo" ?>
+    <?define ProductName = "Hailstorm Tech Demo" ?>
     <?define Win64       = "no" ?>
     <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
     <?endif ?>
@@ -20,7 +20,7 @@
     <!--   Hailstorm Engine Demo Product                              -->
     <!-- ============================================================ -->    
 	<Product Id="dc597f23-e9a3-49ab-8dc0-36296e5c072c"
-             Name="Hailstorm Tech Demo"
+             Name="$(var.ProductName)"
              Language="1033"
              Version="1.0.0.0"
              Manufacturer="Scott MacDonald"
@@ -49,6 +49,7 @@
         <!-- All of the files that this application needs to have installed -->
         <!-- ************************************************************** -->
         <DirectoryRef Id="HailstormBinDir">
+            <!-- The hailstorm executable... it needs to be versioned -->
             <?if $(var.Win64) = "yes" ?>
                 <Component Id="Sandbox.exe" Guid="eb2a53f9-0599-4684-a314-0c200de6fc96" Win64="$(var.Win64)">
                     <File Id="Sandbox64.exe" Source="..\game\bin\Sandbox64.exe" KeyPath="yes" Checksum="yes" />
@@ -57,12 +58,19 @@
                 <Component Id="Sandbox.exe" Guid="e1bb9b75-cde9-4e6c-83f4-fada1ce10094">
                     <File Id="Sandbox32.exe" Source="..\game\bin\Sandbox32.exe" KeyPath="yes" Checksum="yes" />
                 </Component>
-            <?endif ?>      
+            <?endif ?>
         </DirectoryRef>
 
         <DirectoryRef Id="APPLICATIONROOTDIRECTORY">
+            <!-- Extra files that accompany the game. Documentation and the like -->
             <Component Id="readme.txt" Guid="d045dea4-c80b-4ff7-a023-a75ec6a15e10">
                 <File Id="readme.txt" Source="..\ReadMe.txt" />
+            </Component>
+            <Component Id="LICENSE.txt" Guid="1D4F6183-E6F7-4695-92B8-15EBCD52D567">
+                <File Id="LICENSE.txt" Source="..\LICENSE.txt" />
+            </Component>
+            <Component Id="NOTICE.txt" Guid="F8A126AB-69A7-42F4-8A09-01F21A4D9BC0">
+                <File Id="NOTICE.txt" Source="..\NOTICE.txt" />
             </Component>
         </DirectoryRef>
 
@@ -170,6 +178,8 @@
                  Level="1">
             <ComponentRef Id="Sandbox.exe" />
             <ComponentRef Id="readme.txt" />
+            <ComponentRef Id="LICENSE.txt" />
+            <ComponentRef Id="NOTICE.txt" />
             <ComponentRef Id="HailstormShortcuts" />
 			
 			<!-- Note: The following ComponentGroupRef is required to pull in generated authoring from project references. -->

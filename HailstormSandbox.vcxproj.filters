@@ -20,10 +20,10 @@
       <Filter>Gui Code</Filter>
     </ClCompile>
     <ClCompile Include="src\stdafx.cpp">
-      <Filter>VS Support</Filter>
+      <Filter>VS Support and Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\pragmas.cpp">
-      <Filter>VS Support</Filter>
+      <Filter>VS Support and Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\mainwindow.cpp">
       <Filter>Gui Code</Filter>
@@ -73,10 +73,10 @@
       <Filter>Sandbox Code\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\stdafx.h">
-      <Filter>VS Support</Filter>
+      <Filter>VS Support and Assets</Filter>
     </ClInclude>
     <ClInclude Include="src\targetver.h">
-      <Filter>VS Support</Filter>
+      <Filter>VS Support and Assets</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\errordialog.h">
       <Filter>Gui Code\Headers</Filter>
@@ -105,14 +105,15 @@
     <ClInclude Include="src\Resource.h">
       <Filter>VS Support</Filter>
     </ClInclude>
+    <ClInclude Include="src\Resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="directx.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="directx.ico" />
     <None Include="ReadMe.txt" />
-    <None Include="assets\rageface.bmp" />
+    <None Include="NOTICE.txt" />
+    <None Include="assets\hailstorm.ico">
+      <Filter>VS Support and Assets</Filter>
+    </None>
+    <None Include="LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common Code">
@@ -127,9 +128,6 @@
     <Filter Include="Gui Code\Headers">
       <UniqueIdentifier>{49086ab8-ff02-456f-a577-1e0bfb89f0b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="VS Support">
-      <UniqueIdentifier>{de0fb035-0c01-4ecb-adcb-4ff41e923ea7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sandbox Code">
       <UniqueIdentifier>{59898411-75ec-4d6a-a3e4-f89ed3355c3f}</UniqueIdentifier>
     </Filter>
@@ -142,5 +140,13 @@
     <Filter Include="Graphics Code\Headers">
       <UniqueIdentifier>{b4cbd2e1-0bf2-4073-8148-6f1d67822125}</UniqueIdentifier>
     </Filter>
+    <Filter Include="VS Support and Assets">
+      <UniqueIdentifier>{de0fb035-0c01-4ecb-adcb-4ff41e923ea7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="assets\hailstorm.rc">
+      <Filter>VS Support and Assets</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
