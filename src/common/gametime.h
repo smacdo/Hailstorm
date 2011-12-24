@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SCOTT_HAILSTORM_COMMON_GAMETIME_H
-#define SCOTT_HAILSTORM_COMMON_GAMETIME_H
+#ifndef HAILSTORM_COMMON_GAMETIME_H
+#define HAILSTORM_COMMON_GAMETIME_H
 
 typedef float TimeT;
 

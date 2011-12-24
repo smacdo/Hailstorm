@@ -17,7 +17,7 @@
 #define SCOTT_HAILSTORM_GRAPHICS_IRENDERER_H
 
 #include <boost/utility.hpp>
-class Window;
+class IWindow;
 
 /**
  * This is an abstract renderer
@@ -25,7 +25,7 @@ class Window;
 class IRenderer : boost::noncopyable
 {
 public:
-    explicit IRenderer( Window *pWindow );
+    explicit IRenderer( IWindow *pWindow );
     virtual ~IRenderer();
 
     bool initialize();
@@ -37,10 +37,10 @@ protected:
     virtual void onStopRenderer() = 0;
     virtual void onRenderFrame( float currentTime, float deltaTime ) = 0;
 
-    Window *renderWindow();
+    IWindow *renderWindow();
 
 private:
-    Window *mpWindow;
+    IWindow *mpWindow;
     bool mRendererCreatedAndRunning;
 };
 

@@ -19,37 +19,40 @@
 #include <string>
 #include <boost/utility.hpp>
 
-class Window : boost::noncopyable
+/**
+ * Platform independent window class
+ */
+class IWindow : boost::noncopyable
 {
 public:
-    Window( HINSTANCE hInstance,
-            const std::wstring& windowTitle,
-            unsigned int width,
-            unsigned int height );
-    virtual ~Window();
-    void create();
-    void show();
+    IWindow( const std::string& windowTitle,
+             unsigned int width,
+             unsigned int height );
+    virtual ~IWindow();
+    virtual void create() = 0;
+    virtual void show() = 0;
+    virtual bool processMessages() = 0;
+    virtual void exit() = 0;
+
     bool didUserQuit() const;
-    virtual bool processMessages();
-    virtual LRESULT handleMessage( UINT message, WPARAM wParam, LPARAM lParam );
 
-    // Starts the exit process
-    void exit();
+    // Returns the name of the window
+    std::string windowTitle() const;
 
-    HWND windowHandle() const;
-    HINSTANCE appInstance() const;
-
-    void setWindowHandle( HWND hWnd );
+    // Returns the width of the window
     unsigned int width() const;
+
+    // Returns the height of the window
     unsigned int height() const;
 
+protected:
+    void setUserQuit();
+
 private:
-    const std::wstring mAppClassName;
-    std::wstring mTitle;
+    std::string mTitle;
     unsigned int mWidth;
     unsigned int mHeight;
-    HINSTANCE mAppInstance;
-    HWND mWindowHandle;
+
     bool mCreated;
     bool mUserQuit;
 };

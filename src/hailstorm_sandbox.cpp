@@ -15,10 +15,8 @@
  */
 #include "stdafx.h"
 #include "hailstorm_sandbox.h"
-#include "gui/mainwindow.h"
-#include "common/logging.h"
 #include "gameclient.h"
-
+#include "gui/mainwindow.h"
 
 /////////////////////////////////////////////////////////////////////////////git s
 // Application entry point
@@ -32,11 +30,8 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
     UNREFERENCED_PARAMETER(nCmdShow);
 
-    LOG_NOTICE("PLATFORM") << "Application has entered WinMain";
-
     // Create a new window
-    MainWindow mainWindow( hInstance, L"Hailstorm Tech Demo", 800u, 600u );
-    
+    MainWindow mainWindow( hInstance, "Hailstorm Tech Demo", 800u, 600u );
     mainWindow.create();
     
     GameClient game( &mainWindow );

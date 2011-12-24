@@ -27,6 +27,8 @@
     <LinkerAdditionalOptions>-ext WixUIExtension</LinkerAdditionalOptions>
     <OutputPath>bin\$(Configuration)-$(Platform)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <SuppressValidation>True</SuppressValidation>
+    <SuppressIces>ICE60;ICE82</SuppressIces>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <LinkerAdditionalOptions>-ext WixUIExtension</LinkerAdditionalOptions>

@@ -17,7 +17,7 @@
 #include "common/platform_windows.h"
 #include "common/platform.h"
 #include "common/delete.h"
-#include "gui/window.h"
+#include "gui/mainwindow.h"
 #include "gui/aboutbox.h"
 #include "gui/assertiondialog.h"
 #include "gui/errordialog.h"
@@ -154,7 +154,7 @@ namespace App
 /////////////////////////////////////////////////////////////////////////////
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    Window * pWindow = NULL;
+    MainWindow * pMainWindow = NULL;
 
     //
     // Grab a pointer to the Window* instance that is sending this message.
@@ -168,30 +168,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // grab the encoded Window* pointer and use SetWindowLong to save it for
         // future use
         LPCREATESTRUCT cs = reinterpret_cast<LPCREATESTRUCT>( lParam );
-        pWindow           = reinterpret_cast<Window*>( cs->lpCreateParams );
-        assert( pWindow != NULL && "Failed to find window pointer");
+        pMainWindow       = reinterpret_cast<MainWindow*>( cs->lpCreateParams );
+        assert( pMainWindow != NULL && "Failed to find window pointer");
 
         // Store the window pointer
         ::SetWindowLongPtr(
             hWnd,
             GWLP_USERDATA,
-            reinterpret_cast<LONG_PTR>( pWindow ) );
+            reinterpret_cast<LONG_PTR>( pMainWindow ) );
 
         // Also store the assigned HWND value
-        pWindow->setWindowHandle( hWnd );
+        pMainWindow->setWindowHandle( hWnd );
     }
     else
     {
         // Try to look up the pointer that is stored in the window's userdata
         // field
-        pWindow = reinterpret_cast<Window*>( ::GetWindowLongPtr( hWnd, GWLP_USERDATA ) );
+        pMainWindow =
+            reinterpret_cast<MainWindow*>( ::GetWindowLongPtr( hWnd, GWLP_USERDATA ) );
     }
 
     // Route the message to the correct window instance. If we could not decipher
     // the instance, then just let windows perform a default action
-    if ( pWindow != NULL )
+    if ( pMainWindow != NULL )
     {
-        return pWindow->handleMessage( message, wParam, lParam );
+        return pMainWindow->handleMessage( message, wParam, lParam );
     }
     else
     {

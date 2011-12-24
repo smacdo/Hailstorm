@@ -16,26 +16,43 @@
 #ifndef SCOTT_HAILSTORM_GUI_MAINWINDOW_H
 #define SCOTT_HAILSTORM_GUI_MAINWINDOW_H
 
-#include "gui/window.h"
+#include "gui/iwindow.h"
 #include <string>
 
-class MainWindow : public Window
+class MainWindow : public IWindow
 {
 public:
     MainWindow( HINSTANCE hInstance,
-                const std::wstring& title,
+                const std::string& title,
                 unsigned int width,
                 unsigned int height );
     ~MainWindow();
 
+    virtual void create();
+    virtual void show();
+    virtual void exit();
+    
+    virtual bool processMessages();
+
+    HWND windowHandle() const;
+    HINSTANCE appInstance() const;
+
+    void setWindowHandle( HWND hWnd );
+
+    // Handles window events that come from Windows
+    LRESULT handleMessage( UINT message, WPARAM wParam, LPARAM lParam );
+
     // Show the message box
     void showAboutBox() const;
-
-    virtual LRESULT handleMessage( UINT message, WPARAM wParam, LPARAM lParam );
 
 protected:
     
     virtual void onPaint();
+
+private:
+    const std::wstring mAppClassName;
+    HINSTANCE mAppInstance;
+    HWND mWindowHandle;
 };
 
 #endif

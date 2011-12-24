@@ -16,9 +16,6 @@
     <ClCompile Include="src\common\platform_windows.cpp">
       <Filter>Common Code</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\window.cpp">
-      <Filter>Gui Code</Filter>
-    </ClCompile>
     <ClCompile Include="src\stdafx.cpp">
       <Filter>VS Support and Assets</Filter>
     </ClCompile>
@@ -39,6 +36,9 @@
     </ClCompile>
     <ClCompile Include="src\graphics\dxrenderer.cpp">
       <Filter>Graphics Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\iwindow.cpp">
+      <Filter>Gui Code</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,9 +64,6 @@
       <Filter>Gui Code\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\Resource.h">
-      <Filter>Gui Code\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gui\window.h">
       <Filter>Gui Code\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\hailstorm_sandbox.h">
@@ -106,6 +103,10 @@
       <Filter>VS Support</Filter>
     </ClInclude>
     <ClInclude Include="src\Resource.h" />
+    <ClInclude Include="src\Resource.h" />
+    <ClInclude Include="src\gui\iwindow.h">
+      <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

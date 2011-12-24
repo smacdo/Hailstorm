@@ -12,13 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */s
+ */
 #ifndef SCOTT_GAME_CLIENT_H
 #define SCOTT_GAME_CLIENT_H
 
-#include <boost/noncopyable.hpp>
-#include "common/platform.h"
 #include "common/gametime.h"
+#include "common/platform.h"
+#include <boost/noncopyable.hpp>
 
 class MainWindow;
 class IRenderer;

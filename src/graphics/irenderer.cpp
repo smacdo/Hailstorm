@@ -16,7 +16,7 @@
 #include "stdafx.h"
 #include "graphics/irenderer.h"
 
-IRenderer::IRenderer( Window *pWindow )
+IRenderer::IRenderer( IWindow *pWindow )
     : mpWindow( pWindow ),
       mRendererCreatedAndRunning( false )
 {
@@ -80,7 +80,7 @@ void IRenderer::stop()
 /**
  * Return a pointer to the renderer's main window
  */
-Window* IRenderer::renderWindow()
+IWindow* IRenderer::renderWindow()
 {
     return mpWindow;
 }
