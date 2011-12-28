@@ -21,6 +21,8 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 
+class LogStream;
+
 #define LOG_TRACE(x)  GlobalLog::getInstance().trace(x)
 #define LOG_DEBUG(x)  GlobalLog::getInstance().debug(x)
 #define LOG_INFO(x)   GlobalLog::getInstance().info(x)
@@ -33,31 +35,14 @@
  */
 enum ELogLevel
 {
-    ELOG_TRACE,
-    ELOG_DEBUG,
-    ELOG_INFO,
-    ELOG_NOTICE,
-    ELOG_WARN,
-    ELOG_ERROR,
+    ELOGLEVEL_TRACE,
+    ELOGLEVEL_DEBUG,
+    ELOGLEVEL_INFO,
+    ELOGLEVEL_NOTICE,
+    ELOGLEVEL_WARN,
+    ELOGLEVEL_ERROR,
+    ELOGLEVEL_FATAL,
     ELogLevel_Count
-};
-
-/**
- * A null stream buffer, great for redirecting C++ output streams
- * to nothingness. This functions very similiarly to the UNIX idea of /dev/null
- */
-class NullStreamBuf : public std::streambuf
-{
-public:
-    NullStreamBuf()
-    {
-    }
-
-private:
-    virtual int overflow( int c )
-    {
-        return std::char_traits<char>::not_eof(c);
-    }
 };
 
 /**
@@ -70,26 +55,20 @@ private:
 class LogEntry
 {
 public:
-    LogEntry( std::ostream& consoleInput,
-              std::ostream& fileInput,
-              ELogLevel logLevel,
-              const std::string& system );
-    LogEntry( std::ostream& singleInput );
+    LogEntry( LogStream* debugStream );
     ~LogEntry();
 
     template<typename T>
     LogEntry& operator << ( const T& obj )
     {
-        mConsoleStream << obj;
-        mFileStream    << obj;
+        mDebugStream << obj;
         return *this;
     }
 
 private:
     LogEntry& operator = ( const LogEntry& );
 
-    std::ostream& mConsoleStream;
-    std::ostream& mFileStream;
+    LogStream* mDebugStream;
 };
 
 /**
@@ -99,6 +78,7 @@ class Log : boost::noncopyable
 {
 public:
     Log();
+    Log( std::ostream *pConsoleStream, std::ofstream* pFileStream );
     ~Log();
 
     LogEntry trace( const std::string& system ) const;
@@ -109,11 +89,7 @@ public:
     LogEntry error( const std::string& system ) const;
 
 private:
-    std::ofstream mOutputFile;
-    mutable std::ostream  mNullStream;
-    std::ostream& mConsoleStream;
-    std::ostream& mFileStream;
-    ELogLevel mMinimumLogLevel;
+    LogStream *mDebugStream;
 };
 
 /**

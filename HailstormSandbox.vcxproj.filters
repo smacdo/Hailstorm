@@ -40,6 +40,9 @@
     <ClCompile Include="src\gui\iwindow.cpp">
       <Filter>Gui Code</Filter>
     </ClCompile>
+    <ClCompile Include="src\common\logstream.cpp">
+      <Filter>Common Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\debugging.h">
@@ -106,6 +109,17 @@
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\gui\iwindow.h">
       <Filter>Gui Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Resource.h" />
+    <ClInclude Include="src\common\logging_impl.h">
+      <Filter>Common Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Resource.h" />
+    <ClInclude Include="src\common\logging_stream.h">
+      <Filter>Common Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\debugstreambuf.inl">
+      <Filter>Common Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

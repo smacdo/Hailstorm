@@ -114,7 +114,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -170,6 +170,9 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common\logging_impl.h" />
+    <ClInclude Include="src\common\logging_stream.h" />
+	<ClInclude Include="src\common\debugstreambuf.inl" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\common\gametime.h" />
     <ClInclude Include="src\graphics\dxrenderer.h" />
@@ -193,6 +196,7 @@
     <ClInclude Include="src\version.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\common\logstream.cpp" />
     <ClCompile Include="src\graphics\dxrenderer.cpp" />
     <ClCompile Include="src\graphics\irenderer.cpp" />
     <ClCompile Include="src\gameclient.cpp" />

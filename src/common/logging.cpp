@@ -15,7 +15,8 @@
  */
 #include "stdafx.h"
 #include "common/logging.h"
-
+#include "common/logging_impl.h"
+#include "common/logging_stream.h"
 #include <iostream>
 #include <ostream>
 #include <fstream>
@@ -38,34 +39,10 @@ const char* LOG_LEVEL_NAMES[ELogLevel_Count] =
  * be the console output, and file output streams. Will also print a short
  * entry header consisting of the log level and component before returning
  *
- * \param  consoleStream  Output stream to use for console output
- * \param  fileStream     Output stream to use for logfile output
- * \param  logLevel       The level at which this entry was emitted
- * \param  system         Name of the component or subsystem
+ * \param  debugStream
  */
-LogEntry::LogEntry( std::ostream& consoleStream,
-                    std::ostream& fileStream,
-                    ELogLevel logLevel,
-                    const std::string& system )
-    : mConsoleStream(consoleStream),
-      mFileStream(fileStream)
-      
-{
-    // Write console output header
-    mConsoleStream
-        << "["  << LOG_LEVEL_NAMES[logLevel]
-        << "; " << system << "] ";
-}
-
-/**
- * Null stream constructor. Takes in a reference to a (hopefully)
- * nullstream object, and doesn't print anything useful
- *
- * \param  nullStream  Reference to a null stream object
- */
-LogEntry::LogEntry( std::ostream& nullStream )
-    : mConsoleStream( nullStream ),
-      mFileStream( nullStream )
+LogEntry::LogEntry( LogStream* debugStream )
+    : mDebugStream( debugStream )      
 {
 }
 
@@ -75,24 +52,23 @@ LogEntry::LogEntry( std::ostream& nullStream )
  */
 LogEntry::~LogEntry()
 {
-    mConsoleStream << std::endl;
+    mDebugStream->endLogEntry();
 }
 
 Log::Log()
-    : mOutputFile(),
-      mNullStream( new NullStreamBuf ),
-      mConsoleStream( std::cout ),
-      mFileStream( mNullStream ),
-      mMinimumLogLevel( ELOG_DEBUG )
+    : mDebugStream( new LogStream(NULL,NULL) )
+{
+
+}
+
+Log::Log( std::ostream *pConsoleStream, std::ofstream* pFileStream )
+    : mDebugStream( new LogStream(pConsoleStream, pFileStream) )
 {
 }
 
 Log::~Log()
 {
-    if ( mOutputFile.is_open() )
-    {
-        mOutputFile.close();
-    }
+    boost::checked_delete( mDebugStream );
 }
 
 /**
@@ -105,14 +81,8 @@ Log::~Log()
  */
 LogEntry Log::trace( const std::string& system ) const
 {
-    if ( mMinimumLogLevel <= ELOG_TRACE )
-    {
-        return LogEntry( mConsoleStream, mFileStream, ELOG_TRACE, system );
-    }
-    else
-    {
-        return LogEntry( mNullStream );
-    }
+    mDebugStream->startLogEntry( system, ELOGLEVEL_INFO );
+    return LogEntry( mDebugStream );
 }
 
 /**
@@ -125,14 +95,8 @@ LogEntry Log::trace( const std::string& system ) const
  */
 LogEntry Log::debug( const std::string& system ) const
 {
-    if ( mMinimumLogLevel <= ELOG_DEBUG )
-    {
-        return LogEntry( mConsoleStream, mFileStream, ELOG_DEBUG, system );
-    }
-    else
-    {
-        return LogEntry( mNullStream );
-    }
+    mDebugStream->startLogEntry( system, ELOGLEVEL_DEBUG );
+    return LogEntry( mDebugStream );
 }
 
 /**
@@ -145,14 +109,8 @@ LogEntry Log::debug( const std::string& system ) const
  */
 LogEntry Log::info( const std::string& system ) const
 {
-    if ( mMinimumLogLevel <= ELOG_INFO )
-    {
-        return LogEntry( mConsoleStream, mFileStream, ELOG_INFO, system );
-    }
-    else
-    {
-        return LogEntry( mNullStream );
-    }
+    mDebugStream->startLogEntry( system, ELOGLEVEL_INFO );
+    return LogEntry( mDebugStream );
 }
 
 /**
@@ -165,14 +123,8 @@ LogEntry Log::info( const std::string& system ) const
  */
 LogEntry Log::notice( const std::string& system ) const
 {
-    if ( mMinimumLogLevel <= ELOG_NOTICE )
-    {
-        return LogEntry( mConsoleStream, mFileStream, ELOG_NOTICE, system );
-    }
-    else
-    {
-        return LogEntry( mNullStream );
-    }
+    mDebugStream->startLogEntry( system, ELOGLEVEL_NOTICE );
+    return LogEntry( mDebugStream );
 }
 
 /**
@@ -185,14 +137,8 @@ LogEntry Log::notice( const std::string& system ) const
  */
 LogEntry Log::warn( const std::string& system ) const
 {
-    if ( mMinimumLogLevel <= ELOG_WARN )
-    {
-        return LogEntry( mConsoleStream, mFileStream, ELOG_WARN, system );
-    }
-    else
-    {
-        return LogEntry( mNullStream );
-    }
+    mDebugStream->startLogEntry( system, ELOGLEVEL_WARN );
+    return LogEntry( mDebugStream );
 }
 
 /**
@@ -205,14 +151,8 @@ LogEntry Log::warn( const std::string& system ) const
  */
 LogEntry Log::error( const std::string& system ) const
 {
-    if ( mMinimumLogLevel <= ELOG_ERROR )
-    {
-        return LogEntry( mConsoleStream, mFileStream, ELOG_ERROR, system );
-    }
-    else
-    {
-        return LogEntry( mNullStream );
-    }
+    mDebugStream->startLogEntry( system, ELOGLEVEL_ERROR );
+    return LogEntry( mDebugStream );
 }
 
 /**
