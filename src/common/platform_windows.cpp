@@ -206,6 +206,15 @@ namespace App
      */
     void startup()
     {
+        // Enable Visual Studio's debug heap and various memory checking features
+        int flags = _CrtSetDbgFlag( _CRTDBG_REPORT_FLAG );
+
+        flags |= _CRTDBG_LEAK_CHECK_DF;         // Turn on leak-checking bit.
+        flags &= ~_CRTDBG_CHECK_CRT_DF;         // Turn off CRT block checking bit.
+        _CrtSetDbgFlag( flags );                // Now set debug flags           
+        
+        _CrtSetReportMode ( _CRT_ERROR, _CRTDBG_MODE_DEBUG);
+
         // We need a console window
         WinApp::CreateConsoleWindow( true );
 

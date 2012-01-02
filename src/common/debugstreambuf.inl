@@ -73,7 +73,7 @@ DebugStreambuf<C,T>::DebugStreambuf( std::basic_streambuf<C,T>* pConsoleBuffer,
 template<typename C, typename T>
 DebugStreambuf<C,T>::~DebugStreambuf()
 {
-    boost::checked_array_delete( mpConsoleBuffer );
+    boost::checked_array_delete( mpInternalBuffer );
 }
 
 /**
