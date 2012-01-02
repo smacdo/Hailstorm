@@ -30,7 +30,7 @@
  */
 template<typename C, typename T>
 DebugStreambuf<C,T>::DebugStreambuf()
-    : BUFFER_SIZE( 16 ),
+    : BUFFER_SIZE( 4096 ),
       mpInternalBuffer( new char[BUFFER_SIZE] ),
       mpConsoleBuffer( NULL ),
       mpFileBuffer( NULL ),
@@ -42,7 +42,7 @@ DebugStreambuf<C,T>::DebugStreambuf()
       mLogLevel( mDefaultLogLevel ),
       mModuleName( mDefaultModuleName )
 {
-//    setp( &mpInternalBuffer[0], &mpInternalBuffer[BUFFER_SIZE] );
+    setp( &mpInternalBuffer[0], &mpInternalBuffer[BUFFER_SIZE] );
 }
 
 /**
@@ -52,7 +52,7 @@ DebugStreambuf<C,T>::DebugStreambuf()
 template<typename C, typename T>
 DebugStreambuf<C,T>::DebugStreambuf( std::basic_streambuf<C,T>* pConsoleBuffer,
                                      std::basic_filebuf<C,T>* pFileBuffer )
-    : BUFFER_SIZE( 16 ),
+    : BUFFER_SIZE( 4096 ),
       mpInternalBuffer( new char[BUFFER_SIZE] ),
       mpConsoleBuffer( pConsoleBuffer ),
       mpFileBuffer( pFileBuffer ),
@@ -64,11 +64,11 @@ DebugStreambuf<C,T>::DebugStreambuf( std::basic_streambuf<C,T>* pConsoleBuffer,
       mLogLevel( mDefaultLogLevel ),
       mModuleName( mDefaultModuleName )
 {
-//    setp( &mpInternalBuffer[0], &mpInternalBuffer[BUFFER_SIZE] );
+    setp( &mpInternalBuffer[0], &mpInternalBuffer[BUFFER_SIZE] );
 }
 
 /**
- * Destructor
+ * Destructor. Destroys its internal buffer array
  */
 template<typename C, typename T>
 DebugStreambuf<C,T>::~DebugStreambuf()
@@ -97,25 +97,6 @@ void DebugStreambuf<C,T>::setFileThreshold( ELogLevel logLevel )
 }
 
 /**
- * Sets the name of the module that will be generating the next log entry
- */
-template<typename C, typename T>
-void DebugStreambuf<C,T>::setModule( const char* module )
-{
-    mModuleName = module;
-}
-
-/**
- * Sets the severity level of the next log entry
- */
-template<typename C, typename T>
-void DebugStreambuf<C,T>::setLogLevel( ELogLevel level )
-{
-    mLogLevel = level;
-}
-
-
-/**
  * Set the debug stream's console output to be a pointer to the given stream
  * buffer. Passing in NULL will disable the console output.
  *
@@ -140,58 +121,129 @@ void DebugStreambuf<C,T>::setFile( std::basic_filebuf<C,T> *pFileBuffer )
 }
 
 /**
- * Overridden stream handling method. xsputn is called by the underlying
- * basic_streambuf class whenever the streambuf receives input data.
- *
- * The method takes all of character output, appends any unnecessary log entry
- * text and then routes everything to our console and file stream_bufs.
- *
- * \param  pSequence  The character sequence to write
- * \param  size       The size of the character sequence
- * \return            Number of characters written. Zero if there was a problem
+ * Starts a new log entry
  */
 template<typename C, typename T>
-std::streamsize DebugStreambuf<C,T>::xsputn( const C* pSequence, std::streamsize size )
+void DebugStreambuf<C,T>::startLogEntry( ELogLevel logLevel, const char* moduleName )
 {
-    bool didWrite = true;
-    bool isAtLineStart = mAtLineStart;
-
-    //
-    // Write log data to the user's console
-    //
-    if ( mpConsoleBuffer != NULL && mLogLevel >= mConsoleThreshold )
+    // Save this entry's log level and module name before writing the log header
+    mLogLevel   = logLevel;
+    mModuleName = moduleName;
+    
+    // Now create the log header
+    if ( mpConsoleBuffer != NULL )
     {
-        // Write out the log header to the console
-        if ( mAtLineStart )
-        {
-            writeEntryHeaderConsole();
-            isAtLineStart = false;
-        }
-
-        // Now write the actual string to the console
-        mpConsoleBuffer->sputn( pSequence, size );
+        writeEntryHeaderConsole();
     }
 
-    //
-    // Now write the log contents to the file log
-    //
-    if ( mpFileBuffer != NULL && mLogLevel >= mFileThreshold )
+    if ( mpFileBuffer != NULL )
     {
-        // Write out the log header to the console
-        if ( mAtLineStart )
-        {
-            writeEntryHeaderFile();
-            isAtLineStart = false;
-        }
+        writeEntryHeaderFile();
+    }
+}
 
-        // Now write the actual string to the console
-        mpFileBuffer->sputn( pSequence, size );
+/**
+ * Called when the logger has finished emitting a single log entry. This
+ * method then resets our internal state in preparation for the next log
+ * entry
+ */
+template<typename C,typename T>
+void DebugStreambuf<C,T>::endLogEntry()
+{
+    // Reset current log entry state
+    mAtLineStart = true;
+    mLogLevel    = mDefaultLogLevel;
+    mModuleName  = mDefaultModuleName;
+
+    // Add a newline character to separate log entries (both for the console
+    // and the file)
+    sputc( '\n' );
+
+    // Write all buffered log data (this should be all of the current log entry
+    // unless it was exceptionally large) to our output sources
+    pubsync();
+}
+
+/**
+ * Called by the underlying basic_streambuf class when it runs out of buffer space
+ * to store current log text. This method will drain any text in the internal
+ * buffer, and then inform the base streambuf class that we have an empty buffer
+ * to use.
+ */
+template<typename C, typename T>
+int DebugStreambuf<C,T>::overflow( int c )
+{
+    // How much data do we have buffered?
+    std::streamsize n = static_cast<std::streamsize>( this->pptr() - this->pbase() );
+
+    // First copy our internal buffer to the console stream
+    if ( mpConsoleBuffer != NULL )
+    {
+        std::streamsize count = mpConsoleBuffer->sputn( this->pbase(), n );
+
+        if ( count != n )
+        {
+            return traits_type::eof();
+        }
     }
 
-    // Make sure we if we wrote a log entry that we don't do so again until
-    // the start of a new log entry
-    mAtLineStart = isAtLineStart;
-    return (didWrite ? size : 0u );
+    // Now again copy the internal buffer, but this time to our file log
+    if ( mpFileBuffer != NULL )
+    {
+        std::streamsize count = mpFileBuffer->sputn( this->pbase(), n );
+
+        if ( count != n )
+        {
+            return traits_type::eof();
+        }
+    }
+
+    // Reset out character buffer
+    setp( mpInternalBuffer, mpInternalBuffer + BUFFER_SIZE );
+
+    // Write the passed character (if necessary)
+    if (! traits_type::eq_int_type( c, traits_type::eof() ) )
+    {
+        traits_type::assign( *this->pptr(), traits_type::to_char_type(c) );
+        this->pbump( 1 );
+    }
+
+    return traits_type::not_eof(c);
+}
+
+/**
+ * Overridden sync method. When called, this method will synchronize the state
+ * of the logger's internal buffer with its output streams (console and file).
+ * This will effectively drain all cached text and make it appear.
+ */
+template<typename C, typename T>
+int DebugStreambuf<C,T>::sync()
+{
+    int retval = 0;
+
+    // drain our internal buffer into mpConsole and mpFile
+    int_type c = this->overflow( traits_type::eof() );
+
+    // don't flush if overflow returned an eof
+    if ( traits_type::eq_int_type( c, traits_type::eof() ) )
+    {
+        retval = -1;
+    }
+    else
+    {
+        if ( mpConsoleBuffer != NULL && mpConsoleBuffer->pubsync() == -1 )
+        {
+            retval = -1;
+        }
+
+        if ( mpFileBuffer != NULL && mpFileBuffer->pubsync() == -1 )
+        {
+            retval = -1;
+        }
+    }
+
+    // Let caller know if we sync'd
+    return retval;
 }
 
 /**
@@ -204,7 +256,7 @@ void DebugStreambuf<C,T>::write( const std::basic_string<C,T>& str )
 }
 
 /**
- * Writes the log entry's "header" text out to the console. Thsi text
+ * Writes the log entry's "header" text out to the console. This text
  * consists of the current date/time, entry module and severity level.
  *
  * \return  True if the header was written to the console, false otherwise
@@ -306,35 +358,6 @@ const char* DebugStreambuf<C,T>::getLogLevelString( ELogLevel level ) const
     }
 }
 
-/**
- * Called when the logger has finished emitting a single log entry. This
- * method then resets our internal state in preparation for the next log
- * entry
- */
-template<typename C,typename T>
-void DebugStreambuf<C,T>::endLogEntry()
-{
-    // Reset current log entry state
-    mAtLineStart = true;
-    mLogLevel    = mDefaultLogLevel;
-    mModuleName  = mDefaultModuleName;
 
-    // Make sure we emit any buffered log data before attempting to sync
-    // our output sources
-    pubsync();
-
-    // Sync output
-    if ( mpConsoleBuffer != NULL  && mLogLevel >= mConsoleThreshold )
-    {
-        mpConsoleBuffer->sputc( '\n' );
-        mpConsoleBuffer->pubsync();
-    }
-
-    if ( mpFileBuffer != NULL && mLogLevel >= mFileThreshold )
-    {
-        mpFileBuffer->sputc( '\n' );
-        mpFileBuffer->pubsync();
-    }
-}
 
 #endif

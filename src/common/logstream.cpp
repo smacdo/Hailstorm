@@ -117,8 +117,7 @@ void LogStream::setFileStream( std::ofstream *pFileStream )
  */
 void LogStream::startLogEntry( const std::string& system, ELogLevel level )
 {
-    mpStreambuf->setLogLevel( level );
-    mpStreambuf->setModule( system.c_str() );
+    mpStreambuf->startLogEntry( level, system.c_str() );
 }
 
 /**

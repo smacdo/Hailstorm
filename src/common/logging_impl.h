@@ -43,17 +43,17 @@ public:
     void write( const std::basic_string<Char,Traits>& contents );
     void setConsoleThreshold( ELogLevel level );
     void setFileThreshold( ELogLevel level );
-    void setLogLevel( ELogLevel level );
-    void setModule( const char* moduleName );
 
     void setConsole( std::basic_streambuf<Char, Traits> *pConsoleBuffer );
     void setFile( std::basic_filebuf<Char,Traits> *pFileBuffer );
 
-    // make these protected later on
+    void startLogEntry( ELogLevel logLevel, const char* moduleName );
     void endLogEntry();
 
 protected:
-    virtual std::streamsize xsputn( const Char* pSequence, std::streamsize size );
+    virtual int overflow( int c = EOF );
+    virtual int sync();
+ //   std::streamsize write( const Char* pSequence, std::streamsize size );
 
     // Returns a textual version of the log level
     const char* getLogLevelString( ELogLevel level ) const;
