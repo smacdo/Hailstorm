@@ -73,9 +73,11 @@ void IRenderer::tick()
 
     // Was the window resized? Make sure to let give the renderer a chance to
     // intercept this event before we start the next frame
-    if ( mpWindow->wasResized() )
+    if ( mpWindow->wasResized() && (!mpWindow->isResizing()) && (!mpWindow->isPaused()) )
     {
-        LOG_NOTICE("The rendering window was resized");
+        LOG_NOTICE("Renderer")
+            << "Renderer resized to " << mpWindow->width()
+            << " x "                  << mpWindow->height();
 
         // Raise the onResize event which will let a derived renderer handle this
         // event
@@ -88,6 +90,7 @@ void IRenderer::tick()
         mpWindow->clearResizedFlag();
     }
 
+    // Keep rendering whatever is going on
     onRenderFrame( 0.0f, 0.0f );
 }
 

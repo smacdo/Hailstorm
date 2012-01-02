@@ -225,6 +225,30 @@ LRESULT MainWindow::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )
             {
                 setResized( true, LOWORD(lParam), HIWORD(lParam) );
             }
+            break;
+
+        case WM_POWERBROADCAST:
+            if ( wParam == PBT_APMQUERYSUSPEND )
+            {
+                // The application is about to be suspended. We should prepare for
+                // this event by saving any data and then pausing the game loop
+                // until we come out of suspension
+            }
+            else if ( wParam == PBT_APMRESUMESUSPEND )
+            {
+                // The application is being resumed from suspension. We should
+                // reload any saved data and unpause the game loop
+            }
+
+        case WM_ENTERMENULOOP:
+            // Pause while user is in menu
+            setPaused( true );
+            break;
+
+        case WM_EXITMENULOOP:
+            // Unpause after user has exited menu
+            setPaused( false );
+            break;
 
         case WM_ENTERSIZEMOVE:
             setResizing( true );

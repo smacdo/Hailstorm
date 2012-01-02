@@ -102,9 +102,6 @@ void IWindow::setResizing( bool isResizing )
 {
     // Save the state of resizing
     mResizing = isResizing;
-
-    // Also make sure the window is paused when resizing
-    setPaused( isResizing );
 }
 
 /**
@@ -112,14 +109,11 @@ void IWindow::setResizing( bool isResizing )
  */
 void IWindow::setResized( bool wasResized, unsigned int width, unsigned int height )
 {
-    mResizedFlag = true;
+    mResizedFlag = wasResized;
 
     // If the window was resized, then save the new width and height of the window
     if ( mResizedFlag )
     {
-        LOG_NOTICE("Window")
-            << "Window was resized to " << width << " x " << height;
-
         assert2( width  > 0, "Window width cannot be zero" );
         assert2( height > 0, "Window height cannot be zero" );
 
@@ -141,7 +135,7 @@ bool IWindow::wasResized() const
  */
 void IWindow::clearResizedFlag()
 {
-    LOG_DEBUG("Window") << "Cleared window resized flag";
+    LOG_TRACE("Window") << "Cleared window resized flag";
     mResizedFlag = false;
 }
 
