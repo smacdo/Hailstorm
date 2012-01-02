@@ -55,17 +55,28 @@ LogEntry::~LogEntry()
     mDebugStream->endLogEntry();
 }
 
+/**
+ * Log object constructor. Creates a new log with an associated log stream,
+ * but does not set any console or file output.
+ */
 Log::Log()
     : mDebugStream( new LogStream(NULL,NULL) )
 {
 
 }
 
+/**
+ * Log object constructor. Creates a new log with an associated log stream and
+ * associates the given console/file streams to the log stream
+ */
 Log::Log( std::ostream *pConsoleStream, std::ofstream* pFileStream )
     : mDebugStream( new LogStream(pConsoleStream, pFileStream) )
 {
 }
 
+/**
+ * Log destructor. Destroys the log stream associated with this log object
+ */
 Log::~Log()
 {
     boost::checked_delete( mDebugStream );
@@ -142,6 +153,32 @@ LogEntry Log::warn( const std::string& system ) const
 }
 
 /**
+ * Sets the output stream used for console window output
+ */
+void Log::setConsoleStream( std::ostream *pConsoleStream )
+{
+    if ( pConsoleStream == NULL )
+    {
+        warn("Logging") << "Attaching a null console stream...";
+    }
+
+    mDebugStream->setConsoleStream( pConsoleStream );
+}
+
+/**
+ * Sets the output stream used for file output
+ */
+void Log::setFileStream( std::ofstream *pFileStream )
+{
+    if ( pFileStream == NULL )
+    {
+        warn("Logging") << "Attaching a null file stream...";
+    }
+
+    mDebugStream->setFileStream( pFileStream );
+}
+
+/**
  * Writes an error entry to the program's log, and a stream that can be
  * used to append additional information to the entry
  *
@@ -160,7 +197,9 @@ LogEntry Log::error( const std::string& system ) const
  */
 void GlobalLog::start()
 {
-
+    // Attach the windows console to the log stream (We've already started a
+    // console window before this)
+    mLog.setConsoleStream( &std::cout );
 }
 
 /**

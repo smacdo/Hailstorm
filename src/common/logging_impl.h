@@ -27,7 +27,7 @@
  * interface, intercept all the data coming into the stream buffer and then be
  * able to output where ever we like.
  */
-template<typename Char, typename Traits = std::char_traits<char> >
+template<typename Char, typename Traits >
 class DebugStreambuf : public std::basic_streambuf<Char, Traits>
 {
 public:
@@ -53,7 +53,8 @@ public:
     void endLogEntry();
 
 protected:
-    std::streamsize xsputn( const Char* pSequence, std::streamsize size );
+    virtual std::streamsize xsputn( const Char* pSequence, std::streamsize size );
+    virtual int overflow( int c = EOF );
 
     // Returns a textual version of the log level
     const char* getLogLevelString( ELogLevel level ) const;
@@ -69,6 +70,9 @@ private:
     DebugStreambuf& operator = ( const DebugStreambuf& );
 
 private:
+    const std::size_t BUFFER_SIZE;
+    char * mpInternalBuffer;
+
     std::basic_streambuf<Char,Traits> *mpConsoleBuffer;
     std::basic_filebuf<Char,Traits> *mpFileBuffer;
 

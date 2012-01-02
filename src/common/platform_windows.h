@@ -21,6 +21,7 @@
 namespace WinApp
 {
     std::wstring ToWideString( const std::string& str );
+    void CreateConsoleWindow( bool redirectStdout );
 }
 
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);

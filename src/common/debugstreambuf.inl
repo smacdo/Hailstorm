@@ -30,7 +30,9 @@
  */
 template<typename C, typename T>
 DebugStreambuf<C,T>::DebugStreambuf()
-    : mpConsoleBuffer( NULL ),
+    : BUFFER_SIZE( 16 ),
+      mpInternalBuffer( new char[BUFFER_SIZE] ),
+      mpConsoleBuffer( NULL ),
       mpFileBuffer( NULL ),
       mDefaultLogLevel( ELOGLEVEL_INFO ),
       mDefaultModuleName( "App" ),
@@ -40,6 +42,7 @@ DebugStreambuf<C,T>::DebugStreambuf()
       mLogLevel( mDefaultLogLevel ),
       mModuleName( mDefaultModuleName )
 {
+//    setp( &mpInternalBuffer[0], &mpInternalBuffer[BUFFER_SIZE] );
 }
 
 /**
@@ -49,7 +52,9 @@ DebugStreambuf<C,T>::DebugStreambuf()
 template<typename C, typename T>
 DebugStreambuf<C,T>::DebugStreambuf( std::basic_streambuf<C,T>* pConsoleBuffer,
                                      std::basic_filebuf<C,T>* pFileBuffer )
-    : mpConsoleBuffer( pConsoleBuffer ),
+    : BUFFER_SIZE( 16 ),
+      mpInternalBuffer( new char[BUFFER_SIZE] ),
+      mpConsoleBuffer( pConsoleBuffer ),
       mpFileBuffer( pFileBuffer ),
       mDefaultLogLevel( ELOGLEVEL_INFO ),
       mDefaultModuleName( "App" ),
@@ -59,6 +64,7 @@ DebugStreambuf<C,T>::DebugStreambuf( std::basic_streambuf<C,T>* pConsoleBuffer,
       mLogLevel( mDefaultLogLevel ),
       mModuleName( mDefaultModuleName )
 {
+//    setp( &mpInternalBuffer[0], &mpInternalBuffer[BUFFER_SIZE] );
 }
 
 /**
@@ -67,6 +73,7 @@ DebugStreambuf<C,T>::DebugStreambuf( std::basic_streambuf<C,T>* pConsoleBuffer,
 template<typename C, typename T>
 DebugStreambuf<C,T>::~DebugStreambuf()
 {
+    boost::checked_array_delete( mpConsoleBuffer );
 }
 
 /**
@@ -130,6 +137,13 @@ template<typename C, typename T>
 void DebugStreambuf<C,T>::setFile( std::basic_filebuf<C,T> *pFileBuffer )
 {
     mpFileBuffer = pFileBuffer;
+}
+
+template<typename C, typename T>
+int DebugStreambuf<C,T>::overflow( int c )
+{
+    std::cerr << "---" << (char) c << std::endl;
+    return c;
 }
 
 /**
@@ -311,6 +325,10 @@ void DebugStreambuf<C,T>::endLogEntry()
     mAtLineStart = true;
     mLogLevel    = mDefaultLogLevel;
     mModuleName  = mDefaultModuleName;
+
+    // Make sure we emit any buffered log data before attempting to sync
+    // our output sources
+    pubsync();
 
     // Sync output
     if ( mpConsoleBuffer != NULL )

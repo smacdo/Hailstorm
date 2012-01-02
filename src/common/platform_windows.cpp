@@ -17,6 +17,7 @@
 #include "common/platform_windows.h"
 #include "common/platform.h"
 #include "common/delete.h"
+#include "common/logging.h"
 #include "gui/mainwindow.h"
 #include "gui/aboutbox.h"
 #include "gui/assertiondialog.h"
@@ -26,6 +27,13 @@
 
 #include <cassert>
 
+// For console
+#include <fcntl.h>
+#include <io.h>
+
+/////////////////////////////////////////////////////////////////////////////
+// Windows specific application helper functions                           //
+/////////////////////////////////////////////////////////////////////////////
 namespace WinApp
 {
     /**
@@ -61,8 +69,68 @@ namespace WinApp
 
         return result;
     }
+
+    /**
+     * Creates the a console window using the Windows API, and optionally
+     * redirects standard output/input to this console window
+     */
+    void CreateConsoleWindow( bool redirectStdout )
+    {
+        // --- I think we should break all this out into a separate class ---
+        const int MAX_CONSOLE_LINES = 4096;
+//        const int CONSOLE_COLS      = 100;
+
+        intptr_t stdHandle = 0;
+        int consoleHandle = 0;
+        FILE * pFile      = NULL;
+
+        // Create the console window
+        AllocConsole();
+
+        SetConsoleTitleW( L"Application Console" );
+
+        // Set up the screen buffer to be big enough that we can scroll the text
+        // area
+        CONSOLE_SCREEN_BUFFER_INFOEX consoleInfo;
+        GetConsoleScreenBufferInfoEx( GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo );
+
+//        consoleInfo.dwSize.X = CONSOLE_COLS;
+        consoleInfo.dwSize.Y = MAX_CONSOLE_LINES;
+
+        SetConsoleScreenBufferSize( GetStdHandle(STD_OUTPUT_HANDLE), consoleInfo.dwSize );
+
+        // Redirect unbuffered STDOUT to the console window
+        stdHandle     = reinterpret_cast<intptr_t>( GetStdHandle( STD_OUTPUT_HANDLE ) );
+        consoleHandle = _open_osfhandle( stdHandle, _O_TEXT );
+        pFile         = _fdopen( consoleHandle, "w" );
+
+        *stdout = *pFile;
+        setvbuf( stdout, NULL, _IOLBF, 4096 );  // is this large enough?
+
+        // Redirect unbuffered STDIN to the console
+        stdHandle     = reinterpret_cast<intptr_t>( GetStdHandle( STD_INPUT_HANDLE ) );
+        consoleHandle = _open_osfhandle( stdHandle, _O_TEXT );
+        pFile         = _fdopen( consoleHandle, "r" );
+
+        *stdin = *pFile;
+        setvbuf( stdin, NULL, _IONBF, 0 );
+
+        // Redirect unbuffered STDERR to the console
+        stdHandle     = reinterpret_cast<intptr_t>( GetStdHandle( STD_ERROR_HANDLE ) );
+        consoleHandle = _open_osfhandle( stdHandle, _O_TEXT );
+        pFile         = _fdopen( consoleHandle, "w" );
+
+        *stderr = *pFile;
+        setvbuf( stderr, NULL, _IONBF, 0 );
+
+        // Sync C++ cout/cin/cerr/clog with the new handles
+        std::ios::sync_with_stdio();
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Windows implementation of platform specific functions                   //
+/////////////////////////////////////////////////////////////////////////////
 namespace App
 {
     /**
@@ -138,6 +206,12 @@ namespace App
      */
     void startup()
     {
+        // We need a console window
+        WinApp::CreateConsoleWindow( true );
+
+        // Make sure the logging system is initialized first before any of the
+        // other critical system services
+        GlobalLog::start();
     }
 
     /**

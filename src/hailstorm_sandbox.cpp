@@ -18,6 +18,9 @@
 #include "gameclient.h"
 #include "gui/mainwindow.h"
 
+#include "common/platform.h"
+#include "common/logging.h"
+
 /////////////////////////////////////////////////////////////////////////////git s
 // Application entry point
 /////////////////////////////////////////////////////////////////////////////
@@ -30,10 +33,22 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
     UNREFERENCED_PARAMETER(nCmdShow);
 
+    // Make sure we call any platform specific start up code first. This will allow
+    // us to initialize all core libraries and anything else the specific platform
+    // may require
+    App::startup();
+    LOG_NOTICE("WinMain") << "Application has started";
+
     // Create a new window
+    LOG_NOTICE("WinMain") << "Creating main application window";
     MainWindow mainWindow( hInstance, "Hailstorm Tech Demo", 800u, 600u );
     mainWindow.create();
     
+    // Create the game client
+    LOG_NOTICE("WinMain") << "Creating the game client";
     GameClient game( &mainWindow );
+
+    // Run the game
+    LOG_NOTICE("WinMain") << "Starting the game";
     return game.run();
 }

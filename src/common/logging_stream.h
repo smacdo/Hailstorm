@@ -16,21 +16,4 @@
 #ifndef SCOTT_COMMON_LOGGING_STREAM_H
 #define SCOTT_COMMON_LOGGING_STREAM_H
 
-#include "common/logging.h"
-
-class LogStream : public std::ostream
-{
-public:
-    LogStream( std::ostream *pConsoleStream, std::ofstream* pFileStream );
-    ~LogStream();
-
-    void startLogEntry( const std::string& module, ELogLevel level );
-    void endLogEntry();
-
-private:
-    DebugStreambuf<char>* mpStreambuf;
-    std::ostream *mpConsoleStream;
-    std::ofstream *mpFileStream;
-};
-
 #endif

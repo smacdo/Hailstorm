@@ -17,11 +17,15 @@
 #define SCOTT_HAILSTORM_COMMON_LOGGING_H
 
 #include <ostream>
-#include <fstream>
 #include <string>
 #include <boost/noncopyable.hpp>
+#include <iostream>
 
+// Forward declarations
 class LogStream;
+
+template<typename Char, typename Traits = std::char_traits<char> >
+class DebugStreambuf;
 
 #define LOG_TRACE(x)  GlobalLog::getInstance().trace(x)
 #define LOG_DEBUG(x)  GlobalLog::getInstance().debug(x)
@@ -46,6 +50,28 @@ enum ELogLevel
 };
 
 /**
+ * Log stream class. This class extends the abstract IOStream ostream class
+ * to turn it into a class capable of doing high level logging work.
+ */
+class LogStream : public std::ostream
+{
+public:
+    LogStream( std::ostream *pConsoleStream, std::ofstream* pFileStream );
+    ~LogStream();
+
+    void setConsoleStream( std::ostream *pConsoleStream );
+    void setFileStream( std::ofstream* pFileStream );
+
+    void startLogEntry( const std::string& module, ELogLevel level );
+    void endLogEntry();
+
+private:
+    DebugStreambuf<char>* mpStreambuf;
+    std::ostream *mpConsoleStream;
+    std::ofstream *mpFileStream;
+};
+
+/**
  * The "magic" of the logging system. An instance of this class is returned
  * each time a call is made to GlobalLog::write(), which allows the caller
  * to stream anything interesting into the log entry for writing. As a great
@@ -58,16 +84,19 @@ public:
     LogEntry( LogStream* debugStream );
     ~LogEntry();
 
+    /**
+     * Returns a iostreams instance that will emit output to the logging
+     * interface rather than the generic STDOUT
+     */
     template<typename T>
-    LogEntry& operator << ( const T& obj )
+    std::ostream& operator << ( const T& obj )
     {
-        mDebugStream << obj;
-        return *this;
+        (*mDebugStream) << obj;
+        return *mDebugStream;
     }
 
 private:
     LogEntry& operator = ( const LogEntry& );
-
     LogStream* mDebugStream;
 };
 
@@ -88,6 +117,9 @@ public:
     LogEntry warn( const std::string& system ) const;
     LogEntry error( const std::string& system ) const;
 
+    void setConsoleStream( std::ostream *pConsoleStream );
+    void setFileStream( std::ofstream *pFileStream );
+
 private:
     LogStream *mDebugStream;
 };
@@ -104,5 +136,7 @@ public:
 private:
     static Log mLog;
 };
+
+
 
 #endif
