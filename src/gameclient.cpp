@@ -198,7 +198,7 @@ App::EProgramStatus GameClient::runMainGameLoop()
  * Code that initializes the game client and all required game subsystems
  * such as rendering, resource management and sound.
  *
- * \return  True if all components were initialized successfully, false otherwise
+ * \return  True if all components were initialized successfully, false otherwies
  */
 bool GameClient::initializeClient()
 {

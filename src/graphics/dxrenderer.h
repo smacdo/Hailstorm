@@ -23,6 +23,11 @@ class MainWindow;
 struct ID3D10Device1;
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
+struct ID3D10Texture2D;
+struct ID3D10DepthStencilView;
+struct D2D1Factory;
+struct D2D1HwndRenderTarget;
+struct ID3DX10Font;
 
 /**
  * This is the DirectX implementation of the abstract renderer
@@ -39,16 +44,49 @@ protected:
     virtual void onRenderFrame( float currentTime, float deltaTime );
 
 private:
-    HRESULT createDeviceAndSwapChain();
-    HRESULT createRenderTarget();
+    bool createDeviceAndSwapChain();
+    bool createDepthAndStencilBuffer();
+    bool createRenderTarget();
+    bool createRenderFont();
     void createViewport();
+    bool startDirectDraw();
     bool verifyResult( HRESULT result, const std::string& action ) const;
 
 private:
+    /// Pointer to the main rendering window
     MainWindow * mpMainWindow;
+
+    /// Pointer to a Direct2D factory that generates D2D surfaces
+    D2D1Factory * mpDDrawFactory;
+
+    /// Pointer to the render target for DirectDraw code
+    D2D1HwndRenderTarget * mpDDrawRenderTarget;
+
+    /// Pointer to a Direct2D surface that can be drawn on
+
+    /// Pointer to the D3D 10 device
     ID3D10Device1 * mpDevice;
+
+    /// Pointer to the renderer swap chain
     IDXGISwapChain * mpSwapChain;
+
+    /// Pointer to the render target view
     ID3D10RenderTargetView * mpRenderTargetView;
+
+    /// Pointer to the depth stencil texture buffer
+    ID3D10Texture2D * mpDepthStencilBuffer;
+
+    /// Pointer to the depth stencil view
+    ID3D10DepthStencilView * mpDepthStencilView;
+
+    /// Pointer to the renderer font
+    ID3DX10Font * mpRendererFont;
+
+    /// Number of multi samples (Anti aliasing)
+    UINT mMultisampleCount;
+
+    /// Multi sample quality
+    UINT mMultisampleQuality;
 };
 
 #endif
