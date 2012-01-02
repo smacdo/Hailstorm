@@ -139,13 +139,6 @@ void DebugStreambuf<C,T>::setFile( std::basic_filebuf<C,T> *pFileBuffer )
     mpFileBuffer = pFileBuffer;
 }
 
-template<typename C, typename T>
-int DebugStreambuf<C,T>::overflow( int c )
-{
-    std::cerr << "---" << (char) c << std::endl;
-    return c;
-}
-
 /**
  * Overridden stream handling method. xsputn is called by the underlying
  * basic_streambuf class whenever the streambuf receives input data.

@@ -35,6 +35,16 @@ public:
     virtual void exit() = 0;
 
     bool didUserQuit() const;
+    bool isPaused() const;
+    bool isResizing() const;
+    bool isMinimized() const;
+    bool wasResized() const;
+
+    void setMinimized( bool wasMinimized );
+    void setMaximized( bool wasMaximized );
+    void setResized( bool wasResized, unsigned int width=0, unsigned int height=0 );
+
+    void clearResizedFlag();
 
     // Returns the name of the window
     std::string windowTitle() const;
@@ -47,6 +57,8 @@ public:
 
 protected:
     void setUserQuit();
+    void setPaused( bool isPaused );
+    void setResizing( bool isResizing );
 
 private:
     std::string mTitle;
@@ -55,6 +67,10 @@ private:
 
     bool mCreated;
     bool mUserQuit;
+    bool mPaused;
+    bool mResizing;
+    bool mResizedFlag;
+    bool mMinimized;
 };
 
 #endif

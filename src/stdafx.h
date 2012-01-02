@@ -12,13 +12,18 @@
 #include <windows.h>
 #include <tchar.h>
 
+
+// CRT's memory leak detection
+#if defined(DEBUG) || defined(_DEBUG)
+#include <crtdbg.h>
+#endif
+
 #include <string>
 #include <vector>
 #include <algorithm>
 
 #include <boost/utility.hpp>
 
-
 // TODO: reference additional headers your program requires here
-#include "common/platform.h"
 #include "common/debugging.h"
+#include "common/platform.h"

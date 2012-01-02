@@ -24,6 +24,8 @@
 #include <d3dx10.h>
 #include <d2d1.h>
 
+#define DXVERIFY(expr,msg) if (!verifyResult(expr,msg)) { return false; }
+
 DXRenderer::DXRenderer( MainWindow *pWindow )
     : IRenderer( pWindow ),
       mpDDrawFactory( NULL ),
@@ -95,6 +97,16 @@ bool DXRenderer::onStartRenderer()
 
 void DXRenderer::onStopRenderer()
 {
+
+}
+
+/**
+ * Handle the rendering window being resized by the player
+ */
+void DXRenderer::onResizeWindow( unsigned int width, unsigned int height )
+{
+    LOG_DEBUG("Renderer")
+        << "Handling window resize to " << width << " x " << height;
 
 }
 
@@ -268,6 +280,15 @@ bool DXRenderer::createDepthAndStencilBuffer()
 
     // Create the depth and stencil buffer texture
     result = mpDevice->CreateTexture2D( &depthStencilDesc, 0, &mpDepthStencilBuffer );
+
+    DXVERIFY( result, "Creating depth stencil buffer" );
+    assert( mpDepthStencilBuffer != NULL );
+
+    // Now create the depth and stencil view
+    result = mpDevice->CreateDepthStencilView( mpDepthStencilBuffer, 0, &mpDepthStencilView );
+
+    DXVERIFY( result, "Creating depth stencil view" );
+    assert( mpDepthStencilView != NULL );
 
     return true;
 }

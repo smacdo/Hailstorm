@@ -46,8 +46,6 @@ public:
     void showAboutBox() const;
 
 protected:
-    
-    virtual void onPaint();
 
 private:
     const std::wstring mAppClassName;

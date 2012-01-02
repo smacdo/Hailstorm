@@ -126,34 +126,28 @@ void MainWindow::showAboutBox() const
 }
 
 /**
- * Custom paint code
+ * Return the handle of the main window
  */
-void MainWindow::onPaint()
-{
-    PAINTSTRUCT ps;
-    HDC hdc;
-    HWND hWnd = windowHandle();
-
-    hdc = BeginPaint( hWnd, &ps );
-    // TODO: Add any drawing code here...
-    EndPaint( hWnd, &ps );
-}
-
 HWND MainWindow::windowHandle() const
 {
     return mWindowHandle;
 }
 
+/**
+ * Sets the window handle that represents the main window
+ */
 void MainWindow::setWindowHandle( HWND hWnd )
 {
     mWindowHandle = hWnd;
 }
 
+/**
+ * Returns the application instance that owns the main window
+ */
 HINSTANCE MainWindow::appInstance() const
 {
     return mAppInstance;
 }
-
 
 /**
  * Process any incoming window messages
@@ -205,6 +199,39 @@ LRESULT MainWindow::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )
                 default:
                     return DefWindowProc( hWnd, message, wParam, lParam );
             }
+            break;
+
+        case WM_ACTIVATE:
+            if ( LOWORD(wParam) == WA_INACTIVE )
+            {
+                setPaused( true );
+            }
+            else
+            {
+                setPaused( false );
+            }
+            break;
+
+        case WM_SIZE:
+            if ( wParam == SIZE_MINIMIZED )
+            {
+                setMinimized( true );
+            }
+            else if ( wParam == SIZE_MAXIMIZED )
+            {
+                setMaximized( true );
+            }
+            else
+            {
+                setResized( true, LOWORD(lParam), HIWORD(lParam) );
+            }
+
+        case WM_ENTERSIZEMOVE:
+            setResizing( true );
+            break;
+
+        case WM_EXITSIZEMOVE:
+            setResizing( false );
             break;
 
         case WM_CLOSE:

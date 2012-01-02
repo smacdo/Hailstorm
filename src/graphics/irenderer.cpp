@@ -15,6 +15,7 @@
  */
 #include "stdafx.h"
 #include "graphics/irenderer.h"
+#include "gui/iwindow.h"
 #include "common/logging.h"
 
 /**
@@ -68,6 +69,23 @@ void IRenderer::tick()
     if (! mRendererCreatedAndRunning )
     {
         return;
+    }
+
+    // Was the window resized? Make sure to let give the renderer a chance to
+    // intercept this event before we start the next frame
+    if ( mpWindow->wasResized() )
+    {
+        LOG_NOTICE("The rendering window was resized");
+
+        // Raise the onResize event which will let a derived renderer handle this
+        // event
+        assert( mpWindow->width() > 0 );
+        assert( mpWindow->height() > 0 );
+
+        onResizeWindow( mpWindow->width(), mpWindow->height() );
+
+        // Clear the resize flag so we do not constantly resize
+        mpWindow->clearResizedFlag();
     }
 
     onRenderFrame( 0.0f, 0.0f );

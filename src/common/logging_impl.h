@@ -54,7 +54,6 @@ public:
 
 protected:
     virtual std::streamsize xsputn( const Char* pSequence, std::streamsize size );
-    virtual int overflow( int c = EOF );
 
     // Returns a textual version of the log level
     const char* getLogLevelString( ELogLevel level ) const;
