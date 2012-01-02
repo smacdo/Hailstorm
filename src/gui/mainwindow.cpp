@@ -18,6 +18,7 @@
 #include "gui/aboutbox.h"
 #include "gui/errordialog.h"
 #include "common/platform_windows.h"
+#include "common/logging.h"
 #include "resource.h"
 
 /**
@@ -48,6 +49,7 @@ MainWindow::~MainWindow()
  */
 void MainWindow::create()
 {
+    LOG_DEBUG("GUI") << "Creating the renderer main window";
     WNDCLASSEX wcex;
 
     // Configure the window description struct
@@ -97,6 +99,7 @@ void MainWindow::create()
  */
 void MainWindow::show()
 {
+    LOG_DEBUG("GUI") << "Showing the main window";
     assert( mWindowHandle != 0 );
 
     ShowWindow( mWindowHandle, SW_RESTORE );
@@ -108,6 +111,7 @@ void MainWindow::show()
  */
 void MainWindow::exit()
 {
+    LOG_DEBUG("GUI") << "MainWindow::exit() has been called";
     setUserQuit();
     DestroyWindow( mWindowHandle );
 }
@@ -163,6 +167,7 @@ bool MainWindow::processMessages()
     {
         if ( message.message == WM_QUIT )
         {
+            LOG_NOTICE("GUI") << "Quit received. Application is going to exit";
             keepGoing = false;
             setUserQuit();
         }

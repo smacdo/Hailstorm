@@ -200,6 +200,9 @@ void GlobalLog::start()
     // Attach the windows console to the log stream (We've already started a
     // console window before this)
     mLog.setConsoleStream( &std::cout );
+
+    // Generate a new date time string to use as the log's name
+
 }
 
 /**

@@ -17,6 +17,7 @@
 #include "gameclient.h"
 #include "common/delete.h"
 #include "common/gametime.h"
+#include "common/logging.h"
 #include "gui/mainwindow.h"
 #include "graphics/dxrenderer.h"
 
@@ -74,6 +75,9 @@ void GameClient::setUpdateFrequency( int numUpdatesPerSecond )
     // for some ungodly reason
     mUpdateFrequency = 1 / static_cast<TimeT>( numUpdatesPerSecond );
     assert( mUpdateFrequency > 0 );
+
+    // Logging
+    LOG_TRACE("GameClient") << "Setting the update frequency to " << mUpdateFrequency;
 }
 
 /**
@@ -112,6 +116,8 @@ App::EProgramStatus GameClient::run()
  */
 App::EProgramStatus GameClient::runMainGameLoop()
 {
+    LOG_INFO("GameClient") << "Entering the main game loop";
+
     assert( mTimerFrequency > 0.0f );
     mIsGameRunning = true;
 
@@ -184,6 +190,7 @@ App::EProgramStatus GameClient::runMainGameLoop()
         }
     }
 
+    LOG_NOTICE("GameClient") << "Game has left the main game loop";
     return App::EPROGRAM_OK;
 }
 
@@ -195,6 +202,8 @@ App::EProgramStatus GameClient::runMainGameLoop()
  */
 bool GameClient::initializeClient()
 {
+    LOG_DEBUG("GameClient") << "Initializing the game client";
+
     // We need to find the internal tick rate before using time
     calculateSystemTimerFrequency();
 
@@ -220,12 +229,13 @@ bool GameClient::initialize()
  */
 bool GameClient::loadContent()
 {
+    LOG_NOTICE("GameClient") << "Loading the game's art assets";
     return true;
 }
 
 void GameClient::unloadContent()
 {
-
+    LOG_NOTICE("GameClient") << "Unloading the game's art assets";
 }
 
 /**

@@ -17,6 +17,7 @@
 #include "graphics/dxrenderer.h"
 #include "graphics/dxutils.h"
 #include "gui/mainwindow.h"
+#include "common/logging.h"
 
 #include <d3d10_1.h>
 #include <d3d10.h>
@@ -95,6 +96,7 @@ void DXRenderer::onRenderFrame( float currentTime, float deltaTime )
  */
 HRESULT DXRenderer::createDeviceAndSwapChain()
 {
+    LOG_DEBUG("Renderer") << "Creating DirectX device and swap chain";
     HRESULT result = S_OK;
 
     // Init a struct to hold swap chain description
@@ -160,6 +162,7 @@ HRESULT DXRenderer::createRenderTarget()
     }
 
     // Now bind the back buffer to the render target view
+    LOG_DEBUG("Renderer") << "Creating the render target view";
     result = mpDevice->CreateRenderTargetView( pBackBufferTexture, NULL, &mpRenderTargetView );
 
     if ( result != S_OK )
@@ -176,6 +179,7 @@ HRESULT DXRenderer::createRenderTarget()
     SafeRelease( &pBackBufferTexture );
 
     // Bind the render target to the output merger state
+    LOG_DEBUG("Renderer") << "Binding the render target to the output merger stage";
     mpDevice->OMSetRenderTargets( 1, &mpRenderTargetView, NULL );
     return S_OK;
 }
@@ -184,7 +188,7 @@ HRESULT DXRenderer::createRenderTarget()
  * Support the viewport 
  */
 void DXRenderer::createViewport()
-{
+{ 
     D3D10_VIEWPORT viewport;
     ZeroMemory( &viewport, sizeof(D3D10_VIEWPORT) );
 
@@ -193,6 +197,7 @@ void DXRenderer::createViewport()
     viewport.Width    = mpMainWindow->width();
     viewport.Height   = mpMainWindow->height();
 
+    LOG_DEBUG("Renderer") << "Creating the display viewport";
     mpDevice->RSSetViewports( 1, &viewport );
 }
 

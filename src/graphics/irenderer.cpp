@@ -15,7 +15,11 @@
  */
 #include "stdafx.h"
 #include "graphics/irenderer.h"
+#include "common/logging.h"
 
+/**
+ * Renderer constructor
+ */
 IRenderer::IRenderer( IWindow *pWindow )
     : mpWindow( pWindow ),
       mRendererCreatedAndRunning( false )
@@ -23,6 +27,9 @@ IRenderer::IRenderer( IWindow *pWindow )
     assert( pWindow != NULL && "The renderer needs a window" );
 }
 
+/**
+ * Renderer destructor
+ */
 IRenderer::~IRenderer()
 {
     // nothing
@@ -40,12 +47,15 @@ bool IRenderer::initialize()
     assert2( mRendererCreatedAndRunning == false, "Cannot start when already running" );
 
     // Let the renderer perform any needed start up code
+    LOG_INFO("Renderer") << "Initializing the renderer";
+
     if ( onStartRenderer() )
     {
         mRendererCreatedAndRunning = true;
     }
 
     // Now let the 
+    LOG_NOTICE("Renderer") << "The renderer has been initialized";
     return mRendererCreatedAndRunning;
 }
 
@@ -72,9 +82,13 @@ void IRenderer::stop()
     // Only attempt to stop if the renderer is actually... you know... running :p
     if ( mRendererCreatedAndRunning )
     {
+        LOG_INFO("Renderer") << "Stopping the renderer";
         onStopRenderer();
+
         mRendererCreatedAndRunning = false;
     }
+
+    LOG_NOTICE("Renderer") << "The renderer has been stopped";
 }
 
 /**

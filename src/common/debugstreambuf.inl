@@ -36,7 +36,7 @@ DebugStreambuf<C,T>::DebugStreambuf()
       mpFileBuffer( NULL ),
       mDefaultLogLevel( ELOGLEVEL_INFO ),
       mDefaultModuleName( "App" ),
-      mConsoleThreshold( ELOGLEVEL_INFO ),
+      mConsoleThreshold( ELOGLEVEL_DEBUG ),
       mFileThreshold( ELOGLEVEL_DEBUG ),
       mAtLineStart( true ),
       mLogLevel( mDefaultLogLevel ),
@@ -331,13 +331,13 @@ void DebugStreambuf<C,T>::endLogEntry()
     pubsync();
 
     // Sync output
-    if ( mpConsoleBuffer != NULL )
+    if ( mpConsoleBuffer != NULL  && mLogLevel >= mConsoleThreshold )
     {
         mpConsoleBuffer->sputc( '\n' );
         mpConsoleBuffer->pubsync();
     }
 
-    if ( mpFileBuffer != NULL )
+    if ( mpFileBuffer != NULL && mLogLevel >= mFileThreshold )
     {
         mpFileBuffer->sputc( '\n' );
         mpFileBuffer->pubsync();
