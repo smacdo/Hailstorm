@@ -74,15 +74,20 @@ void MainWindow::create()
     // Convert the UTF8 window title to Window's UTF16s
     std::wstring wideWindowTitle = WinApp::ToWideString( windowTitle() );
 
+    // Need to find out how big to make the window, depending on the size of the
+    // back buffer
+    RECT windowRect = { 200, 200, 200 + width(), 200 + height() };
+    AdjustWindowRectEx( &windowRect, WS_OVERLAPPEDWINDOW, TRUE, WS_EX_OVERLAPPEDWINDOW );
+
     // Now create the window
     HWND tempHwnd = CreateWindowEx( WS_EX_OVERLAPPEDWINDOW,
         mAppClassName.c_str(),
         wideWindowTitle.c_str(),
         WS_OVERLAPPEDWINDOW,
-        200,
-        200,
-        static_cast<int>( width() ),
-        static_cast<int>( height() ),
+        windowRect.left,
+        windowRect.top,
+        windowRect.right - windowRect.left,
+        windowRect.bottom - windowRect.top,
         NULL,
         NULL,
         mAppInstance,

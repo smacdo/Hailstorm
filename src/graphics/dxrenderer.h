@@ -45,11 +45,9 @@ protected:
     virtual void onResizeWindow( unsigned int width, unsigned int height );
 
 private:
-    bool createDeviceAndSwapChain();
-    bool createDepthAndStencilBuffer();
-    bool createRenderTarget();
+    bool createDeviceViews();
+    bool createRenderDevice();
     bool createRenderFont();
-    void createViewport();
     bool startDirectDraw();
     bool verifyResult( HRESULT result, const std::string& action ) const;
 
@@ -88,6 +86,8 @@ private:
 
     /// Multi sample quality
     UINT mMultisampleQuality;
+
+    bool mWindowedMode;
 };
 
 #endif

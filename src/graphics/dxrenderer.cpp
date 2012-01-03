@@ -40,7 +40,8 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
       mpDepthStencilBuffer( NULL ),
       mpDepthStencilView( NULL ),
       mMultisampleCount( 4 ),
-      mMultisampleQuality( D3D10_STANDARD_MULTISAMPLE_PATTERN )
+      mMultisampleQuality( D3D10_STANDARD_MULTISAMPLE_PATTERN ),
+      mWindowedMode( true )
 {
     // We need to have a valid window handle
     assert( pWindow->windowHandle() != NULL );
@@ -71,26 +72,16 @@ DXRenderer::~DXRenderer()
 bool DXRenderer::onStartRenderer()
 {
     // Create our device and swap chain
-    if(! createDeviceAndSwapChain() )
+    if(! createRenderDevice() )
     {
         return false;
     }
 
-    // Generate the depth and stencil buffer before creating the render target
-    // view
-    if (! createDepthAndStencilBuffer() )
+    // Create the back buffer and the depth stencil buffer object
+    if (! createDeviceViews() )
     {
         return false;
     }
-
-    // Create the render target view
-    if (! createRenderTarget() )
-    {
-        return false;
-    }
-
-    // Now set up the viewport
-    createViewport();
 
     // We also want a renderer font that we can use to draw basic text with
     if (! createRenderFont() )
@@ -141,13 +132,11 @@ void DXRenderer::onRenderFrame( float currentTime, float deltaTime )
 }
 
 /**
- * Configures and then creates the DirectX 10 device and as well as the DXGI
- * swap chain structure.
+ * Creates the Direct3D render device and DXGI swap chain.
  *
- * \return  Result of the action. S_OK if it worked, otherwise something went
- *          wrong
+ * \return  True if the call succeeded, false otherwise
  */
-bool DXRenderer::createDeviceAndSwapChain()
+bool DXRenderer::createRenderDevice()
 {
     LOG_DEBUG("Renderer") << "Creating DirectX device and swap chain";
     HRESULT result = S_OK;
@@ -193,17 +182,17 @@ bool DXRenderer::createDeviceAndSwapChain()
 }
 
 /**
- * Creates the DirectX backbuffer object, and assigns it to be the render
- * target.
+ * Creates the render target view, the depth stencil texture + view and also
+ * creates a full window viewport.
  *
- * \return  An HRESULT representing the success/failure of this action
+ * \return  True if the call succeeded, false otherwise
  */
-bool DXRenderer::createRenderTarget()
+bool DXRenderer::createDeviceViews()
 {
     HRESULT result = S_OK;
     ID3D10Texture2D *pBackBufferTexture = NULL;
 
-    // Get the address of the backbuffer
+    // Grab a pointer to the texture object that is acting as our main backbuffer
     result = mpSwapChain->GetBuffer( 0,
                                      __uuidof(ID3D10Texture2D),
                                      reinterpret_cast<LPVOID*>(&pBackBufferTexture) );
@@ -226,6 +215,35 @@ bool DXRenderer::createRenderTarget()
         assert( mpRenderTargetView != NULL );
     }
 
+    // Create the depth and stencil buffer texture
+    D3D10_TEXTURE2D_DESC depthStencilDesc;
+    ZeroMemory( &depthStencilDesc, sizeof(D3D10_TEXTURE2D_DESC) );
+
+    depthStencilDesc.Width              = mpMainWindow->width();
+    depthStencilDesc.Height             = mpMainWindow->height();
+    depthStencilDesc.MipLevels          = 1;
+    depthStencilDesc.ArraySize          = 1;
+    depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilDesc.SampleDesc.Count   = mMultisampleCount;
+    depthStencilDesc.SampleDesc.Quality = mMultisampleQuality;
+    depthStencilDesc.Usage              = D3D10_USAGE_DEFAULT;
+    depthStencilDesc.BindFlags          = D3D10_BIND_DEPTH_STENCIL;
+    depthStencilDesc.CPUAccessFlags     = 0;
+    depthStencilDesc.MiscFlags          = 0;
+
+    // Create a texture that will become the depth and stencil buffer
+    result = mpDevice->CreateTexture2D( &depthStencilDesc, 0, &mpDepthStencilBuffer );
+
+    DXVERIFY( result, "Creating depth stencil buffer" );
+    assert( mpDepthStencilBuffer != NULL );
+
+    // With the depth and stencil buffer texture created, the next step is to
+    // create a depth stencil view with that buffer texture.
+    result = mpDevice->CreateDepthStencilView( mpDepthStencilBuffer, 0, &mpDepthStencilView );
+
+    DXVERIFY( result, "Creating depth stencil view" );
+    assert( mpDepthStencilView != NULL );
+
     // We no longer need the backbuffer object now that we've bound it to the
     // render target view
     SafeRelease( &pBackBufferTexture );
@@ -233,6 +251,20 @@ bool DXRenderer::createRenderTarget()
     // Bind the render target to the output merger state
     LOG_DEBUG("Renderer") << "Binding the render target to the output merger stage";
     mpDevice->OMSetRenderTargets( 1, &mpRenderTargetView, mpDepthStencilView );
+
+    // Create the render window viewport, and make it the same size as our rendering
+    // window
+    D3D10_VIEWPORT viewport;
+    ZeroMemory( &viewport, sizeof(D3D10_VIEWPORT) );
+
+    viewport.TopLeftX = 0;
+    viewport.TopLeftY = 0;
+    viewport.Width    = mpMainWindow->width();
+    viewport.Height   = mpMainWindow->height();
+
+    LOG_DEBUG("Renderer") << "Creating the display viewport";
+    mpDevice->RSSetViewports( 1, &viewport );
+
     return true;
 }
 
@@ -260,61 +292,6 @@ bool DXRenderer::createRenderFont()
     // Now create that font
     HRESULT result = D3DX10CreateFontIndirect( mpDevice, &font, &mpRendererFont );
     return verifyResult( result, "Creating a render font" );
-}
-
-/**
- * Creates the depth and stencil buffer
- */
-bool DXRenderer::createDepthAndStencilBuffer()
-{
-    D3D10_TEXTURE2D_DESC depthStencilDesc;
-    HRESULT result = S_OK;
-
-    ZeroMemory( &depthStencilDesc, sizeof(D3D10_TEXTURE2D_DESC) );
-
-    // Depth and stencil buffer texture description
-    depthStencilDesc.Width              = mpMainWindow->width();
-    depthStencilDesc.Height             = mpMainWindow->height();
-    depthStencilDesc.MipLevels          = 1;
-    depthStencilDesc.ArraySize          = 1;
-    depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthStencilDesc.SampleDesc.Count   = mMultisampleCount;
-    depthStencilDesc.SampleDesc.Quality = mMultisampleQuality;
-    depthStencilDesc.Usage              = D3D10_USAGE_DEFAULT;
-    depthStencilDesc.BindFlags          = D3D10_BIND_DEPTH_STENCIL;
-    depthStencilDesc.CPUAccessFlags     = 0;
-    depthStencilDesc.MiscFlags          = 0;
-
-    // Create the depth and stencil buffer texture
-    result = mpDevice->CreateTexture2D( &depthStencilDesc, 0, &mpDepthStencilBuffer );
-
-    DXVERIFY( result, "Creating depth stencil buffer" );
-    assert( mpDepthStencilBuffer != NULL );
-
-    // Now create the depth and stencil view
-    result = mpDevice->CreateDepthStencilView( mpDepthStencilBuffer, 0, &mpDepthStencilView );
-
-    DXVERIFY( result, "Creating depth stencil view" );
-    assert( mpDepthStencilView != NULL );
-
-    return true;
-}
-
-/**
- * Support the viewport 
- */
-void DXRenderer::createViewport()
-{ 
-    D3D10_VIEWPORT viewport;
-    ZeroMemory( &viewport, sizeof(D3D10_VIEWPORT) );
-
-    viewport.TopLeftX = 0;
-    viewport.TopLeftY = 0;
-    viewport.Width    = mpMainWindow->width();
-    viewport.Height   = mpMainWindow->height();
-
-    LOG_DEBUG("Renderer") << "Creating the display viewport";
-    mpDevice->RSSetViewports( 1, &viewport );
 }
 
 /**
