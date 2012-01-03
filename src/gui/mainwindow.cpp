@@ -215,14 +215,29 @@ LRESULT MainWindow::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )
         case WM_SIZE:
             if ( wParam == SIZE_MINIMIZED )
             {
+                setPaused( true );
                 setMinimized( true );
             }
             else if ( wParam == SIZE_MAXIMIZED )
             {
-                setMaximized( true );
+                // Unpause if we are coming out of a minimize
+                if ( isMinimized() )
+                {
+                    setPaused( false );
+                    setMinimized( false );
+                }
+
+                setResized( true, LOWORD(lParam), HIWORD(lParam) );
             }
             else
             {
+                // Unpause if we are coming out of a minimize
+                if ( isMinimized() )
+                {
+                    setPaused( false );
+                    setMinimized( false );
+                }
+
                 setResized( true, LOWORD(lParam), HIWORD(lParam) );
             }
             break;
@@ -252,10 +267,12 @@ LRESULT MainWindow::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )
 
         case WM_ENTERSIZEMOVE:
             setResizing( true );
+            setPaused( true );
             break;
 
         case WM_EXITSIZEMOVE:
             setResizing( false );
+            setPaused( false );
             break;
 
         case WM_CLOSE:

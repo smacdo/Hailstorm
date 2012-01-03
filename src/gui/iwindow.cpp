@@ -74,16 +74,10 @@ bool IWindow::isPaused() const
  */
 void IWindow::setPaused( bool isPaused )
 {
-    mPaused = isPaused;
+    LOG_NOTICE("Window")
+        << "Window has been " << ( isPaused ? "paused" : "unpaused" );
 
-    if ( isPaused )
-    {
-        LOG_NOTICE("Window") << "Window has been paused";
-    }
-    else
-    {
-        LOG_NOTICE("Window") << "Window has been unpaused";
-    }
+    mPaused = isPaused;
 }
 
 /**
@@ -144,8 +138,20 @@ void IWindow::clearResizedFlag()
  */
 void IWindow::setMinimized( bool isMinimized )
 {
-    LOG_DEBUG("Window") << "Window maximized " << isMinimized << " called ";
+    if ( isMinimized )
+    {
+        LOG_DEBUG("Window") << "Window minimized";
+    }
+    
     mMinimized = isMinimized;
+}
+
+/**
+ * Checks if the window is minimized or not
+ */
+bool IWindow::isMinimized() const
+{
+    return mMinimized;
 }
 
 /**
@@ -153,7 +159,10 @@ void IWindow::setMinimized( bool isMinimized )
  */
 void IWindow::setMaximized( bool isMaximized )
 {
-    LOG_DEBUG("Window") << "Window maximized " << isMaximized << " called ";
+    if ( isMaximized )
+    {
+        LOG_DEBUG("Window") << "Window maximized";
+    }
 }
 
 /**

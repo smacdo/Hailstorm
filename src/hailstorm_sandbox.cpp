@@ -37,7 +37,6 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
     // us to initialize all core libraries and anything else the specific platform
     // may require
     App::startup();
-    LOG_NOTICE("WinMain") << 42 << " this is a string " << 5.0f << true;
     LOG_NOTICE("WinMain") << "Application has started";
 
     // Create a new window

@@ -26,6 +26,9 @@
 
 #define DXVERIFY(expr,msg) if (!verifyResult(expr,msg)) { return false; }
 
+/**
+ * DirectX renderer constructor
+ */
 DXRenderer::DXRenderer( MainWindow *pWindow )
     : IRenderer( pWindow ),
       mpDDrawFactory( NULL ),
@@ -39,9 +42,13 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
       mMultisampleCount( 4 ),
       mMultisampleQuality( D3D10_STANDARD_MULTISAMPLE_PATTERN )
 {
-    // empty
+    // We need to have a valid window handle
+    assert( pWindow->windowHandle() != NULL );
 }
 
+/**
+ * DirectX renderer destructor
+ */
 DXRenderer::~DXRenderer()
 {
     // Unbind the render target view before releasing objects

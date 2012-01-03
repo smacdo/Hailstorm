@@ -12,6 +12,10 @@
 #include <windows.h>
 #include <tchar.h>
 
+// Remove min and max defined from windows.h
+#undef min
+#undef max
+
 
 // CRT's memory leak detection
 #if defined(DEBUG) || defined(_DEBUG)
