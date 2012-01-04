@@ -35,10 +35,14 @@ IWindow::IWindow( const std::string& title,
       mPaused( false ),
       mResizing( false ),
       mResizedFlag( false ),
-      mMinimized( false )
+      mMinimized( false ),
+      mMaximized( false )
 {
 }
 
+/**
+ * Window interface destructor
+ */
 IWindow::~IWindow()
 {
 }
@@ -163,6 +167,8 @@ void IWindow::setMaximized( bool isMaximized )
     {
         LOG_DEBUG("Window") << "Window maximized";
     }
+
+    mMaximized = isMaximized;
 }
 
 /**

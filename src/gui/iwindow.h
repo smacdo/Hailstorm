@@ -71,6 +71,7 @@ private:
     bool mResizing;
     bool mResizedFlag;
     bool mMinimized;
+    bool mMaximized;
 };
 
 #endif

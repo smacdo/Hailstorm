@@ -84,7 +84,7 @@ void IRenderer::tick()
         assert( mpWindow->width() > 0 );
         assert( mpWindow->height() > 0 );
 
-        onResizeWindow( mpWindow->width(), mpWindow->height() );
+        resizeRenderWindow( mpWindow->width(), mpWindow->height() );
 
         // Clear the resize flag so we do not constantly resize
         mpWindow->clearResizedFlag();

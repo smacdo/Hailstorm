@@ -58,10 +58,11 @@ DXRenderer::~DXRenderer()
         mpDevice->OMSetRenderTargets( 0, NULL, NULL );
     }
 
-    SafeRelease( &mpDevice );
-    SafeRelease( &mpSwapChain );
     SafeRelease( &mpRenderTargetView );
+    SafeRelease( &mpDepthStencilView );
+    SafeRelease( &mpSwapChain );
     SafeRelease( &mpDepthStencilBuffer );
+    SafeRelease( &mpDevice );
     SafeRelease( &mpRendererFont );
 }
 
@@ -101,11 +102,26 @@ void DXRenderer::onStopRenderer()
 /**
  * Handle the rendering window being resized by the player
  */
-void DXRenderer::onResizeWindow( unsigned int width, unsigned int height )
+bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
 {
-    LOG_DEBUG("Renderer")
-        << "Handling window resize to " << width << " x " << height;
+    HRESULT result = S_OK;
 
+    // Before we can resize the render window we must release the old device views
+    // as they hold references to the buffers we shall be destroying
+    releaseDeviceViews();
+
+    // Resize the swap chain. This will destroy the current back buffer
+    result = mpSwapChain->ResizeBuffers( 1,
+                                         width,
+                                         height,
+                                         DXGI_FORMAT_R8G8B8A8_UNORM,
+                                         0 );
+
+    DXVERIFY( result, "Resizing the swap chain" );
+
+    // Now that we've resized the back buffer, we can proceed with recreating
+    // our destroyed device view
+    return createDeviceViews();
 }
 
 /**
@@ -182,13 +198,20 @@ bool DXRenderer::createRenderDevice()
 }
 
 /**
- * Creates the render target view, the depth stencil texture + view and also
- * creates a full window viewport.
+ * This method is responsible for creating the back buffer (render target) and
+ * depth stencil buffers. CreateDeviceViews will then bind these buffers to the
+ * device, create the window viewport and then return.
  *
- * \return  True if the call succeeded, false otherwise
+ * This should get called after the d3d render device is created, and anytime after
+ * the d3d render device has been reset.
+ *
+ * \return  True if the call bound the back buffer and depth stencil view, false
+ *          otherwise
  */
 bool DXRenderer::createDeviceViews()
 {
+    LOG_DEBUG("Renderer") << "Creating the render target view";
+
     HRESULT result = S_OK;
     ID3D10Texture2D *pBackBufferTexture = NULL;
 
@@ -197,23 +220,14 @@ bool DXRenderer::createDeviceViews()
                                      __uuidof(ID3D10Texture2D),
                                      reinterpret_cast<LPVOID*>(&pBackBufferTexture) );
 
-    if (! verifyResult( result, "Obtaining the backbuffer texture object" ) )
-    {
-        return false;
-    }
+    DXVERIFY( result, "Obtaining the back buffer texture object" );
+    assert( pBackBufferTexture != NULL );
 
     // Now bind the back buffer to the render target view
-    LOG_DEBUG("Renderer") << "Creating the render target view";
     result = mpDevice->CreateRenderTargetView( pBackBufferTexture, NULL, &mpRenderTargetView );
 
-    if (! verifyResult( result, "Creating the render target view" ) )
-    {
-        return false;
-    }
-    else
-    {
-        assert( mpRenderTargetView != NULL );
-    }
+    DXVERIFY( result, "Creating the render target view" );
+    assert( mpRenderTargetView != NULL );
 
     // Create the depth and stencil buffer texture
     D3D10_TEXTURE2D_DESC depthStencilDesc;
@@ -239,18 +253,19 @@ bool DXRenderer::createDeviceViews()
 
     // With the depth and stencil buffer texture created, the next step is to
     // create a depth stencil view with that buffer texture.
+    LOG_DEBUG("Renderer") << "Creating the depth stencil view";
     result = mpDevice->CreateDepthStencilView( mpDepthStencilBuffer, 0, &mpDepthStencilView );
 
     DXVERIFY( result, "Creating depth stencil view" );
     assert( mpDepthStencilView != NULL );
 
+    // Bind the render target to the output merger state
+    LOG_DEBUG("Renderer") << "Binding the render target and depth stencil views";
+    mpDevice->OMSetRenderTargets( 1, &mpRenderTargetView, mpDepthStencilView );
+
     // We no longer need the backbuffer object now that we've bound it to the
     // render target view
     SafeRelease( &pBackBufferTexture );
-
-    // Bind the render target to the output merger state
-    LOG_DEBUG("Renderer") << "Binding the render target to the output merger stage";
-    mpDevice->OMSetRenderTargets( 1, &mpRenderTargetView, mpDepthStencilView );
 
     // Create the render window viewport, and make it the same size as our rendering
     // window
@@ -267,6 +282,27 @@ bool DXRenderer::createDeviceViews()
 
     return true;
 }
+
+/**
+ * Releases the active backbuffer and depth stencil view that are bound to the
+ * current d3d device. This should be done in preparation to resizing or resetting
+ * the d3d renderer.
+ */
+void DXRenderer::releaseDeviceViews()
+{
+    LOG_DEBUG("Renderer")
+        << "Releasing the device views (backbuffer, depth+stencil)";
+
+    // Bind null views to the DXGI before releasing the views. This makes DirectX
+    // happy and thereby stopping spamming warnings
+    mpDevice->OMSetRenderTargets( 0, NULL, NULL );
+
+    // Release our views and the stencil buffer
+    SafeRelease( &mpRenderTargetView );
+    SafeRelease( &mpDepthStencilView );
+    SafeRelease( &mpDepthStencilBuffer );
+}
+
 
 /**
  * Creates a simple system font that the renderer can use to display simple
