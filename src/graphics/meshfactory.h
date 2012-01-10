@@ -13,31 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SCOTT_HAILSTORM_GRAPHICS_DXUTILS_H
-#define SCOTT_HAILSTORM_GRAPHICS_DXUTILS_H
+#ifndef SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH_FACTORY
+#define SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH_FACTORY
 
-#include <string>
+// Forward declarations
+class StaticMesh;
+struct ID3D10Device;
 
-/**
- * Helper method that safely releases a directx COM object
- */
-template< class T >
-void SafeRelease( T** pObj )
+class MeshFactory
 {
-    if ( *pObj != NULL )
-    {
-        (*pObj)->Release();
-        (*pObj) = NULL;
-    }
-}
-
-/**
- * Method that checks DirectX return values and deals with error conditions
- * in a way that is helpful to programmers and the end user
- */
-namespace DxUtils
-{
-    bool CheckResult( HRESULT result, bool shouldExit, const std::string& action );
-}
+public:
+    static StaticMesh* CreateBox( ID3D10Device *pRenderDevice, float scale );
+};
 
 #endif
