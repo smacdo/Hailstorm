@@ -43,6 +43,18 @@
     <ClCompile Include="src\common\logstream.cpp">
       <Filter>Common Code</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\staticmesh.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\dxutils.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\meshfactory.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\graphicscontentmanager.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\debugging.h">
@@ -120,6 +132,19 @@
     </ClInclude>
     <ClInclude Include="src\common\debugstreambuf.inl">
       <Filter>Common Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Resource.h" />
+    <ClInclude Include="src\graphics\staticmesh.h">
+      <Filter>Graphics Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\staticmeshvertex.h">
+      <Filter>Graphics Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\meshfactory.h">
+      <Filter>Graphics Code\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\graphicscontentmanager.h">
+      <Filter>Graphics Code\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

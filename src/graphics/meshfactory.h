@@ -16,14 +16,39 @@
 #ifndef SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH_FACTORY
 #define SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH_FACTORY
 
+// Required includes
+#include <memory>
+#include <boost/noncopyable.hpp>
+#include <string>
+
 // Forward declarations
 class StaticMesh;
-struct ID3D10Device;
+struct ID3D10Device1;
+struct ID3D10Effect;
+struct ID3D10EffectTechnique;
+struct ID3D10InputLayout;
 
-class MeshFactory
+/**
+ * Creates simple geometric static meshes at run time
+ */
+class MeshFactory : boost::noncopyable
 {
 public:
-    static StaticMesh* CreateBox( ID3D10Device *pRenderDevice, float scale );
+    MeshFactory( const std::string& dataDir,
+                 ID3D10Device1 * pRenderDevice );
+    ~MeshFactory();
+
+    std::shared_ptr<StaticMesh> createBox( float scale ) const;
+
+private:
+    // Initialize the mesh factory. Only call once
+    void init( const std::string& dataDir );
+
+private:
+    ID3D10Device1 * mpRenderDevice;
+    ID3D10Effect * mpStaticMeshFX;
+    ID3D10EffectTechnique * mpStaticMeshTechnique;
+    ID3D10InputLayout * mpStaticMeshInputLayout;
 };
 
 #endif

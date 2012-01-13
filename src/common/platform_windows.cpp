@@ -197,7 +197,14 @@ namespace App
     void raiseFatalError( const std::string& message,
                           const std::string& details )
     {
+        ErrorDialog error( message, details );
+        error.setIsFatal( true );
+        error.show();
 
+        if ( error.didUserPressQuit() )
+        {
+            App::quit( EPROGRAM_USER_ERROR, "User quit in response to error" );
+        }
     }
 
     /**

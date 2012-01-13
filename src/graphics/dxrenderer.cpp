@@ -16,8 +16,10 @@
 #include "stdafx.h"
 #include "graphics/dxrenderer.h"
 #include "graphics/dxutils.h"
+#include "graphics/graphicscontentmanager.h"
 #include "gui/mainwindow.h"
 #include "common/logging.h"
+#include "common/delete.h"
 
 #include <d3d10_1.h>
 #include <d3d10.h>
@@ -41,7 +43,8 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
       mpDepthStencilView( NULL ),
       mMultisampleCount( 4 ),
       mMultisampleQuality( D3D10_STANDARD_MULTISAMPLE_PATTERN ),
-      mWindowedMode( true )
+      mWindowedMode( true ),
+      mpContentManager( NULL ) // this is initialized later
 {
     // We need to have a valid window handle
     assert( pWindow->windowHandle() != NULL );
@@ -52,17 +55,17 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
  */
 DXRenderer::~DXRenderer()
 {
-    // Unbind the render target view before releasing objects
-    if ( mpDevice != NULL )
-    {
-        mpDevice->OMSetRenderTargets( 0, NULL, NULL );
-    }
+    // Kill the content manager first
+    Delete( mpContentManager );
 
-    SafeRelease( &mpRenderTargetView );
-    SafeRelease( &mpDepthStencilView );
+    // Release the device view before destroying the view itself
+    releaseDeviceViews();
     SafeRelease( &mpSwapChain );
-    SafeRelease( &mpDepthStencilBuffer );
+
+    // Now destroy the d3d device
     SafeRelease( &mpDevice );
+
+    // Finally make sure we release the renderer font
     SafeRelease( &mpRendererFont );
 }
 
@@ -89,6 +92,9 @@ bool DXRenderer::onStartRenderer()
     {
         return false;
     }
+
+    // Content manager allows us to create and load graphics
+    mpContentManager = new GraphicsContentManager( mpDevice, "..\\data" );
 
     // The renderer has been created and initialized properly
     return true;
@@ -293,8 +299,8 @@ void DXRenderer::releaseDeviceViews()
     LOG_DEBUG("Renderer")
         << "Releasing the device views (backbuffer, depth+stencil)";
 
-    // Bind null views to the DXGI before releasing the views. This makes DirectX
-    // happy and thereby stopping spamming warnings
+    // Make DirectX happy by binding null views before we go ahead and release
+    // everything
     mpDevice->OMSetRenderTargets( 0, NULL, NULL );
 
     // Release our views and the stencil buffer
@@ -302,7 +308,6 @@ void DXRenderer::releaseDeviceViews()
     SafeRelease( &mpDepthStencilView );
     SafeRelease( &mpDepthStencilBuffer );
 }
-
 
 /**
  * Creates a simple system font that the renderer can use to display simple
@@ -352,7 +357,7 @@ bool DXRenderer::startDirectDraw()
  * \param  action  The action that the renderer was attempting to perform
  * \return         True if the check succeeded, false otherwise
  */
-bool DXRenderer::verifyResult( HRESULT result, const std::string& action ) const
+bool DXRenderer::verifyResult( HRESULT result, const std::string& action )
 {
     // Don't do anything if it worked
     if ( result == S_OK )
@@ -403,7 +408,6 @@ bool DXRenderer::verifyResult( HRESULT result, const std::string& action ) const
     }
 
     // Raise the error with the application before returning false
-    App::raiseError( "Failed to perform: " + action,
-                     errorText );
+    App::raiseError( "Failed to perform: " + action, errorText );
     return false;
 }

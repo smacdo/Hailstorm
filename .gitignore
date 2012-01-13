@@ -1,4 +1,5 @@
 build/*
+ipch/*
 *.exe
 *.pdb
 *.ilk

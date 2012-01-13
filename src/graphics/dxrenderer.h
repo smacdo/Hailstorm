@@ -20,6 +20,7 @@
 
 // Forward declarations
 class MainWindow;
+class GraphicsContentManager;
 struct ID3D10Device1;
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
@@ -48,9 +49,10 @@ private:
     bool createDeviceViews();
     void releaseDeviceViews();
     bool createRenderDevice();
+    void destroyRenderDevice();
     bool createRenderFont();
     bool startDirectDraw();
-    bool verifyResult( HRESULT result, const std::string& action ) const;
+    static bool verifyResult( HRESULT result, const std::string& action );
 
 private:
     /// Pointer to the main rendering window
@@ -88,7 +90,11 @@ private:
     /// Multi sample quality
     UINT mMultisampleQuality;
 
+    /// Flag if we are rendering in windowed mode or full screen
     bool mWindowedMode;
+
+    /// The currently running graphics content manager
+    GraphicsContentManager * mpContentManager;
 };
 
 #endif
