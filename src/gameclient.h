@@ -41,7 +41,7 @@ protected:
     virtual bool loadContent();
     virtual void unloadContent();
     virtual void update( TimeT simulationTime, TimeT deltaTime );
-    virtual void draw( TimeT simulationTime, float interpolation );
+    virtual void draw( TimeT simulationTime, double interpolation );
 
 private:
     App::EProgramStatus runMainGameLoop();

@@ -17,6 +17,8 @@
 #define SCOTT_HAILSTORM_GRAPHICS_IRENDERER_H
 
 #include <boost/utility.hpp>
+#include "common/gametime.h"
+
 class IWindow;
 
 /**
@@ -30,12 +32,12 @@ public:
 
     bool initialize();
     void stop();
-    void tick();
+    void tick( TimeT currentTime, TimeT deltaTime );
 
 protected:
     virtual bool onStartRenderer() = 0;
     virtual void onStopRenderer() = 0;
-    virtual void onRenderFrame( float currentTime, float deltaTime ) = 0;
+    virtual void onRenderFrame( double currentTime, double deltaTime ) = 0;
     virtual bool resizeRenderWindow( unsigned int width, unsigned int height ) = 0;
 
     IWindow *renderWindow();

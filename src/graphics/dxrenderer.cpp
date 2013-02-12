@@ -171,7 +171,7 @@ bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
 /**
  * Time to draw something
  */
-void DXRenderer::onRenderFrame( float currentTime, float deltaTime )
+void DXRenderer::onRenderFrame( double currentTime, double deltaTime )
 {
     // Clear the back buffer and the depth stencil view before doing doing any
     // rendering
@@ -194,10 +194,10 @@ void DXRenderer::onRenderFrame( float currentTime, float deltaTime )
 	mpDevice->IASetPrimitiveTopology( D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
 	// Update rotation blah
-	if ( GetAsyncKeyState('W') & 0x8000 ) mTheta -= 2.0f * deltaTime;
-	if ( GetAsyncKeyState('A') & 0x8000 ) mTheta += 2.0f * deltaTime;
-	if ( GetAsyncKeyState('S') & 0x8000 ) mPhi   -= 2.0f * deltaTime;
-	if ( GetAsyncKeyState('D') & 0x8000 ) mPhi   += 2.0f * deltaTime;
+	if ( GetAsyncKeyState('W') & 0x8000 ) mTheta -= static_cast<float>( 2.0 * deltaTime );
+	if ( GetAsyncKeyState('A') & 0x8000 ) mTheta += static_cast<float>( 2.0 * deltaTime );
+	if ( GetAsyncKeyState('S') & 0x8000 ) mPhi   -= static_cast<float>( 2.0 * deltaTime );
+	if ( GetAsyncKeyState('D') & 0x8000 ) mPhi   += static_cast<float>( 2.0 * deltaTime );
 
 	if ( mPhi < 0.1f ) mPhi = 0.1f;
 	if ( mPhi > 3.1415927f - 0.1f ) mPhi = 3.1415927f - 0.1f;

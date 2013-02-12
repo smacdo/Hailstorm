@@ -16,6 +16,6 @@
 #ifndef HAILSTORM_COMMON_GAMETIME_H
 #define HAILSTORM_COMMON_GAMETIME_H
 
-typedef float TimeT;
+typedef double TimeT;
 
 #endif

@@ -175,11 +175,11 @@ App::EProgramStatus GameClient::runMainGameLoop()
         // Calculate the amount of interpolation that will our renderer will
         // need to account for when rendering between the last simulation update
         // and the next upcoming update
-        float interpolation = 1.0f - ( accumulatedTime / mUpdateFrequency );
+        double interpolation = 1.0f - ( accumulatedTime / mUpdateFrequency );
 
         // Now draw the next frame
         draw( simulationTime, interpolation );
-        mpRenderer->tick();
+        mpRenderer->tick( simulationTime, frameTime );
 
         // If there is a large delta between the system time and the time before
         // the next simulation update, we can afford to sleep a tiny bit and
@@ -264,7 +264,7 @@ void GameClient::update( TimeT simulationTime, TimeT deltaTime )
  * \param  deltaTime       Amount of time since the last simulation
  * \param  interpolation   Amount to interpolate between (1.0 use the simT)
  */
-void GameClient::draw( TimeT simulationTime, float interpolation )
+void GameClient::draw( TimeT simulationTime, double interpolation )
 {
     // empty for now
 }

@@ -63,7 +63,7 @@ bool IRenderer::initialize()
 /**
  * Ticks the graphics renderer
  */
-void IRenderer::tick()
+void IRenderer::tick( TimeT currentTime, TimeT deltaTime )
 {
     // Do not do anything if the renderer is not running
     if (! mRendererCreatedAndRunning )
@@ -91,7 +91,7 @@ void IRenderer::tick()
     }
 
     // Keep rendering whatever is going on
-    onRenderFrame( 0.0f, 0.0f );
+    onRenderFrame( currentTime, deltaTime );
 }
 
 /**
