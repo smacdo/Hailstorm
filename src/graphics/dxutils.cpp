@@ -20,7 +20,6 @@
 #include "gui/mainwindow.h"
 #include "common/logging.h"
 
-#include <d3d10_1.h>
 #include <d3d10.h>
 #include <d3dx10.h>
 

@@ -55,6 +55,9 @@
     <ClCompile Include="src\graphics\graphicscontentmanager.cpp">
       <Filter>Graphics Code</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\cubemesh.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\debugging.h">
@@ -148,6 +151,10 @@
     </ClInclude>
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\Resource.h" />
+    <ClInclude Include="src\Resource.h" />
+    <ClInclude Include="src\graphics\cubemesh.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -190,5 +197,8 @@
     <ResourceCompile Include="assets\hailstorm.rc">
       <Filter>VS Support and Assets</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="game\data\shaders\cube.fx" />
   </ItemGroup>
 </Project>

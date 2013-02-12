@@ -17,6 +17,7 @@
 #include "graphics/dxrenderer.h"
 #include "graphics/dxutils.h"
 #include "graphics/graphicscontentmanager.h"
+#include "graphics/cubemesh.h"
 #include "gui/mainwindow.h"
 #include "common/logging.h"
 #include "common/delete.h"
@@ -26,6 +27,19 @@
 #include <d3dx10.h>
 
 #define DXVERIFY(expr,msg) if (!verifyResult(expr,msg)) { return false; }
+
+struct Vertex1
+{
+	D3DXVECTOR3 pos;
+	D3DXCOLOR color;
+};
+
+struct Vertex2
+{
+	D3DXVECTOR3 pos;
+	D3DXVECTOR3 normal;
+	D3DXVECTOR2 texC;
+};
 
 /**
  * DirectX renderer constructor
@@ -38,13 +52,24 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
       mpRenderTargetView( NULL ),
       mpDepthStencilBuffer( NULL ),
       mpDepthStencilView( NULL ),
+	  mpFX( NULL ),
+	  mpTechnique( NULL ),
+	  mpVertexLayout( NULL ),
+	  mpWVP( NULL ),
       mMultisampleCount( 4 ),
       mMultisampleQuality( 1 ),
       mWindowedMode( true ),
-      mpContentManager( NULL ) // this is initialized later
+	  mTheta( 0.0f ),
+	  mPhi( 3.1415927f * 0.25f ),
+      mpContentManager( NULL ), // this is initialized later
+	  mpCubeMesh( NULL )
 {
     // We need to have a valid window handle
     assert( pWindow->windowHandle() != NULL );
+
+	D3DXMatrixIdentity( &mView );
+	D3DXMatrixIdentity( &mProjection );
+	D3DXMatrixIdentity( &mWVP );
 }
 
 /**
@@ -54,9 +79,14 @@ DXRenderer::~DXRenderer()
 {
     // Kill the content manager first
     Delete( mpContentManager );
+	Delete( mpCubeMesh );
 
     // Release the device view before destroying the view itself
     releaseDeviceViews();
+
+	SafeRelease( &mpFX );
+	SafeRelease( &mpVertexLayout );
+
     SafeRelease( &mpSwapChain );
 
     // Now destroy the d3d device
@@ -90,8 +120,14 @@ bool DXRenderer::onStartRenderer()
         return false;
     }
 
+	if (! buildFX() | !buildVertexLayout() )
+	{
+		return false;
+	}
+
     // Content manager allows us to create and load graphics
     mpContentManager = new GraphicsContentManager( mpDevice, "..\\data" );
+	mpCubeMesh = new CubeMesh( mpDevice );
 
     // The renderer has been created and initialized properly
     return true;
@@ -122,6 +158,11 @@ bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
 
     DXVERIFY( result, "Resizing the swap chain" );
 
+	// Reset our aspect ratio and the perspective matrix
+	float aspect = (float) width / (float) height;
+
+	D3DXMatrixPerspectiveFovLH( &mProjection, 0.25f * 3.1415927f, aspect, 0.1f, 1000.0f );
+
     // Now that we've resized the back buffer, we can proceed with recreating
     // our destroyed device view
     return createDeviceViews();
@@ -141,6 +182,52 @@ void DXRenderer::onRenderFrame( float currentTime, float deltaTime )
                                      D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL,
                                      1.0f,
                                      0 );
+
+	// Restore the renderer's default states, input layout and primitive topology because
+	// mFont->DrawText chagnse them. Note that we can restore the default states by passing null.
+	mpDevice->OMSetDepthStencilState( 0, 0 );
+
+	float blendFactors[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	mpDevice->OMSetBlendState( 0, blendFactors, 0xffffffff );
+	mpDevice->IASetInputLayout( mpVertexLayout );
+	mpDevice->IASetPrimitiveTopology( D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+
+	// Update rotation blah
+	if ( GetAsyncKeyState('W') & 0x8000 ) mTheta -= 2.0f * deltaTime;
+	if ( GetAsyncKeyState('A') & 0x8000 ) mTheta += 2.0f * deltaTime;
+	if ( GetAsyncKeyState('S') & 0x8000 ) mPhi   -= 2.0f * deltaTime;
+	if ( GetAsyncKeyState('D') & 0x8000 ) mPhi   += 2.0f * deltaTime;
+
+	if ( mPhi < 0.1f ) mPhi = 0.1f;
+	if ( mPhi > 3.1415927f - 0.1f ) mPhi = 3.1415927f - 0.1f;
+
+	// Convert spherical coordinates to cartesian.
+	float x =  5.0f * sinf( mPhi ) * sinf( mTheta );
+	float y = -5.0f * sinf( mPhi ) * cosf( mTheta );
+	float z =  5.0f * cosf( mPhi ); 
+
+	// Build the view matrix
+	D3DXVECTOR3 pos( x, y, z );
+	D3DXVECTOR3 target( 0.0f, 0.0f, 0.0f );
+	D3DXVECTOR3 up( 0.0f, 1.0f, 0.0f );
+
+	D3DXMatrixLookAtLH( &mView, &pos, &target, &up );
+
+	// Set up our view constants
+	mWVP = mView * mProjection;
+	mpWVP->SetMatrix( (float*) &mWVP );
+
+	// Load the effect technique for cube
+	D3D10_TECHNIQUE_DESC technique;
+	mpTechnique->GetDesc( &technique );
+
+	// Draw the cube
+	for ( unsigned int passIndex = 0; passIndex < technique.Passes; ++passIndex )
+	{
+		mpTechnique->GetPassByIndex( 0 )->Apply( 0 );
+		mpCubeMesh->draw( mpDevice );
+	}
 
     // Draw some text
     const D3DXCOLOR BLACK( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -306,6 +393,80 @@ void DXRenderer::releaseDeviceViews()
 }
 
 /**
+ * Creates and sets up the vertex buffer.
+ */
+bool DXRenderer::buildVertexLayout()
+{
+	// Describe the vertex input layout.
+	D3D10_INPUT_ELEMENT_DESC vertexDescription[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	// Load the default pass from the .fx file we loaded earlier
+	D3D10_PASS_DESC passDescription;
+	mpTechnique->GetPassByIndex( 0 )->GetDesc( &passDescription );
+
+	// Create the vertex input layout.
+	HRESULT result = mpDevice->CreateInputLayout( vertexDescription,
+		                                          2,
+												  passDescription.pIAInputSignature,
+												  passDescription.IAInputSignatureSize,
+												  &mpVertexLayout );
+	// Make sure it worked
+	verifyResult( result, "Creating the vertex input layout" );
+
+	LOG_DEBUG("Renderer") << "Created the vertex input layout.";
+	return true;
+}
+
+/**
+ * Creates the .fx stuff
+ */
+bool DXRenderer::buildFX()
+{
+	DWORD shaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;
+
+#if defined( DEBUG ) || defined( _DEBUG )
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3D10Blob * pCompilationErrors = NULL;
+	HRESULT result = D3DX10CreateEffectFromFile(
+		L"../data/shaders/cube.fx",
+		0,
+		0,
+		"fx_4_0",
+		shaderFlags,
+		0,
+		mpDevice,
+		0,
+		0,
+		&mpFX,
+		&pCompilationErrors,
+		0 );
+
+	if ( FAILED( result ) )
+	{
+		if ( pCompilationErrors != NULL )
+		{
+			App::raiseFatalError( (char*) pCompilationErrors->GetBufferPointer(), "Failed to compile cube shader" );
+			SafeRelease( &pCompilationErrors );
+
+			return false;
+		}
+	}
+
+	mpTechnique = mpFX->GetTechniqueByName( "DefaultCubeTechnique" );
+	mpWVP = mpFX->GetVariableByName( "gWVP" )->AsMatrix();
+
+	LOG_DEBUG("Renderer") << "Created effects data";
+	return true;
+}
+
+/**
  * Creates a simple system font that the renderer can use to display simple
  * text on the screen
  */
@@ -329,19 +490,6 @@ bool DXRenderer::createRenderFont()
     // Now create that font
     HRESULT result = D3DX10CreateFontIndirect( mpDevice, &font, &mpRendererFont );
     return verifyResult( result, "Creating a render font" );
-}
-
-/**
- * Starts up DirectDraw, and creates a hardware rendering surface that can be
- * used later on to perform DirectDraw commands
- */
-bool DXRenderer::startDirectDraw()
-{
-    LOG_DEBUG("Renderer") << "Initializing DirectDraw support";
-    ID3D10Texture2D *pBackBufferTexture = NULL;
-    HRESULT result = S_OK;
-
-    return true;
 }
 
 /**

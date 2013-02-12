@@ -1,4 +1,4 @@
-// staticmesh.fx - Shaders for static meshes
+// cube.fx - Shader for a cube
 // (c) 20102 Scott MacDonald
 ////////////////////////////////////////////////////////////////////////////////
 cbuffer cbPerObject
@@ -24,7 +24,7 @@ float4 PS( float4 pos   : SV_POSITION,
 	return color;
 }
 
-technique10 DefaultStaticMeshTechnique
+technique10 DefaultCubeTechnique
 {
 	pass P0
 	{

@@ -121,7 +121,7 @@ void MeshFactory::init( const std::string& dataDir )
 
     // Create string that contains file path to effects file
     std::wstring fxfilepath = WinApp::ToWideString(dataDir) +
-                              std::wstring( L"\\shaders\\staticmesh.fx" );
+                              std::wstring( L"\\shaders\\cube.fx" );
 
     // Load the shader FX file from disk
     ID3D10Blob *pError = NULL;
@@ -164,7 +164,7 @@ void MeshFactory::init( const std::string& dataDir )
     assert( mpStaticMeshFX != NULL );
 
     // Now grab the technique
-    mpStaticMeshTechnique = mpStaticMeshFX->GetTechniqueByName( "DefaultStaticMeshTechnique" );
+    mpStaticMeshTechnique = mpStaticMeshFX->GetTechniqueByName( "DefaultCubeTechnique" );
     assert( mpStaticMeshTechnique != NULL );
 
     // Create the vertex layout expected in a static mesh

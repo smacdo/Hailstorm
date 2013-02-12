@@ -18,15 +18,24 @@
 
 #include "graphics/irenderer.h"
 
+// temporary while we host the camera matrices
+#include <d3dx10.h>
+
 // Forward declarations
 class MainWindow;
 class GraphicsContentManager;
+class CubeMesh;
+
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
 struct ID3D10Texture2D;
 struct ID3D10DepthStencilView;
 struct ID3D10Device;
 struct ID3DX10Font;
+struct ID3D10Effect;
+struct ID3D10EffectTechnique;
+struct ID3D10InputLayout;
+struct ID3D10EffectMatrixVariable;
 
 /**
  * This is the DirectX implementation of the abstract renderer
@@ -47,9 +56,10 @@ private:
     bool createDeviceViews();
     void releaseDeviceViews();
     bool createRenderDevice();
+	bool buildVertexLayout();
+	bool buildFX();
     void destroyRenderDevice();
     bool createRenderFont();
-    bool startDirectDraw();
     static bool verifyResult( HRESULT result, const std::string& action );
 
 private:
@@ -71,6 +81,11 @@ private:
     /// Pointer to the depth stencil view
     ID3D10DepthStencilView * mpDepthStencilView;
 
+	ID3D10Effect * mpFX;
+	ID3D10EffectTechnique * mpTechnique;
+	ID3D10InputLayout * mpVertexLayout;
+	ID3D10EffectMatrixVariable * mpWVP;
+
     /// Pointer to the renderer font
     ID3DX10Font * mpRendererFont;
 
@@ -83,8 +98,17 @@ private:
     /// Flag if we are rendering in windowed mode or full screen
     bool mWindowedMode;
 
+	D3DXMATRIX mView;
+	D3DXMATRIX mProjection;
+	D3DXMATRIX mWVP;
+
+	float mTheta;
+	float mPhi;
+
     /// The currently running graphics content manager
     GraphicsContentManager * mpContentManager;
+
+	CubeMesh * mpCubeMesh;
 };
 
 #endif
