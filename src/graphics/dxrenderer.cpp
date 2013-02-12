@@ -17,7 +17,7 @@
 #include "graphics/dxrenderer.h"
 #include "graphics/dxutils.h"
 #include "graphics/graphicscontentmanager.h"
-#include "graphics/cubemesh.h"
+#include "graphics/landscapemesh.h"
 #include "gui/mainwindow.h"
 #include "common/logging.h"
 #include "common/delete.h"
@@ -59,8 +59,7 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
       mMultisampleCount( 4 ),
       mMultisampleQuality( 1 ),
       mWindowedMode( true ),
-	  mTheta( 0.0f ),
-	  mPhi( 3.1415927f * 0.25f ),
+	  mRadius( 100.0f ),
       mpContentManager( NULL ), // this is initialized later
 	  mpCubeMesh( NULL )
 {
@@ -127,7 +126,7 @@ bool DXRenderer::onStartRenderer()
 
     // Content manager allows us to create and load graphics
     mpContentManager = new GraphicsContentManager( mpDevice, "..\\data" );
-	mpCubeMesh = new CubeMesh( mpDevice );
+	mpCubeMesh = new LandscapeMesh( mpDevice, 256, 256 );
 
     // The renderer has been created and initialized properly
     return true;
@@ -193,19 +192,9 @@ void DXRenderer::onRenderFrame( double currentTime, double deltaTime )
 	mpDevice->IASetInputLayout( mpVertexLayout );
 	mpDevice->IASetPrimitiveTopology( D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-	// Update rotation blah
-	if ( GetAsyncKeyState('W') & 0x8000 ) mTheta -= static_cast<float>( 2.0 * deltaTime );
-	if ( GetAsyncKeyState('A') & 0x8000 ) mTheta += static_cast<float>( 2.0 * deltaTime );
-	if ( GetAsyncKeyState('S') & 0x8000 ) mPhi   -= static_cast<float>( 2.0 * deltaTime );
-	if ( GetAsyncKeyState('D') & 0x8000 ) mPhi   += static_cast<float>( 2.0 * deltaTime );
-
-	if ( mPhi < 0.1f ) mPhi = 0.1f;
-	if ( mPhi > 3.1415927f - 0.1f ) mPhi = 3.1415927f - 0.1f;
-
-	// Convert spherical coordinates to cartesian.
-	float x =  5.0f * sinf( mPhi ) * sinf( mTheta );
-	float y = -5.0f * sinf( mPhi ) * cosf( mTheta );
-	float z =  5.0f * cosf( mPhi ); 
+	float x = mRadius * cosf( static_cast<float>( 0.5 * currentTime ) );
+	float z = mRadius * sinf( static_cast<float>( 0.5 * currentTime ) );
+	float y = 50.0f * sinf( static_cast<float>( 0.5 * currentTime ) ) + 50.0f;
 
 	// Build the view matrix
 	D3DXVECTOR3 pos( x, y, z );

@@ -24,7 +24,7 @@
 // Forward declarations
 class MainWindow;
 class GraphicsContentManager;
-class CubeMesh;
+class LandscapeMesh;
 
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
@@ -102,13 +102,12 @@ private:
 	D3DXMATRIX mProjection;
 	D3DXMATRIX mWVP;
 
-	float mTheta;
-	float mPhi;
+	float mRadius;
 
     /// The currently running graphics content manager
     GraphicsContentManager * mpContentManager;
 
-	CubeMesh * mpCubeMesh;
+	LandscapeMesh * mpCubeMesh;
 };
 
 #endif

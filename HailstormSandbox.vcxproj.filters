@@ -58,6 +58,9 @@
     <ClCompile Include="src\graphics\cubemesh.cpp">
       <Filter>Graphics Code</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\landscapemesh.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\debugging.h">
@@ -153,6 +156,9 @@
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\graphics\cubemesh.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\landscapemesh.h">
       <Filter>Graphics Code</Filter>
     </ClInclude>
   </ItemGroup>

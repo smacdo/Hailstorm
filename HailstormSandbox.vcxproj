@@ -179,6 +179,7 @@
     <ClInclude Include="src\common\debugstreambuf.inl" />
     <ClInclude Include="src\graphics\cubemesh.h" />
     <ClInclude Include="src\graphics\graphicscontentmanager.h" />
+    <ClInclude Include="src\graphics\landscapemesh.h" />
     <ClInclude Include="src\graphics\meshfactory.h" />
     <ClInclude Include="src\graphics\staticmesh.h" />
     <ClInclude Include="src\graphics\staticmeshvertex.h" />
@@ -212,6 +213,7 @@
     <ClCompile Include="src\graphics\graphicscontentmanager.cpp" />
     <ClCompile Include="src\graphics\irenderer.cpp" />
     <ClCompile Include="src\gameclient.cpp" />
+    <ClCompile Include="src\graphics\landscapemesh.cpp" />
     <ClCompile Include="src\graphics\meshfactory.cpp" />
     <ClCompile Include="src\graphics\staticmesh.cpp" />
     <ClCompile Include="src\gui\aboutbox.cpp" />
