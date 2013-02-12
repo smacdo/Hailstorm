@@ -5,5 +5,9 @@ ipch/*
 *.ilk
 *.pdb
 *.aps
+*.opensdf
+*.sdf
+*.suo
+*Thumbs.db
 Installer/bin/*
 Installer/obj/*
