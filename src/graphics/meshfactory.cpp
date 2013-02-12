@@ -16,7 +16,6 @@
 #include "stdafx.h"
 #include "graphics/meshfactory.h"
 
-#include <d3d10_1.h>
 #include <d3d10.h>
 #include <d3dx10.h>
 #include <memory>
@@ -33,7 +32,7 @@
  * active Direct3d renderer
  */
 MeshFactory::MeshFactory( const std::string& dataDir,
-                          ID3D10Device1 * pRenderDevice )
+                          ID3D10Device * pRenderDevice )
     : mpRenderDevice( pRenderDevice ),
       mpStaticMeshFX( NULL ),
       mpStaticMeshTechnique( NULL ),

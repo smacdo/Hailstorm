@@ -21,10 +21,9 @@
 #include "common/logging.h"
 #include "common/delete.h"
 
-#include <d3d10_1.h>
+#include <DXGI.h>
 #include <d3d10.h>
 #include <d3dx10.h>
-#include <d2d1.h>
 
 #define DXVERIFY(expr,msg) if (!verifyResult(expr,msg)) { return false; }
 
@@ -33,16 +32,14 @@
  */
 DXRenderer::DXRenderer( MainWindow *pWindow )
     : IRenderer( pWindow ),
-      mpDDrawFactory( NULL ),
-      mpDDrawRenderTarget( NULL ),
+	  mpMainWindow( pWindow ),
       mpDevice( NULL ),
       mpSwapChain( NULL ),
       mpRenderTargetView( NULL ),
-      mpMainWindow( pWindow ),
       mpDepthStencilBuffer( NULL ),
       mpDepthStencilView( NULL ),
       mMultisampleCount( 4 ),
-      mMultisampleQuality( D3D10_STANDARD_MULTISAMPLE_PATTERN ),
+      mMultisampleQuality( 1 ),
       mWindowedMode( true ),
       mpContentManager( NULL ) // this is initialized later
 {
@@ -188,13 +185,12 @@ bool DXRenderer::createRenderDevice()
         D3D10_CREATE_DEVICE_DEBUG;              // support debug layer
 
     // Create a device, device context and swap chain
-    result = D3D10CreateDeviceAndSwapChain1(
+    result = D3D10CreateDeviceAndSwapChain(
         NULL,                           // use default IDXGIAdapter
         D3D10_DRIVER_TYPE_HARDWARE,     // hardware support only
         NULL,                           // no software renderer DLL
         flags,                          // kinda obvious...
-        D3D10_FEATURE_LEVEL_10_1,       // want 10.1 support
-        D3D10_1_SDK_VERSION,            // want DX 10
+        D3D10_SDK_VERSION,              // want DX 10
         &scd,                           // swap chain desc from above
         &mpSwapChain,                   // address to assign pointer
         &mpDevice );                    // address to assign pointer

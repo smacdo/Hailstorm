@@ -146,6 +146,8 @@
     <ClInclude Include="src\graphics\graphicscontentmanager.h">
       <Filter>Graphics Code\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\Resource.h" />
+    <ClInclude Include="src\Resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

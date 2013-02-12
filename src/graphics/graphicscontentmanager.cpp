@@ -16,7 +16,7 @@
 #include "stdafx.h"
 #include "graphics/graphicscontentmanager.h"
 
-#include <d3d10_1.h>
+#include <DXGI.h>
 #include <d3d10.h>
 #include <d3dx10.h>
 
@@ -26,7 +26,7 @@
 /**
  * Graphics content manager constructor
  */
-GraphicsContentManager::GraphicsContentManager( ID3D10Device1 *pRenderDevice,
+GraphicsContentManager::GraphicsContentManager( ID3D10Device *pRenderDevice,
                                                 const std::string& contentDir )
     : mContentDir( contentDir ),
       mMeshFactory( contentDir, pRenderDevice )

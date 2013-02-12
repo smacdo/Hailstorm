@@ -16,7 +16,7 @@
 #include "stdafx.h"
 #include "graphics/staticmesh.h"
 
-#include <d3d10_1.h>
+#include <DXGI.h>
 #include <d3d10.h>
 #include <d3dx10.h>
 

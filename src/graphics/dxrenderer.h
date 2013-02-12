@@ -21,13 +21,11 @@
 // Forward declarations
 class MainWindow;
 class GraphicsContentManager;
-struct ID3D10Device1;
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
 struct ID3D10Texture2D;
 struct ID3D10DepthStencilView;
-struct D2D1Factory;
-struct D2D1HwndRenderTarget;
+struct ID3D10Device;
 struct ID3DX10Font;
 
 /**
@@ -58,16 +56,8 @@ private:
     /// Pointer to the main rendering window
     MainWindow * mpMainWindow;
 
-    /// Pointer to a Direct2D factory that generates D2D surfaces
-    D2D1Factory * mpDDrawFactory;
-
-    /// Pointer to the render target for DirectDraw code
-    D2D1HwndRenderTarget * mpDDrawRenderTarget;
-
-    /// Pointer to a Direct2D surface that can be drawn on
-
     /// Pointer to the D3D 10 device
-    ID3D10Device1 * mpDevice;
+    ID3D10Device * mpDevice;
 
     /// Pointer to the renderer swap chain
     IDXGISwapChain * mpSwapChain;

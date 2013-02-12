@@ -22,7 +22,7 @@
 #include "graphics/meshfactory.h"
 
 // Forward declarations
-struct ID3D10Device1;
+struct ID3D10Device;
 
 /**
  * Manages the creation, loading and unloading of graphical assets in the game.
@@ -30,7 +30,7 @@ struct ID3D10Device1;
 class GraphicsContentManager
 {
 public:
-    GraphicsContentManager( ID3D10Device1 * pRenderDevice,
+    GraphicsContentManager( ID3D10Device * pRenderDevice,
                             const std::string& mContentDir );
     ~GraphicsContentManager();
 

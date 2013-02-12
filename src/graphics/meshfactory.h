@@ -23,7 +23,7 @@
 
 // Forward declarations
 class StaticMesh;
-struct ID3D10Device1;
+struct ID3D10Device;
 struct ID3D10Effect;
 struct ID3D10EffectTechnique;
 struct ID3D10InputLayout;
@@ -35,7 +35,7 @@ class MeshFactory : boost::noncopyable
 {
 public:
     MeshFactory( const std::string& dataDir,
-                 ID3D10Device1 * pRenderDevice );
+                 ID3D10Device * pRenderDevice );
     ~MeshFactory();
 
     std::shared_ptr<StaticMesh> createBox( float scale ) const;
@@ -45,7 +45,7 @@ private:
     void init( const std::string& dataDir );
 
 private:
-    ID3D10Device1 * mpRenderDevice;
+    ID3D10Device * mpRenderDevice;
     ID3D10Effect * mpStaticMeshFX;
     ID3D10EffectTechnique * mpStaticMeshTechnique;
     ID3D10InputLayout * mpStaticMeshInputLayout;
