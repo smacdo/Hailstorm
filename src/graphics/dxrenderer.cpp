@@ -30,19 +30,6 @@
 
 #define DXVERIFY(expr,msg) if (!verifyResult(expr,msg)) { return false; }
 
-struct Vertex1
-{
-	D3DXVECTOR3 pos;
-	D3DXCOLOR color;
-};
-
-struct Vertex2
-{
-	D3DXVECTOR3 pos;
-	D3DXVECTOR3 normal;
-	D3DXVECTOR2 texC;
-};
-
 /**
  * DirectX renderer constructor
  */
@@ -176,9 +163,9 @@ bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
 }
 
 /**
- * Time to draw something
+ * Update animations and whatnot
  */
-void DXRenderer::onRenderFrame( double currentTime, double deltaTime )
+void DXRenderer::onUpdate( double currentTime, double deltaTime )
 {
 	// Every quarter second, generate a random wave
 	static float t_base = 0.0f;
@@ -195,6 +182,27 @@ void DXRenderer::onRenderFrame( double currentTime, double deltaTime )
 		mpWaterMesh->perturb( i, j, r ) ;
 	}
 
+	// Make sure the water mesh is kept up to date with ripple animations
+	mpWaterMesh->update( (float) deltaTime );
+
+	// Rotate camera around the landscape
+	float x = mRadius * cosf( static_cast<float>( 0.5 * currentTime ) );
+	float z = mRadius * sinf( static_cast<float>( 0.5 * currentTime ) );
+	float y = 50.0f * sinf( static_cast<float>( 0.5 * currentTime ) ) + 50.0f;
+
+	// Rebuild view matrix with the new camera coordinates
+	D3DXVECTOR3 pos( x, y, z );
+	D3DXVECTOR3 target( 0.0f, 0.0f, 0.0f );
+	D3DXVECTOR3 up( 0.0f, 1.0f, 0.0f );
+
+	D3DXMatrixLookAtLH( &mView, &pos, &target, &up );
+}
+
+/**
+ * Time to draw something
+ */
+void DXRenderer::onRenderFrame()
+{
     // Clear the back buffer and the depth stencil view before doing doing any
     // rendering
     mpDevice->ClearRenderTargetView( mpRenderTargetView,
@@ -215,16 +223,6 @@ void DXRenderer::onRenderFrame( double currentTime, double deltaTime )
 	mpDevice->IASetInputLayout( mpVertexLayout );
 	mpDevice->IASetPrimitiveTopology( D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-	float x = mRadius * cosf( static_cast<float>( 0.5 * currentTime ) );
-	float z = mRadius * sinf( static_cast<float>( 0.5 * currentTime ) );
-	float y = 50.0f * sinf( static_cast<float>( 0.5 * currentTime ) ) + 50.0f;
-
-	// Build the view matrix
-	D3DXVECTOR3 pos( x, y, z );
-	D3DXVECTOR3 target( 0.0f, 0.0f, 0.0f );
-	D3DXVECTOR3 up( 0.0f, 1.0f, 0.0f );
-
-	D3DXMatrixLookAtLH( &mView, &pos, &target, &up );
 
 	// Load the effect technique for cube
 	D3D10_TECHNIQUE_DESC technique;
@@ -246,10 +244,9 @@ void DXRenderer::onRenderFrame( double currentTime, double deltaTime )
 		// Draw the water
 		mpDevice->RSSetState( mpWireframeRS );
 		pPass->Apply( 0 );
-		mpWaterMesh->update( (float) deltaTime );
+		
 		mpWaterMesh->draw( mpDevice );
 	}
-
 
     // Draw some text
     const D3DXCOLOR BLACK( 1.0f, 1.0f, 1.0f, 1.0f );

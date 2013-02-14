@@ -91,7 +91,8 @@ void IRenderer::tick( TimeT currentTime, TimeT deltaTime )
     }
 
     // Keep rendering whatever is going on
-    onRenderFrame( currentTime, deltaTime );
+	onUpdate( currentTime, deltaTime );
+    onRenderFrame();
 }
 
 /**

@@ -208,7 +208,7 @@ void WaterMesh::update( float deltaTime )
 		for ( unsigned int i = 0; i < mCurrentSolution.size(); ++i )
 		{
 			pVertices[i].pos = mCurrentSolution[ i ];
-			pVertices[i].color = D3DXCOLOR( 0.0f, 1.0f, 0.0f, 1.0f );
+			pVertices[i].color = D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f );
 		}
 
 		mpVertexBuffer->Unmap();

@@ -50,7 +50,8 @@ public:
 protected:
     virtual bool onStartRenderer();
     virtual void onStopRenderer();
-    virtual void onRenderFrame( double currentTime, double deltaTime );
+    virtual void onRenderFrame();
+	virtual void onUpdate( double currentTime, double deltaTime );
     virtual bool resizeRenderWindow( unsigned int width, unsigned int height );
 
 private:

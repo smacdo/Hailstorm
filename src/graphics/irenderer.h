@@ -37,7 +37,8 @@ public:
 protected:
     virtual bool onStartRenderer() = 0;
     virtual void onStopRenderer() = 0;
-    virtual void onRenderFrame( double currentTime, double deltaTime ) = 0;
+	virtual void onUpdate( double currentTime, double deltaTime ) = 0;
+    virtual void onRenderFrame() = 0;
     virtual bool resizeRenderWindow( unsigned int width, unsigned int height ) = 0;
 
     IWindow *renderWindow();
