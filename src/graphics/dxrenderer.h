@@ -20,6 +20,7 @@
 
 // temporary while we host the camera matrices
 #include <d3dx10.h>
+#include "light.h"		// temporary, remove this eventually
 
 // Forward declarations
 class MainWindow;
@@ -61,6 +62,7 @@ private:
 	bool buildVertexLayout();
 	bool buildFX();
 	void buildRenderStates();
+	void buildLights();
     void destroyRenderDevice();
     bool createRenderFont();
     static bool verifyResult( HRESULT result, const std::string& action );
@@ -88,7 +90,12 @@ private:
 	ID3D10EffectTechnique * mpTechnique;
 	ID3D10InputLayout * mpVertexLayout;
 	ID3D10EffectMatrixVariable * mpWVP;
+	ID3D10EffectMatrixVariable * mpWorldVar;
+	ID3D10EffectVariable * mpFxEyePosVar;
+	ID3D10EffectVariable * mpFxLightVar;
+	ID3D10EffectScalarVariable * mpFxLightType;
 
+	ID3D10RasterizerState * mpDefaultRasterizerState;
 	ID3D10RasterizerState * mpWireframeRS;
 
     /// Pointer to the renderer font
@@ -106,8 +113,15 @@ private:
 	D3DXMATRIX mView;
 	D3DXMATRIX mProjection;
 	D3DXMATRIX mWVP;
+	D3DXVECTOR3 mEyePos;
+
+	D3DXMATRIX mLandTransform;
+	D3DXMATRIX mWaterTransform;
 
 	float mRadius;
+
+	Light mLights[3];
+	int mLightType;
 
     /// The currently running graphics content manager
     GraphicsContentManager * mpContentManager;

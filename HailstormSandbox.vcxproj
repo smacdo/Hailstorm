@@ -181,6 +181,7 @@
     <ClInclude Include="src\graphics\cubemesh.h" />
     <ClInclude Include="src\graphics\graphicscontentmanager.h" />
     <ClInclude Include="src\graphics\landscapemesh.h" />
+    <ClInclude Include="src\graphics\light.h" />
     <ClInclude Include="src\graphics\meshfactory.h" />
     <ClInclude Include="src\graphics\staticmesh.h" />
     <ClInclude Include="src\graphics\staticmeshvertex.h" />
@@ -216,6 +217,7 @@
     <ClCompile Include="src\graphics\irenderer.cpp" />
     <ClCompile Include="src\gameclient.cpp" />
     <ClCompile Include="src\graphics\landscapemesh.cpp" />
+    <ClCompile Include="src\graphics\light.cpp" />
     <ClCompile Include="src\graphics\meshfactory.cpp" />
     <ClCompile Include="src\graphics\staticmesh.cpp" />
     <ClCompile Include="src\graphics\watermesh.cpp" />
@@ -240,6 +242,18 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="game\data\shaders\cube.fx">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="game\data\shaders\landscape.fx">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="game\data\shaders\light.fx">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>

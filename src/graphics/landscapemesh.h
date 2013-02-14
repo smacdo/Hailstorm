@@ -37,10 +37,11 @@ public:
 
     unsigned int vertexCount() const;
     unsigned int faceCount() const;
+	float getHeight( float x, float y ) const;
 
 private:
 	void init( ID3D10Device * pDevice );
-	float getHeight( float x, float y ) const;
+	
 
 private:
 	unsigned int mNumRows;

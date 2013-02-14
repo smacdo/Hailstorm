@@ -33,9 +33,46 @@ const int CUBE_FACE_COUNT = 12;
  */
 struct LandscapeVertex
 {
-    D3DXVECTOR3 pos;
-    D3DXCOLOR color;
+	D3DXVECTOR3 pos;
+	D3DXVECTOR3 normal;
+	D3DXCOLOR   diffuse;
+	D3DXCOLOR   spec; // (r, g, b, specPower);
 };
+
+namespace
+{
+	/**
+     * Returns an appropriate color for the landscape height.
+     */
+	void FindVertexColor( float y, D3DXCOLOR * pDiffuse, D3DXCOLOR * pSpecular )
+	{
+		if ( y < -10.0f )
+		{
+			*pDiffuse  = D3DXCOLOR( 1.0f, 0.96f, 0.62f, 1.0f );
+			*pSpecular = D3DXCOLOR( 0.2f, 0.2f, 0.2f, 32.0f );
+		}
+		else if ( y < 5.0f )
+		{
+			*pDiffuse  = D3DXCOLOR( 0.48f, 0.77f, 0.46f, 1.0f );
+			*pSpecular = D3DXCOLOR( 0.2f, 0.2f, 0.2f, 32.0f );
+		}
+		else if ( y < 12.0f )
+		{
+			*pDiffuse  = D3DXCOLOR( 0.1f, 0.48f, 0.19f, 1.0f );
+			*pSpecular = D3DXCOLOR( 0.2f, 0.2f, 0.2f, 32.0f );
+		}
+		else if ( y < 20.0f )
+		{
+			*pDiffuse  = D3DXCOLOR( 0.45f, 0.39f, 0.34f, 1.0f );
+			*pSpecular = D3DXCOLOR( 0.4f, 0.4f, 0.4f, 64.0f );
+		}
+		else
+		{
+			*pDiffuse  = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
+			*pSpecular = D3DXCOLOR( 0.8f, 0.8f, 0.8f, 64.0f );
+		}		
+	}
+}
 
 /**
  * Static mesh constructor that takes an already constructed vertex and index
@@ -93,34 +130,25 @@ void LandscapeMesh::init( ID3D10Device * pRenderDevice )
 
 		for ( unsigned int j = 0; j < mNumCols; ++j )
 		{
+			unsigned int index = i * mNumCols + j;
 			float x = -halfWidth + j * dx;
 
 			// Graph of this function looks like a mountain range.
 			float y = getHeight( x, z );
 
-			vertices[ i * mNumCols + j ].pos = D3DXVECTOR3( x, y, z );
+			vertices[index].pos = D3DXVECTOR3( x, y, z );
+			FindVertexColor( y, &vertices[index].diffuse, &vertices[index].spec );
 
-			// Color the vertex based on it's height
-			if ( y < -10.0f )
-			{
-				vertices[ i * mNumCols + j ].color = D3DXCOLOR(1.0f, 0.96f, 0.62f, 1.0f);
-			}
-			else if ( y < 5.0f )
-			{
-				vertices[ i * mNumCols + j ].color = D3DXCOLOR(0.48f, 0.77f, 0.46f, 1.0f);
-			}
-			else if ( y < 12.0f )
-			{
-				vertices[ i * mNumCols + j ].color = D3DXCOLOR(0.1f, 0.48f, 0.19f, 1.0f);
-			}
-			else if ( y < 20.0f )
-			{
-				vertices[ i * mNumCols + j ].color = D3DXCOLOR(0.45f, 0.39f, 0.34f, 1.0f);
-			}
-			else
-			{
-				vertices[ i * mNumCols + j ].color = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-			}
+			// Calculate normal for this point. Since this landscape is mathematically generated we can use
+			// the book's nice formula for finding a smooth normal;
+			//  FORMULA: n = ( -df / dx, 1, -df/dz)
+			D3DXVECTOR3 normal;
+
+			normal.x = -0.03f * z * cosf( 0.1f * x ) - 0.3f * cosf( 0.1f * z );
+			normal.y =  1.0f;
+			normal.z = -0.3f * sinf( 0.1f * x ) + 0.03f * x * sinf( 0.1f * z );
+
+			D3DXVec3Normalize( &vertices[index].normal, &normal );
 		}
 	}
 
@@ -142,7 +170,7 @@ void LandscapeMesh::init( ID3D10Device * pRenderDevice )
 	// Upload the vertex buffer to the graphics card.
 	HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mpVertexBuffer );
 
-	if (! DxUtils::CheckResult( result, true, "Creating a vertex buffer" ) )
+	if (! DxUtils::CheckResult( result, true, "Creating the landscape vertex buffer" ) )
 	{
 		return;
 	}
@@ -183,7 +211,7 @@ void LandscapeMesh::init( ID3D10Device * pRenderDevice )
 	// Upload the index buffer to the graphics card.
     result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mpIndexBuffer );
 
-    if (! DxUtils::CheckResult( result, true, "Creating an index buffer" ) )
+    if (! DxUtils::CheckResult( result, true, "Creating the landscape index buffer" ) )
     {
         return;
     }

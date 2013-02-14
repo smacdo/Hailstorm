@@ -64,6 +64,9 @@
     <ClCompile Include="src\graphics\watermesh.cpp">
       <Filter>Graphics Code</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\light.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\debugging.h">
@@ -170,6 +173,9 @@
     <ClInclude Include="src\common\mathutils.h">
       <Filter>Common Code</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\light.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -212,5 +218,7 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="game\data\shaders\cube.fx" />
+    <FxCompile Include="game\data\shaders\landscape.fx" />
+    <FxCompile Include="game\data\shaders\light.fx" />
   </ItemGroup>
 </Project>

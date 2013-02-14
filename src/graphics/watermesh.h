@@ -31,8 +31,10 @@ struct StaticMeshVertex;
  */
 struct WaterMeshVertex
 {
-    D3DXVECTOR3 pos;
-    D3DXCOLOR color;
+	D3DXVECTOR3 pos;
+	D3DXVECTOR3 normal;
+	D3DXCOLOR   diffuse;
+	D3DXCOLOR   spec; // (r, g, b, specPower);
 };
 
 /**
@@ -79,6 +81,7 @@ private:
 
 	std::vector<D3DXVECTOR3> mPreviousSolution;
 	std::vector<D3DXVECTOR3> mCurrentSolution;
+	std::vector<D3DXVECTOR3> mNormals;
 
     ID3D10Buffer * mpVertexBuffer;
     ID3D10Buffer * mpIndexBuffer;

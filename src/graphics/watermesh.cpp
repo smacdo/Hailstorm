@@ -50,6 +50,7 @@ WaterMesh::WaterMesh( ID3D10Device * pRenderDevice,
 	  mSimulationTime( 0.0f ),
 	  mPreviousSolution( rows * cols ),
 	  mCurrentSolution( rows * cols ),
+	  mNormals( rows * cols ),
       mpVertexBuffer( NULL ),
       mpIndexBuffer( NULL )
 {
@@ -99,8 +100,9 @@ void WaterMesh::init( ID3D10Device * pRenderDevice )
 		{
 			float x = -halfWidth + j * mSpatialStep;
 
-			mPreviousSolution[ i * mNumRows + j ] = D3DXVECTOR3( x, 0.0f, z );
-			mCurrentSolution[ i * mNumRows + j ] = D3DXVECTOR3( x, 0.0f, z );
+			mPreviousSolution[ i * mNumCols + j ] = D3DXVECTOR3( x, 0.0f, z );
+			mCurrentSolution[ i * mNumCols + j ] = D3DXVECTOR3( x, 0.0f, z );
+			mNormals[ i * mNumCols + j ] = D3DXVECTOR3( 0.0f, 1.0f, 0.0f );
 		}
 	}
 
@@ -122,7 +124,7 @@ void WaterMesh::init( ID3D10Device * pRenderDevice )
 	// Upload the vertex buffer to the graphics card.
 	HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mpVertexBuffer );
 
-	DxUtils::CheckResult( result, true, "Creating a vertex buffer" );
+	DxUtils::CheckResult( result, true, "Creating the water vertex buffer" );
 
 	// Generate the landscape index buffer
 	std::vector<DWORD> indices( mFaceCount * 3 );
@@ -160,7 +162,7 @@ void WaterMesh::init( ID3D10Device * pRenderDevice )
 	// Upload the index buffer to the graphics card.
     result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mpIndexBuffer );
 
-    DxUtils::CheckResult( result, true, "Creating an index buffer" );
+    DxUtils::CheckResult( result, true, "Creating the water index buffer" );
 }
 
 /**
@@ -201,14 +203,34 @@ void WaterMesh::update( float deltaTime )
 
 		t = 0.0f;		// reset time (this is stupid... we should accumulate and store it)
 
+		// Compute normals using finite difference scheme
+		for ( unsigned int i = 1; i < mNumRows - 1; ++i )
+		{
+			for ( unsigned int j = 1; j < mNumCols - 1; ++j )
+			{
+				float l = mCurrentSolution[ i * mNumCols + j - 1 ].y;
+				float r = mCurrentSolution[ i * mNumCols + j + 1 ].y;
+				float t = mCurrentSolution[ (i-1) * mNumCols + j - 1 ].y;
+				float b = mCurrentSolution[ (i-1) * mNumCols + j + 1 ].y;
+
+				mNormals[ i * mNumCols + j ].x = -r + 1.0f;
+				mNormals[ i * mNumCols + j ].y = 2.0f * mSpatialStep;
+				mNormals[ i * mNumCols + j ].z = b - t;
+
+				D3DXVec3Normalize( &mNormals[ i * mNumCols + j ], &mNormals[ i * mNumCols + j ] );
+			}
+		}
+
 		// Update the vertex buffer with the new solution
 		WaterMeshVertex * pVertices = NULL;
 		DxUtils::CheckResult( mpVertexBuffer->Map( D3D10_MAP_WRITE_DISCARD, 0, (void**) &pVertices ), true, "Uploading new water vertices" );
 
 		for ( unsigned int i = 0; i < mCurrentSolution.size(); ++i )
 		{
-			pVertices[i].pos = mCurrentSolution[ i ];
-			pVertices[i].color = D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f );
+			pVertices[i].pos     = mCurrentSolution[ i ];
+			pVertices[i].diffuse = D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f );
+			pVertices[i].spec    = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 128.0f );
+			pVertices[i].normal  = mNormals[i];
 		}
 
 		mpVertexBuffer->Unmap();

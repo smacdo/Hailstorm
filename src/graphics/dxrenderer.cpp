@@ -49,7 +49,9 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
       mMultisampleCount( 4 ),
       mMultisampleQuality( 1 ),
       mWindowedMode( true ),
-	  mRadius( 100.0f ),
+	  mEyePos( 0.0f, 0.0f, 0.0f ),
+	  mRadius( 75 ),
+	  mLightType( 0 ),
       mpContentManager( NULL ), // this is initialized later
 	  mpCubeMesh( NULL ),
 	  mpWaterMesh( NULL )
@@ -60,6 +62,9 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
 	D3DXMatrixIdentity( &mView );
 	D3DXMatrixIdentity( &mProjection );
 	D3DXMatrixIdentity( &mWVP );
+
+	D3DXMatrixIdentity( &mLandTransform );
+	D3DXMatrixIdentity( &mWaterTransform );
 }
 
 /**
@@ -117,6 +122,7 @@ bool DXRenderer::onStartRenderer()
 	}
 
 	buildRenderStates();
+	buildLights();
 
     // Content manager allows us to create and load graphics
     mpContentManager = new GraphicsContentManager( mpDevice, "..\\data" );
@@ -155,7 +161,7 @@ bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
 	// Reset our aspect ratio and the perspective matrix
 	float aspect = (float) width / (float) height;
 
-	D3DXMatrixPerspectiveFovLH( &mProjection, 0.25f * 3.1415927f, aspect, 0.1f, 1000.0f );
+	D3DXMatrixPerspectiveFovLH( &mProjection, 0.25f * 3.1415927f, aspect, 1.0f, 1000.0f );
 
     // Now that we've resized the back buffer, we can proceed with recreating
     // our destroyed device view
@@ -167,6 +173,11 @@ bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
  */
 void DXRenderer::onUpdate( double currentTime, double deltaTime )
 {
+	// Set up the light type based on user input
+	if ( GetAsyncKeyState( '1' & 0x8000 ) ) { mLightType = 0; }
+	if ( GetAsyncKeyState( '2' & 0x8000 ) ) { mLightType = 0; }
+	if ( GetAsyncKeyState( '3' & 0x8000 ) ) { mLightType = 0; }
+
 	// Every quarter second, generate a random wave
 	static float t_base = 0.0f;
 
@@ -186,16 +197,27 @@ void DXRenderer::onUpdate( double currentTime, double deltaTime )
 	mpWaterMesh->update( (float) deltaTime );
 
 	// Rotate camera around the landscape
-	float x = mRadius * cosf( static_cast<float>( 0.5 * currentTime ) );
-	float z = mRadius * sinf( static_cast<float>( 0.5 * currentTime ) );
-	float y = 50.0f * sinf( static_cast<float>( 0.5 * currentTime ) ) + 50.0f;
+	mEyePos.x = mRadius * cosf( static_cast<float>( 0.5 * currentTime ) );
+	mEyePos.z = mRadius * sinf( static_cast<float>( 0.5 * currentTime ) );
+	mEyePos.y = 50.0f * sinf( static_cast<float>( 0.5 * currentTime ) ) + 50.0f;
 
 	// Rebuild view matrix with the new camera coordinates
-	D3DXVECTOR3 pos( x, y, z );
 	D3DXVECTOR3 target( 0.0f, 0.0f, 0.0f );
 	D3DXVECTOR3 up( 0.0f, 1.0f, 0.0f );
 
-	D3DXMatrixLookAtLH( &mView, &pos, &target, &up );
+	D3DXMatrixLookAtLH( &mView, &mEyePos, &target, &up );
+
+
+	// The point light circles the scene as a function of time, staying seven units above the land's
+	// or water's surface.
+	mLights[1].pos.x = 50.0f * cosf( (float) currentTime );
+	mLights[1].pos.z = 50.0f * sinf( (float) currentTime );
+	mLights[1].pos.y = 7.0f + std::max( mpCubeMesh->getHeight( mLights[1].pos.x, mLights[1].pos.z ), 0.0f );
+
+	// The spotlight takes on the camera position and is aimed in the same direction as the camera is
+	// looking. In this way it looks like we are holding a flashlight.
+	mLights[2].pos = mEyePos;
+	D3DXVec3Normalize( &mLights[2].dir, &(target - mEyePos) );
 }
 
 /**
@@ -223,6 +245,10 @@ void DXRenderer::onRenderFrame()
 	mpDevice->IASetInputLayout( mpVertexLayout );
 	mpDevice->IASetPrimitiveTopology( D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
+	// Set per frame constants
+	mpFxEyePosVar->SetRawValue( &mEyePos, 0, sizeof( D3DXVECTOR3 ) );
+	mpFxLightVar->SetRawValue( &mLights[mLightType], 0, sizeof( Light ) );
+	mpFxLightType->SetInt( mLightType );
 
 	// Load the effect technique for cube
 	D3D10_TECHNIQUE_DESC technique;
@@ -232,17 +258,24 @@ void DXRenderer::onRenderFrame()
 	for ( unsigned int passIndex = 0; passIndex < technique.Passes; ++passIndex )
 	{
 		ID3D10EffectPass * pPass = mpTechnique->GetPassByIndex( passIndex );
+		mpDevice->RSSetState( mpDefaultRasterizerState );
 
-		// Set up our view constants
-		mWVP = mView * mProjection;
+		// Draw the landscape mesh first
+		mWVP =  mLandTransform * mView * mProjection;
+
 		mpWVP->SetMatrix( (float*) &mWVP );
+		mpWorldVar->SetMatrix( (float*) &mLandTransform );
 
-		// Draw the landscape
 		pPass->Apply( 0 );
 		mpCubeMesh->draw( mpDevice );
 
-		// Draw the water
-		mpDevice->RSSetState( mpWireframeRS );
+		// Draw the water mesh
+		mWVP = mWaterTransform * mView * mProjection;
+		
+		mpWVP->SetMatrix( (float*) &mWVP );
+		mpWorldVar->SetMatrix( (float*) &mWaterTransform );
+
+//		mpDevice->RSSetState( mpWireframeRS );
 		pPass->Apply( 0 );
 		
 		mpWaterMesh->draw( mpDevice );
@@ -286,9 +319,10 @@ bool DXRenderer::createRenderDevice()
 
     // Set up windows flags that we will be passing to directx
     UINT flags =
-        D3D10_CREATE_DEVICE_SINGLETHREADED |    // no need to use threads atm
-        D3D10_CREATE_DEVICE_BGRA_SUPPORT   |    // required for direct2d
-        D3D10_CREATE_DEVICE_DEBUG;              // support debug layer
+        D3D10_CREATE_DEVICE_SINGLETHREADED	    // no need to use threads atm
+#if defined(DEBUG) || defined(_DEBUG)  
+        | D3D10_CREATE_DEVICE_DEBUG;            // support debug layer
+#endif
 
     // Create a device, device context and swap chain
     result = D3D10CreateDeviceAndSwapChain(
@@ -419,8 +453,10 @@ bool DXRenderer::buildVertexLayout()
 	// Describe the vertex input layout.
 	D3D10_INPUT_ELEMENT_DESC vertexDescription[] =
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0 }
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,  D3D10_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+		{ "DIFFUSE",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+		{ "SPECULAR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 40, D3D10_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
 	// Load the default pass from the .fx file we loaded earlier
@@ -429,7 +465,7 @@ bool DXRenderer::buildVertexLayout()
 
 	// Create the vertex input layout.
 	HRESULT result = mpDevice->CreateInputLayout( vertexDescription,
-		                                          2,
+		                                          4,
 												  passDescription.pIAInputSignature,
 												  passDescription.IAInputSignatureSize,
 												  &mpVertexLayout );
@@ -454,7 +490,7 @@ bool DXRenderer::buildFX()
 
 	ID3D10Blob * pCompilationErrors = NULL;
 	HRESULT result = D3DX10CreateEffectFromFile(
-		L"../data/shaders/cube.fx",
+		L"../data/shaders/landscape.fx",
 		0,
 		0,
 		"fx_4_0",
@@ -478,8 +514,13 @@ bool DXRenderer::buildFX()
 		}
 	}
 
-	mpTechnique = mpFX->GetTechniqueByName( "DefaultCubeTechnique" );
-	mpWVP = mpFX->GetVariableByName( "gWVP" )->AsMatrix();
+	mpTechnique = mpFX->GetTechniqueByName( "LandscapeTechnique" );
+
+	mpWVP         = mpFX->GetVariableByName( "gWVP" )->AsMatrix();
+	mpWorldVar    = mpFX->GetVariableByName( "gWorld" )->AsMatrix();
+	mpFxEyePosVar = mpFX->GetVariableByName( "gEyePosW" );
+	mpFxLightVar  = mpFX->GetVariableByName( "gLight" );
+	mpFxLightType = mpFX->GetVariableByName( "gLightType" )->AsScalar();
 
 	LOG_DEBUG("Renderer") << "Created effects data";
 	return true;
@@ -490,13 +531,61 @@ bool DXRenderer::buildFX()
  */
 void DXRenderer::buildRenderStates()
 {
+	// Create the default rasterizer state
 	D3D10_RASTERIZER_DESC rasterizerDescription;
+	ZeroMemory( &rasterizerDescription, sizeof( D3D10_RASTERIZER_DESC ) );
+
+	rasterizerDescription.CullMode = D3D10_CULL_FRONT;
+	rasterizerDescription.FillMode = D3D10_FILL_SOLID;
+	rasterizerDescription.FrontCounterClockwise = true;
+	rasterizerDescription.DepthBias = false;
+	rasterizerDescription.DepthBiasClamp = 0;
+	rasterizerDescription.SlopeScaledDepthBias = 0;
+	rasterizerDescription.DepthClipEnable = true;
+	rasterizerDescription.ScissorEnable = false;
+	rasterizerDescription.MultisampleEnable = false;
+	rasterizerDescription.AntialiasedLineEnable = true;
+
+	DxUtils::CheckResult( mpDevice->CreateRasterizerState( &rasterizerDescription, &mpDefaultRasterizerState ), true, "Creating default rasterizer state" );
+
+	// Create a transparent rasterizer state
 	ZeroMemory( &rasterizerDescription, sizeof( D3D10_RASTERIZER_DESC ) );
 
 	rasterizerDescription.FillMode = D3D10_FILL_WIREFRAME;
 	rasterizerDescription.CullMode = D3D10_CULL_BACK;
 
-	DxUtils::CheckResult( mpDevice->CreateRasterizerState( &rasterizerDescription, &mpWireframeRS ), true, "Creating rasterizer state" );
+	DxUtils::CheckResult( mpDevice->CreateRasterizerState( &rasterizerDescription, &mpWireframeRS ), true, "Creating wireframe rasterizer state" );
+}
+
+/**
+ * Populate light structs
+ */
+void DXRenderer::buildLights()
+{
+	// Parallel light
+	mLights[0].dir = D3DXVECTOR3( 0.57735f, -0.57735f, 0.57735f );
+	mLights[0].ambient = D3DXCOLOR( 0.2f, 0.2f, 0.2f, 1.0f );
+	mLights[0].diffuse = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
+	mLights[0].specular = D3DXCOLOR ( 1.0f, 1.0f, 1.0f, 1.0f );
+
+	// Point light (position is changed every frame)
+	mLights[1].ambient = D3DXCOLOR( 0.4f, 0.4f, 0.4f, 1.0f );
+	mLights[1].diffuse = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
+	mLights[1].specular = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
+	mLights[1].att.x = 0.0f;
+	mLights[1].att.y = 0.1f;
+	mLights[1].att.z = 0.0f;
+	mLights[1].range = 50.0f;
+
+	// Spotlight -- position and direction changed every frame
+	mLights[2].ambient = D3DXCOLOR( 0.4f, 0.4f, 0.4f, 1.0f );
+	mLights[2].diffuse = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
+	mLights[2].specular = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
+	mLights[2].att.x = 1.0f;
+	mLights[2].att.y = 0.0f;
+	mLights[2].att.z = 0.0f;
+	mLights[2].spotPow = 64.0f;
+	mLights[2].range = 10000.0f;
 }
 
 /**
