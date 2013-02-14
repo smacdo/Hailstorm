@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH
-#define SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH
+#ifndef SCOTT_HAILSTORM_LANDSCAPE_MESH_H
+#define SCOTT_HAILSTORM_LANDSCAPE_MESH_H
 
 // Includes
 #include <boost/noncopyable.hpp>

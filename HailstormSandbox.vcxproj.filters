@@ -61,6 +61,9 @@
     <ClCompile Include="src\graphics\landscapemesh.cpp">
       <Filter>Graphics Code</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\watermesh.cpp">
+      <Filter>Graphics Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\debugging.h">
@@ -105,17 +108,8 @@
     <ClInclude Include="src\gameclient.h">
       <Filter>Sandbox Code</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\irenderer.h">
-      <Filter>Graphics Code\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\gui\mainwindow.h">
       <Filter>Gui Code\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\dxrenderer.h">
-      <Filter>Graphics Code\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\dxutils.h">
-      <Filter>Graphics Code\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\common\gametime.h">
       <Filter>Common Code\Headers</Filter>
@@ -140,18 +134,6 @@
       <Filter>Common Code</Filter>
     </ClInclude>
     <ClInclude Include="src\Resource.h" />
-    <ClInclude Include="src\graphics\staticmesh.h">
-      <Filter>Graphics Code\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\staticmeshvertex.h">
-      <Filter>Graphics Code\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\meshfactory.h">
-      <Filter>Graphics Code\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\graphicscontentmanager.h">
-      <Filter>Graphics Code\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\Resource.h" />
@@ -160,6 +142,33 @@
     </ClInclude>
     <ClInclude Include="src\graphics\landscapemesh.h">
       <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\dxrenderer.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\graphicscontentmanager.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\dxutils.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\irenderer.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\meshfactory.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\staticmesh.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\staticmeshvertex.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\watermesh.h">
+      <Filter>Graphics Code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\mathutils.h">
+      <Filter>Common Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -191,9 +200,6 @@
     </Filter>
     <Filter Include="Graphics Code">
       <UniqueIdentifier>{e5c58e7a-ba74-4be4-9c27-e65a7b42ba5c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Graphics Code\Headers">
-      <UniqueIdentifier>{b4cbd2e1-0bf2-4073-8148-6f1d67822125}</UniqueIdentifier>
     </Filter>
     <Filter Include="VS Support and Assets">
       <UniqueIdentifier>{de0fb035-0c01-4ecb-adcb-4ff41e923ea7}</UniqueIdentifier>

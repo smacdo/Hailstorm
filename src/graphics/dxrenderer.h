@@ -25,6 +25,7 @@
 class MainWindow;
 class GraphicsContentManager;
 class LandscapeMesh;
+class WaterMesh;
 
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
@@ -58,6 +59,7 @@ private:
     bool createRenderDevice();
 	bool buildVertexLayout();
 	bool buildFX();
+	void buildRenderStates();
     void destroyRenderDevice();
     bool createRenderFont();
     static bool verifyResult( HRESULT result, const std::string& action );
@@ -86,6 +88,8 @@ private:
 	ID3D10InputLayout * mpVertexLayout;
 	ID3D10EffectMatrixVariable * mpWVP;
 
+	ID3D10RasterizerState * mpWireframeRS;
+
     /// Pointer to the renderer font
     ID3DX10Font * mpRendererFont;
 
@@ -108,6 +112,7 @@ private:
     GraphicsContentManager * mpContentManager;
 
 	LandscapeMesh * mpCubeMesh;
+	WaterMesh * mpWaterMesh;
 };
 
 #endif

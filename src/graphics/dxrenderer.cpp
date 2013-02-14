@@ -18,9 +18,11 @@
 #include "graphics/dxutils.h"
 #include "graphics/graphicscontentmanager.h"
 #include "graphics/landscapemesh.h"
+#include "graphics/watermesh.h"
 #include "gui/mainwindow.h"
 #include "common/logging.h"
 #include "common/delete.h"
+#include "common/mathutils.h"
 
 #include <DXGI.h>
 #include <d3d10.h>
@@ -56,12 +58,14 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
 	  mpTechnique( NULL ),
 	  mpVertexLayout( NULL ),
 	  mpWVP( NULL ),
+	  mpWireframeRS( NULL ),
       mMultisampleCount( 4 ),
       mMultisampleQuality( 1 ),
       mWindowedMode( true ),
 	  mRadius( 100.0f ),
       mpContentManager( NULL ), // this is initialized later
-	  mpCubeMesh( NULL )
+	  mpCubeMesh( NULL ),
+	  mpWaterMesh( NULL )
 {
     // We need to have a valid window handle
     assert( pWindow->windowHandle() != NULL );
@@ -85,6 +89,7 @@ DXRenderer::~DXRenderer()
 
 	SafeRelease( &mpFX );
 	SafeRelease( &mpVertexLayout );
+	SafeRelease( &mpWireframeRS );
 
     SafeRelease( &mpSwapChain );
 
@@ -124,9 +129,12 @@ bool DXRenderer::onStartRenderer()
 		return false;
 	}
 
+	buildRenderStates();
+
     // Content manager allows us to create and load graphics
     mpContentManager = new GraphicsContentManager( mpDevice, "..\\data" );
 	mpCubeMesh = new LandscapeMesh( mpDevice, 256, 256 );
+	mpWaterMesh = new WaterMesh( mpDevice, 257, 257, 0.5f, 0.03f, 3.25f, 0.4f );
 
     // The renderer has been created and initialized properly
     return true;
@@ -172,6 +180,21 @@ bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
  */
 void DXRenderer::onRenderFrame( double currentTime, double deltaTime )
 {
+	// Every quarter second, generate a random wave
+	static float t_base = 0.0f;
+
+	if ( currentTime - t_base >= 0.25f )
+	{
+		t_base += 0.25f;
+
+		unsigned int i = 5 + rand() % 250;
+		unsigned int j = 5 + rand() % 250;
+
+		float r = randF( 1.0f, 2.0f );
+
+		mpWaterMesh->perturb( i, j, r ) ;
+	}
+
     // Clear the back buffer and the depth stencil view before doing doing any
     // rendering
     mpDevice->ClearRenderTargetView( mpRenderTargetView,
@@ -203,20 +226,30 @@ void DXRenderer::onRenderFrame( double currentTime, double deltaTime )
 
 	D3DXMatrixLookAtLH( &mView, &pos, &target, &up );
 
-	// Set up our view constants
-	mWVP = mView * mProjection;
-	mpWVP->SetMatrix( (float*) &mWVP );
-
 	// Load the effect technique for cube
 	D3D10_TECHNIQUE_DESC technique;
 	mpTechnique->GetDesc( &technique );
 
-	// Draw the cube
+	// Draw everything
 	for ( unsigned int passIndex = 0; passIndex < technique.Passes; ++passIndex )
 	{
-		mpTechnique->GetPassByIndex( 0 )->Apply( 0 );
+		ID3D10EffectPass * pPass = mpTechnique->GetPassByIndex( passIndex );
+
+		// Set up our view constants
+		mWVP = mView * mProjection;
+		mpWVP->SetMatrix( (float*) &mWVP );
+
+		// Draw the landscape
+		pPass->Apply( 0 );
 		mpCubeMesh->draw( mpDevice );
+
+		// Draw the water
+		mpDevice->RSSetState( mpWireframeRS );
+		pPass->Apply( 0 );
+		mpWaterMesh->update( (float) deltaTime );
+		mpWaterMesh->draw( mpDevice );
 	}
+
 
     // Draw some text
     const D3DXCOLOR BLACK( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -453,6 +486,20 @@ bool DXRenderer::buildFX()
 
 	LOG_DEBUG("Renderer") << "Created effects data";
 	return true;
+}
+
+/**
+ * Generate render states
+ */
+void DXRenderer::buildRenderStates()
+{
+	D3D10_RASTERIZER_DESC rasterizerDescription;
+	ZeroMemory( &rasterizerDescription, sizeof( D3D10_RASTERIZER_DESC ) );
+
+	rasterizerDescription.FillMode = D3D10_FILL_WIREFRAME;
+	rasterizerDescription.CullMode = D3D10_CULL_BACK;
+
+	DxUtils::CheckResult( mpDevice->CreateRasterizerState( &rasterizerDescription, &mpWireframeRS ), true, "Creating rasterizer state" );
 }
 
 /**
