@@ -158,14 +158,16 @@ bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
 
     DXVERIFY( result, "Resizing the swap chain" );
 
+	// Now that we've resized the back buffer, we can proceed with recreating
+	// our destroyed device view
+	createDeviceViews();
+
 	// Reset our aspect ratio and the perspective matrix
 	float aspect = (float) width / (float) height;
 
 	D3DXMatrixPerspectiveFovLH( &mProjection, 0.25f * 3.1415927f, aspect, 1.0f, 1000.0f );
 
-    // Now that we've resized the back buffer, we can proceed with recreating
-    // our destroyed device view
-    return createDeviceViews();
+	return true;
 }
 
 /**
@@ -310,8 +312,8 @@ bool DXRenderer::createRenderDevice()
     scd.BufferDesc.Format  = DXGI_FORMAT_R8G8B8A8_UNORM; // 32 bit color
     scd.BufferUsage        = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     scd.OutputWindow       = mpMainWindow->windowHandle();
-    scd.SampleDesc.Count   = mMultisampleCount;
-    scd.SampleDesc.Quality = mMultisampleQuality;
+    scd.SampleDesc.Count   = 1; // mMultisampleCount;
+    scd.SampleDesc.Quality = 0; // mMultisampleQuality;
     scd.Windowed           = true;
 
     scd.BufferDesc.RefreshRate.Numerator   = 60;
@@ -371,6 +373,10 @@ bool DXRenderer::createDeviceViews()
     DXVERIFY( result, "Creating the render target view" );
     assert( mpRenderTargetView != NULL );
 
+	// We no longer need the backbuffer object now that we've bound it to the
+	// render target view
+	SafeRelease( &pBackBufferTexture );
+
     // Create the depth and stencil buffer texture
     D3D10_TEXTURE2D_DESC depthStencilDesc;
     ZeroMemory( &depthStencilDesc, sizeof(D3D10_TEXTURE2D_DESC) );
@@ -380,8 +386,8 @@ bool DXRenderer::createDeviceViews()
     depthStencilDesc.MipLevels          = 1;
     depthStencilDesc.ArraySize          = 1;
     depthStencilDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthStencilDesc.SampleDesc.Count   = mMultisampleCount;
-    depthStencilDesc.SampleDesc.Quality = mMultisampleQuality;
+    depthStencilDesc.SampleDesc.Count   = 1; // mMultisampleCount;
+    depthStencilDesc.SampleDesc.Quality = 0; // mMultisampleQuality;
     depthStencilDesc.Usage              = D3D10_USAGE_DEFAULT;
     depthStencilDesc.BindFlags          = D3D10_BIND_DEPTH_STENCIL;
     depthStencilDesc.CPUAccessFlags     = 0;
@@ -405,10 +411,6 @@ bool DXRenderer::createDeviceViews()
     LOG_DEBUG("Renderer") << "Binding the render target and depth stencil views";
     mpDevice->OMSetRenderTargets( 1, &mpRenderTargetView, mpDepthStencilView );
 
-    // We no longer need the backbuffer object now that we've bound it to the
-    // render target view
-    SafeRelease( &pBackBufferTexture );
-
     // Create the render window viewport, and make it the same size as our rendering
     // window
     D3D10_VIEWPORT viewport;
@@ -418,6 +420,8 @@ bool DXRenderer::createDeviceViews()
     viewport.TopLeftY = 0;
     viewport.Width    = mpMainWindow->width();
     viewport.Height   = mpMainWindow->height();
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
 
     LOG_DEBUG("Renderer") << "Creating the display viewport";
     mpDevice->RSSetViewports( 1, &viewport );
