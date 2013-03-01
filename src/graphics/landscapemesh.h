@@ -30,7 +30,10 @@ struct StaticMeshVertex;
 class LandscapeMesh : boost::noncopyable
 {
 public:
-    LandscapeMesh( ID3D10Device * pRenderDevice, unsigned int rows, unsigned int cols );
+    LandscapeMesh( ID3D10Device * pRenderDevice,
+		           unsigned int rows,
+				   unsigned int cols,
+				   float spatialStep );
     ~LandscapeMesh();
 
     void draw( ID3D10Device *pDevice ) const;
@@ -40,7 +43,7 @@ public:
 	float getHeight( float x, float y ) const;
 
 private:
-	void init( ID3D10Device * pDevice );
+	void init( ID3D10Device * pDevice, float dx );
 	
 
 private:

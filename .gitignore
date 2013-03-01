@@ -1,3 +1,10 @@
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
+
+# Build artifacts
+game/*
 build/*
 ipch/*
 *.exe
@@ -7,7 +14,7 @@ ipch/*
 *.aps
 *.opensdf
 *.sdf
-*.suo
 *Thumbs.db
 Installer/bin/*
 Installer/obj/*
+game/bin/*

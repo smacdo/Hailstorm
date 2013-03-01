@@ -78,7 +78,10 @@ namespace
  * Static mesh constructor that takes an already constructed vertex and index
  * buffer.
  */
-LandscapeMesh::LandscapeMesh( ID3D10Device * pRenderDevice, unsigned int rows, unsigned int cols )
+LandscapeMesh::LandscapeMesh( ID3D10Device * pRenderDevice,
+							  unsigned int rows,
+							  unsigned int cols,
+							  float spatialStep )
     : mNumRows( rows ),
 	  mNumCols( cols ),
 	  mVertexCount( 0 ),
@@ -86,7 +89,7 @@ LandscapeMesh::LandscapeMesh( ID3D10Device * pRenderDevice, unsigned int rows, u
       mpVertexBuffer( NULL ),
       mpIndexBuffer( NULL )
 {
-	init( pRenderDevice );
+	init( pRenderDevice, spatialStep );
 }
 
 /**
@@ -103,16 +106,15 @@ LandscapeMesh::~LandscapeMesh()
  */
 float LandscapeMesh::getHeight( float x, float z ) const
 {
-	return 0.3f * ( z * sinf( 0.1f * x ) + x * cosf( 0.1f * z ) );
+	return 0.3f * ( z * sinf( 0.1f * x ) + x * cosf( 0.1f * z ) ) + 8.0f;
 }
 
 /**
  * Takes an array of vertices and indices, uploads them to the video hardware
  * and places their data buffers in mVertexbuffer/mIndexBuffer
  */
-void LandscapeMesh::init( ID3D10Device * pRenderDevice )
+void LandscapeMesh::init( ID3D10Device * pRenderDevice, float dx )
 {
-	const float dx = 1.0f;
 
 	// Initialize a vertex buffer that contains all the vertices making up our cube
 	mVertexCount = mNumRows * mNumCols;

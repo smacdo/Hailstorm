@@ -126,7 +126,7 @@ bool DXRenderer::onStartRenderer()
 
     // Content manager allows us to create and load graphics
     mpContentManager = new GraphicsContentManager( mpDevice, "..\\data" );
-	mpCubeMesh = new LandscapeMesh( mpDevice, 256, 256 );
+	mpCubeMesh = new LandscapeMesh( mpDevice, 129, 129, 1.0f );
 	mpWaterMesh = new WaterMesh( mpDevice, 257, 257, 0.5f, 0.03f, 3.25f, 0.4f );
 
     // The renderer has been created and initialized properly
@@ -176,9 +176,9 @@ bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
 void DXRenderer::onUpdate( double currentTime, double deltaTime )
 {
 	// Set up the light type based on user input
-	if ( GetAsyncKeyState( '1' & 0x8000 ) ) { mLightType = 0; }
-	if ( GetAsyncKeyState( '2' & 0x8000 ) ) { mLightType = 0; }
-	if ( GetAsyncKeyState( '3' & 0x8000 ) ) { mLightType = 0; }
+	if ( GetKeyState( '1' & 0x8000 ) ) { mLightType = 0; LOG_DEBUG("Renderer") << "Switched to light type 0"; }
+	if ( GetKeyState( '2' & 0x8000 ) ) { mLightType = 1; LOG_DEBUG("Renderer") << "Switched to light type 1"; }
+	if ( GetKeyState( '3' & 0x8000 ) ) { mLightType = 2; LOG_DEBUG("Renderer") << "Switched to light type 2"; }
 
 	// Every quarter second, generate a random wave
 	static float t_base = 0.0f;
@@ -201,7 +201,7 @@ void DXRenderer::onUpdate( double currentTime, double deltaTime )
 	// Rotate camera around the landscape
 	mEyePos.x = mRadius * cosf( static_cast<float>( 0.5 * currentTime ) );
 	mEyePos.z = mRadius * sinf( static_cast<float>( 0.5 * currentTime ) );
-	mEyePos.y = 50.0f * sinf( static_cast<float>( 0.5 * currentTime ) ) + 50.0f;
+	mEyePos.y = 50.0f * sinf( static_cast<float>( 0.5 * currentTime ) ) + 75.0f;
 
 	// Rebuild view matrix with the new camera coordinates
 	D3DXVECTOR3 target( 0.0f, 0.0f, 0.0f );
