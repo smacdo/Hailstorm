@@ -128,8 +128,8 @@ void MainWindow::exit()
  */
 void MainWindow::showAboutBox() const
 {
-    AboutBox about( appInstance(), windowHandle() );
-    about.show();
+    AboutBox about(appInstance(), windowHandle());
+    about.Show();
 }
 
 /**

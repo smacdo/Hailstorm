@@ -30,7 +30,7 @@ public:
 
     AboutBox& operator =(const AboutBox&) = delete;
 
-    void show();
+    void Show();
 
 private:
     HINSTANCE mAppInstance;

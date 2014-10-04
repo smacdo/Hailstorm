@@ -16,8 +16,7 @@
 #ifndef SCOTT_HAILSTORM_DEBUGGING_H
 #define SCOTT_HAILSTORM_DEBUGGING_H
 
-#include <cassert>      // TODO: Remove this
-                        // TODO: Change all assert to Assert
+#include "runtime/exceptions.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Platform specific debug trigger
@@ -37,37 +36,34 @@
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+// Verification
+/////////////////////////////////////////////////////////////////////////////
+#define Verify(expr) \
+    do { if (!(expr)) { throw AssertionFailedException(#expr, __FILE__, __LINE__); } } while (0)
+
+#define VerifyNull(expr) \
+    do { if ((expr)==nullptr) { throw IsNullAssertionFailedException(#expr, __FILE__, __LINE__); } } while (0)
+
+#define VerifyNotNull(expr) \
+    do { if ((expr)!=nullptr) { throw IsNotNullAssertionFailedException(#expr, __FILE__, __LINE__); } } while (0)
+
+/////////////////////////////////////////////////////////////////////////////
 // Custom assertion handling
 /////////////////////////////////////////////////////////////////////////////
 #ifdef ASSERTS_ENABLED
-#   define scott_assert(msg,cond)           \
-    do                                      \
-        {                                   \
-        if ( !(cond) )                      \
-            {                               \
-            if ( App::raiseAssertion(msg,#cond,__FILE__,__LINE__) == \
-            App::EAssertion_Halt ) \
-            app_break;              \
-            }                               \
-        } while( 0 )
+#   define scott_assert(AssertType,cond) \
+        do { if (!(cond)) { throw AssertType(#cond, __FILE__, __LINE__); } } while (0)
+#   define scott_assert2(msg,cond) \
+        do { if (!(cond)) { throw AssertionFailedException(msg, #cond, __FILE__, __LINE__); } } while(0)
 
-//#   define assert2(expr,msg) scott_assert(msg,expr)
-//#   define assert_null(var) scott_assert("Pointer was expected to be null",#var##" == NULL")
-//#   define assert_notNull(var) scott_assert("Pointer was expected to be non-null",#var##" != NULL")
-#   define assert2(expr,msg) assert((expr) && (msg))
-#   define assert_null(var) assert((var) == nullptr)
-#   define assert_notNull(var) assert((var) != nullptr)
-#   ifdef ASSERTS_VERIFY        // only enabled for full sanity checks
-//#       define verify(expression)  scott_assert(NULL,expression)
-#       define verify(expression)  assert(expression)
-#   else
-#       define verify(expression)  do { (void)sizeof(x); } while(0)
+#   define Assert2(expr,msg) scott_assert2(msg,expr)
+#   define AssertNull(var) scott_assert(IsNullAssertionFailedException, #var##" == nullptr")
+#   define AssertNotNull(var) scott_assert(IsNotNullAssertionFailedException, #var##" != nullptr")
+
+#   ifdef assert                // detect if the builtin assert has been defined
+#       undef assert            // remove the built in assert
 #   endif
-
-//#   ifdef assert                // detect if the builtin assert has been defined
-//#       undef assert            // remove the built in assert
-//#   endif
-//#   define assert(x) scott_assert(NULL,x)
+#   define assert(x) scott_assert(AssertionFailedException,x)
 
 #else
 #   define assert(x)          do { (void)sizeof(x); } while(0)
