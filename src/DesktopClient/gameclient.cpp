@@ -15,12 +15,14 @@
  */
 #include "stdafx.h"
 #include "gameclient.h"
-#include "runtime/delete.h"
+#include "gui/iwindow.h"
+#include "graphics/dxrenderer.h"
+#include "graphics/DemoScene.h"
+
 #include "runtime/gametime.h"
 #include "runtime/logging.h"
-#include "gui/mainwindow.h"
-#include "graphics/dxrenderer.h"
 #include "runtime/exceptions.h"
+#include "runtime/debugging.h"
 
 #include <Winnt.h>
 
@@ -44,17 +46,18 @@
 /**
  * Game client constructor
  */
-GameClient::GameClient( MainWindow *pMainWindow )
-    : mpMainWindow( pMainWindow ),
-      mpRenderer( NULL ),
-      mIsGameRunning( false ),
-      mIsRunningSlowly( false ),
-      mTimerFrequency( 0.0f ),
-      mUpdateFrequency( 1.0f / 50.0f ), // 20ms, 50 times per second
-      mMaximumSleepSkew( 0.01f )        // 10ms
+GameClient::GameClient(IWindow *pWindow, DXRenderer *pRenderer)
+    : mWindow(pWindow),
+      mRenderer(pRenderer),
+      mDemoScene(),
+      mIsGameRunning(false),
+      mIsRunningSlowly(false),
+      mTimerFrequency(0.0f),
+      mUpdateFrequency(1.0f / 50.0f), // 20ms, 50 times per second
+      mMaximumSleepSkew(0.01f)        // 10ms
 {
-    assert( pMainWindow != NULL );
-    
+    VerifyNotNull(pWindow);
+    VerifyNotNull(pRenderer);
 }
 
 /**
@@ -62,133 +65,106 @@ GameClient::GameClient( MainWindow *pMainWindow )
  */
 GameClient::~GameClient()
 {
-    Delete( mpRenderer );
-}
-
-/**
- * Sets the number of times the game will call the update method
- */
-void GameClient::setUpdateFrequency( int numUpdatesPerSecond )
-{
-    assert( numUpdatesPerSecond > 0 );
-
-    // Calculate the new update frequency and verify that it isn't zero
-    // for some ungodly reason
-    mUpdateFrequency = 1 / static_cast<TimeT>( numUpdatesPerSecond );
-    assert( mUpdateFrequency > 0 );
-
-    // Logging
-    LOG_TRACE("GameClient") << "Setting the update frequency to " << mUpdateFrequency;
 }
 
 /**
  * Starts up and runs the game. This method will not return until after the
  * player has quit the game
  */
-void GameClient::run()
+void GameClient::Run(DemoScene * pDemoScene)
 {
-    // Show the main window before we set up our rendering system or load
-    // any resources
-    mpMainWindow->show();
+    VerifyNotNull(pDemoScene);
+    mDemoScene.reset(pDemoScene);
 
-    // Let the game initialize core systems
-    if ( initializeClient() == false || initialize() == false )
-    {
-        // TODO: Catch exceptions and report them.
-        return;
-    }
+    // Show the main window before we set up our rendering system or load any resources.
+    mWindow->show();
 
-    // Now load resources before entering the main game loop
-    if (! loadContent() )
-    {
-        // TODO: Catch exceptions and report them.
-        return;
-    }
+    // Let the game initialize core systems.
+    InitializeClient();
+    Initialize();
+
+    // Now load resources before entering the main game loop.
+    LoadContent();
 
     // Enter the game
-    runMainGameLoop();
+    RunMainGameLoop();
 
-    // Make sure we unload all of our game's resources before the game client
-    // exits
-    unloadContent();
+    // Make sure we unload all of our game's resources before the game client exits.
+    UnloadContent();
 }
 
 /**
  * Core game loop logic
  */
-void GameClient::runMainGameLoop()
+void GameClient::RunMainGameLoop()
 {
     LOG_INFO("GameClient") << "Entering the main game loop";
 
-    assert( mTimerFrequency > 0.0f );
+    assert(mTimerFrequency > 0.0f);
     mIsGameRunning = true;
 
-    // Start simulation time tracking
+    // Start simulation time tracking.
     TimeT simulationTime = 0.0f;   // t
-    TimeT systemTime     = getCurrentTime();   // currentTime
+    TimeT systemTime     = GetCurrentTime();   // currentTime
     TimeT accumulatedTime = 0.0f;
 
-    // This is where it all starts
-    while ( mIsGameRunning && (!mpMainWindow->didUserQuit()) )
+    // This is where it all starts!
+    while (mIsGameRunning && (!mWindow->didUserQuit()))
     {
-        // Make sure we process ALL THE MESSAGES (before doing any useful
-        // simulation stuffs)
-        mpMainWindow->processMessages();
+        // Make sure we process ALL THE MESSAGES (before doing any useful simulation stuffs).
+        mWindow->processMessages();
 
-        // Get the current system time, and then calculate how much time
-        // has elapsed since the last graphics update (which we will call
-        // frameTime)
-        TimeT newTime   = getCurrentTime();
+        // Get the current system time, and then calculate how much time has elapsed since the last graphics update
+        // (which we will call frameTime).
+        TimeT newTime = GetCurrentTime();
         TimeT frameTime = newTime - systemTime;
 
         systemTime = newTime;
 
-        // Check the amount of time that we have spent since the last loop
-        // iteration. If the value exceeds a threshold, assume that we are in
-        // danger of hitting the "spiral of death" from a slow simulator. To
-        // avoid this, limit the maximum frame time to a more reasonable value
-        if ( frameTime > 0.25f )
+        // Check the amount of time that we have spent since the last loop iteration. If the value exceeds a threshold,
+        // assume that we are in danger of hitting the "spiral of death" from a slow simulator. To avoid this, limit
+        // the maximum frame time to a more reasonable value
+        if (frameTime > 0.25f)
         {
             frameTime = 0.25f;
         }
 
-        // Update the simulation. If the simulation is running too far behind
-        // the system time we will need to run the simulation multiple times
-        // until it is caught up
-        size_t numUpdates  = 0;
-        accumulatedTime   += frameTime;
+        // Update the simulation. If the simulation is running too far behind the system time we will need to run the
+        // simulation multiple times until it is caught up
+        size_t numUpdates = 0;
+        accumulatedTime += frameTime;
 
-        while ( accumulatedTime >= mUpdateFrequency )
+        while (accumulatedTime >= mUpdateFrequency)
         {
             // Is the simulation running multiple times?
-            //   (What's the best way to tell if simulation is slow or gfx?)
-            mIsRunningSlowly = ( numUpdates > 0 );
+            //  TODO: What's the best way to tell if simulation is slow or gfx?
+            mIsRunningSlowly = (numUpdates > 0);
 
             // Update the simulation
-            update( simulationTime, mUpdateFrequency );
+            Update(simulationTime, mUpdateFrequency);
 
-            // The simulation has been updated, and we need to increment our
-            // time tracking variables before the next (possible) loop iteration
-            numUpdates      += 1;
-            simulationTime  += mUpdateFrequency;
+            // The simulation has been updated, and we need to increment our time tracking variables before the next
+            // (possible) loop iteration.
+            numUpdates += 1;
+
+            simulationTime += mUpdateFrequency;
             accumulatedTime -= mUpdateFrequency;
         }
 
-        // Calculate the amount of interpolation that will our renderer will
-        // need to account for when rendering between the last simulation update
-        // and the next upcoming update
-        double interpolation = 1.0f - ( accumulatedTime / mUpdateFrequency );
+        // Calculate the amount of interpolation that will our renderer will need to account for when rendering between
+        // the last simulation update and the next upcoming update
+        double interpolation = 1.0f - (accumulatedTime / mUpdateFrequency);
 
         // Now draw the next frame
-        draw( simulationTime, interpolation );
-        mpRenderer->tick( simulationTime, frameTime );
+        Draw(simulationTime, interpolation);
+        mRenderer->Update(*mDemoScene.get(), simulationTime, frameTime);
 
         // If there is a large delta between the system time and the time before
         // the next simulation update, we can afford to sleep a tiny bit and
         // allow windows some breathing room. (This can be tweaked or disabled)
-        if ( accumulatedTime + mMaximumSleepSkew < mUpdateFrequency )
+        if (accumulatedTime + mMaximumSleepSkew < mUpdateFrequency)
         {
-            Sleep( 2 );
+            Sleep(2);
         }
     }
 
@@ -202,16 +178,11 @@ void GameClient::runMainGameLoop()
  *
  * \return  True if all components were initialized successfully, false otherwies
  */
-bool GameClient::initializeClient()
+void GameClient::InitializeClient()
 {
-    LOG_DEBUG("GameClient") << "Initializing the game client";
-
-    // We need to find the internal tick rate before using time
-    calculateSystemTimerFrequency();
-
-    // Create the DirectX renderer
-    mpRenderer = new DXRenderer(mpMainWindow, mpMainWindow->windowHandle());
-    return mpRenderer->initialize();
+    // We need to find the internal tick rate before using time.
+    mTimerFrequency = CalculateSystemTimerFrequency();
+    mRenderer->initialize();
 }
 
 /**
@@ -221,23 +192,28 @@ bool GameClient::initializeClient()
  *
  * \return  True if all components were initialized successfully, false otherwise
  */
-bool GameClient::initialize()
+void GameClient::Initialize()
 {
-    return true;
+    LOG_NOTICE("GameClient") << "Initializing primary demo scene";
+    DXRenderer *pRenderer = mRenderer.get();
+    mDemoScene->Initialize(*pRenderer);
 }
 
 /**
  * Loads content required for the game to function
  */
-bool GameClient::loadContent()
+void GameClient::LoadContent()
 {
     LOG_NOTICE("GameClient") << "Loading the game's art assets";
-    return true;
+    DXRenderer *pRenderer = mRenderer.get();
+    mDemoScene->LoadContent(*pRenderer);
 }
 
-void GameClient::unloadContent()
+void GameClient::UnloadContent()
 {
     LOG_NOTICE("GameClient") << "Unloading the game's art assets";
+    DXRenderer *pRenderer = mRenderer.get();
+    mDemoScene->UnloadContent(*pRenderer);
 }
 
 /**
@@ -252,9 +228,9 @@ void GameClient::unloadContent()
  * \param  deltaTime        Amount of time that has elapsed since the last call
  *                          to this method (Always the same amount)
  */
-void GameClient::update( TimeT simulationTime, TimeT deltaTime )
+void GameClient::Update(TimeT simulationTime, TimeT deltaTime)
 {
-    // empty for now
+    mDemoScene->Update(simulationTime, deltaTime);
 }
 
 /**
@@ -266,17 +242,35 @@ void GameClient::update( TimeT simulationTime, TimeT deltaTime )
  * \param  deltaTime       Amount of time since the last simulation
  * \param  interpolation   Amount to interpolate between (1.0 use the simT)
  */
-void GameClient::draw( TimeT simulationTime, double interpolation )
+void GameClient::Draw(TimeT simulationTime, double interpolation)
 {
-    // empty for now
+    mDemoScene->Render(*mRenderer.get(), simulationTime, interpolation);
+}
+
+/**
+ * Sets the number of times the game will call the update method
+ */
+void GameClient::SetUpdateFrequency(int numUpdatesPerSecond)
+{
+    assert(numUpdatesPerSecond > 0);
+
+    // Calculate the new update frequency and verify that it isn't zero
+    // for some ungodly reason
+    mUpdateFrequency = 1 / static_cast<TimeT>(numUpdatesPerSecond);
+    assert(mUpdateFrequency > 0);
+
+    // Logging
+    LOG_TRACE("GameClient") << "Setting the update frequency to " << mUpdateFrequency;
 }
 
 /**
  * Queries the Windows API to find out this computer's update frequency, which
  * is the number of times the CPU ticks per second. The Hailstorm engine uses this
  * value to convert system tick count into seconds.
+ *
+ * Post-condition: Return value is always > 0.
  */
-void GameClient::calculateSystemTimerFrequency()
+TimeT GameClient::CalculateSystemTimerFrequency()
 {
     // Query windows for the internal high precision timer frequency. We
     // need to know this value in order to correctly convert timer values
@@ -287,36 +281,35 @@ void GameClient::calculateSystemTimerFrequency()
 
     if (! result )
     {
-        // TODO: Throw more specific exception.
-        throw HailstormException(L"Unable to query performance frequency");
+        throw HailstormException(L"Unable to query performance frequency"); // TODO: Throw more specific exception.
     }
 
-    assert( procFreq.QuadPart > 0 );
-    mTimerFrequency = static_cast<TimeT>( procFreq.QuadPart );
+    if (procFreq.QuadPart == 0)
+    {
+        throw HailstormException(L"Failed to query processor frequency (quad part == 0)");
+    }
 
-    assert( mTimerFrequency > 0.0f );
+    return static_cast<TimeT>(procFreq.QuadPart);
 }
 
 /**
  * Returns the current system time in seconds
  */
-TimeT GameClient::getCurrentTime() const
+TimeT GameClient::GetCurrentTime() const
 {
-    // Get the current system time. We need to lock down the thread affinity
-    // because it is possible on MP machines that cores have slightly different
-    // clock skews (yay)
+    // Get the current system time. We need to lock down the thread affinity because it is possible on MP machines that
+    // cores have slightly different clock skews (yay).
     LARGE_INTEGER now;
-    DWORD_PTR oldmask = ::SetThreadAffinityMask( ::GetCurrentThread(), 0 );
+    DWORD_PTR oldmask = ::SetThreadAffinityMask(::GetCurrentThread(), 0);
 
-    if (! ::QueryPerformanceCounter( &now ) )
+    if (!::QueryPerformanceCounter(&now))
     {
-        // TODO: Throw more specific exception.
-        throw HailstormException(L"Unable  to query performance counter for time");
+        throw HailstormException(L"Unable to query performance counter for time"); // TODO: Throw more specific exception.
     }
 
-    ::SetThreadAffinityMask( ::GetCurrentThread(), oldmask );
+    ::SetThreadAffinityMask(::GetCurrentThread(), oldmask);
 
     // Take the current time and the timer frequency to obtain a floating
     // point representation of the system time
-    return static_cast<TimeT>( now.QuadPart ) / mTimerFrequency;
+    return static_cast<TimeT>(now.QuadPart) / mTimerFrequency;
 }

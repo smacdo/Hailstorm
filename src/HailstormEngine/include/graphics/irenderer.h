@@ -19,6 +19,7 @@
 #include "runtime/gametime.h"
 
 class IWindow;
+class DemoScene;
 
 /**
  * This is an abstract renderer
@@ -34,13 +35,14 @@ public:
 
     bool initialize();
     void stop();
-    void tick( TimeT currentTime, TimeT deltaTime );
+    void Update(const DemoScene& demo, TimeT currentTime, TimeT deltaTime);
 
 protected:
     virtual bool onStartRenderer() = 0;
     virtual void onStopRenderer() = 0;
-	virtual void onUpdate( double currentTime, double deltaTime ) = 0;
-    virtual void onRenderFrame() = 0;
+    
+    virtual void OnRenderFrame(const DemoScene& demo, TimeT currentTime, TimeT deltaTime) = 0;
+
     virtual bool resizeRenderWindow( unsigned int width, unsigned int height ) = 0;
 
     IWindow *renderWindow();

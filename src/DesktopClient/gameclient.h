@@ -19,8 +19,9 @@
 #include "runtime/gametime.h"
 #include <memory>               // Smart pointer.
 
-class MainWindow;
-class IRenderer;
+class IWindow;
+class DXRenderer;
+class DemoScene;
 
 /**
  * This is the foundation class for a hailstorm game client. A custom game
@@ -29,31 +30,37 @@ class IRenderer;
 class GameClient
 {
 public:
-    GameClient( MainWindow *pMainWindow );
+    GameClient(IWindow *pWindow, DXRenderer *pRenderer);
     virtual ~GameClient();
 
-    void run();
-    void setUpdateFrequency( int numUpdatesPerSecond );
+    void Run(DemoScene *pDemoScene);
+    void SetUpdateFrequency(int numUpdatesPerSecond);
+
+    bool IsGameRunning() const { return mIsGameRunning; }
+    bool IsRunningSlowly() const { return mIsRunningSlowly; }
 
 protected:
-    virtual bool initialize();
-    virtual bool loadContent();
-    virtual void unloadContent();
-    virtual void update( TimeT simulationTime, TimeT deltaTime );
-    virtual void draw( TimeT simulationTime, double interpolation );
+    virtual void Initialize();
+    virtual void LoadContent();
+    virtual void UnloadContent();
+    virtual void Update(TimeT simulationTime, TimeT deltaTime);
+    virtual void Draw(TimeT simulationTime, double interpolation);
 
 private:
-    void runMainGameLoop();
-    TimeT getCurrentTime() const;
-    void calculateSystemTimerFrequency();
-    bool initializeClient();
+    void RunMainGameLoop();
+    TimeT GetCurrentTime() const;
+    TimeT CalculateSystemTimerFrequency();
+    void InitializeClient();
 
 private:
     /// Pointer to the main rendering window
-    MainWindow * mpMainWindow;
+    std::shared_ptr<IWindow> mWindow;
 
     /// Pointer to the graphics renderer
-    IRenderer * mpRenderer;
+    std::shared_ptr<DXRenderer> mRenderer;
+
+    /// Demo scene to show.
+    std::unique_ptr<DemoScene> mDemoScene;
 
     /// Flag if the game is game loop is running
     bool mIsGameRunning;

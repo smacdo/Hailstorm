@@ -15,7 +15,7 @@
  */
 #include "stdafx.h"
 #include "graphics/meshfactory.h"
-#include "runtime\exceptions.h"
+#include "graphics/DirectXExceptions.h"
 
 #include <d3d10.h>
 #include <d3dx10.h>

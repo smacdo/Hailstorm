@@ -42,10 +42,10 @@
     do { if (!(expr)) { throw AssertionFailedException(#expr, __FILE__, __LINE__); } } while (0)
 
 #define VerifyNull(expr) \
-    do { if ((expr)==nullptr) { throw IsNullAssertionFailedException(#expr, __FILE__, __LINE__); } } while (0)
+    do { if ((expr)!=nullptr) { throw IsNullAssertionFailedException(#expr, __FILE__, __LINE__); } } while (0)
 
 #define VerifyNotNull(expr) \
-    do { if ((expr)!=nullptr) { throw IsNotNullAssertionFailedException(#expr, __FILE__, __LINE__); } } while (0)
+    do { if ((expr)==nullptr) { throw IsNotNullAssertionFailedException(#expr, __FILE__, __LINE__); } } while (0)
 
 /////////////////////////////////////////////////////////////////////////////
 // Custom assertion handling

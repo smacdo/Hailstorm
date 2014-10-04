@@ -17,14 +17,16 @@
 #define SCOTT_HAILSTORM_GRAPHICS_DXRENDERER_H
 
 #include "graphics/irenderer.h"
-#include "light.h"		// temporary, remove this eventually
-
-// temporary while we host the camera matrices
-#include <d3dx10.h>
+#include <d3dx10.h>             // temporary while we host the camera matrices
 #include <string>
+
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
 
 // Forward declarations
 class MainWindow;
+class DemoScene;
 class GraphicsContentManager;
 class LandscapeMesh;
 class WaterMesh;
@@ -39,6 +41,7 @@ struct ID3D10Effect;
 struct ID3D10EffectTechnique;
 struct ID3D10InputLayout;
 struct ID3D10EffectMatrixVariable;
+struct ID3D10RasterizerState;
 
 /**
  * This is the DirectX implementation of the abstract renderer
@@ -49,11 +52,28 @@ public:
     explicit DXRenderer(IWindow *pWindow, HWND hwnd);
     virtual ~DXRenderer();
 
+    HRESULT LoadFxFile(const std::wstring& fxFilePath, ID3D10Effect ** ppEffectOut) const;
+    void SetDefaultRendering();
+    void SetWireframeRendering();
+
+    // DONT STORE THIS POINTER WHEN CALLING
+    ID3D10Device * GetDevice() { return mpDevice; }
+
+    // TODO: THIS IS A TERRIBLE HACK FIGURE OUT HOW TO NOT DO THIS
+    void GetProjectionMatrix(D3DXMATRIX *projectionOut) const;
+
+    static bool verifyResult(HRESULT result, const std::string& action);
+
 protected:
-    virtual bool onStartRenderer();
-    virtual void onStopRenderer();
-    virtual void onRenderFrame();
-	virtual void onUpdate( double currentTime, double deltaTime );
+    virtual bool onStartRenderer() override;
+    virtual void onStopRenderer() override;
+
+    
+    virtual void OnRenderFrame(const DemoScene& scene, TimeT currentTime, TimeT deltaTime) override;
+
+    void OnStartRenderFrame(TimeT currentTime, TimeT deltaTime);
+    void OnFinishRenderFrame(TimeT currentTime, TimeT deltaTime);
+
     virtual bool resizeRenderWindow( unsigned int width, unsigned int height );
 
 private:
@@ -61,12 +81,12 @@ private:
     void releaseDeviceViews();
     bool createRenderDevice();
 	bool buildVertexLayout();
-	bool buildFX();
+    
 	void buildRenderStates();
 	void buildLights();
     void destroyRenderDevice();
     bool createRenderFont();
-    static bool verifyResult( HRESULT result, const std::string& action );
+    
 
 private:
     /// Handle to render window.
@@ -90,15 +110,6 @@ private:
     /// Pointer to the depth stencil view
     ID3D10DepthStencilView * mpDepthStencilView;
 
-	ID3D10Effect * mpFX;
-	ID3D10EffectTechnique * mpTechnique;
-	ID3D10InputLayout * mpVertexLayout;
-	ID3D10EffectMatrixVariable * mpWVP;
-	ID3D10EffectMatrixVariable * mpWorldVar;
-	ID3D10EffectVariable * mpFxEyePosVar;
-	ID3D10EffectVariable * mpFxLightVar;
-	ID3D10EffectScalarVariable * mpFxLightType;
-
 	ID3D10RasterizerState * mpDefaultRasterizerState;
 	ID3D10RasterizerState * mpWireframeRS;
 
@@ -114,24 +125,10 @@ private:
     /// Flag if we are rendering in windowed mode or full screen
     bool mWindowedMode;
 
-	D3DXMATRIX mView;
-	D3DXMATRIX mProjection;
-	D3DXMATRIX mWVP;
-	D3DXVECTOR3 mEyePos;
-
-	D3DXMATRIX mLandTransform;
-	D3DXMATRIX mWaterTransform;
-
-	float mRadius;
-
-	Light mLights[3];
-	int mLightType;
-
+	
     /// The currently running graphics content manager
-    GraphicsContentManager * mpContentManager;
-
-	LandscapeMesh * mpCubeMesh;
-	WaterMesh * mpWaterMesh;
+    GraphicsContentManager* mpContentManager;
+    D3DXMATRIX mProjection;
 };
 
 #endif

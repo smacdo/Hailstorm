@@ -90,24 +90,4 @@ public:
         unsigned int lineNumber);
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// DirectX Exceptions.
-///////////////////////////////////////////////////////////////////////////////////////////////////
-class DirectXException : public HailstormException
-{
-public:
-    DirectXException(unsigned long errorCode)
-        : HailstormException(L"DirectX Exception")
-    {
-    }
-
-    DirectXException(unsigned long errorCode, const std::wstring& details, const std::wstring& context)
-        : HailstormException(L"DirectX Exception", details, context)
-    {
-    }
-
-private:
-
-};
-
 #endif

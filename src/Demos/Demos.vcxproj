@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\cubemesh.h" />
+    <ClInclude Include="include\demos\WaterLandscapeDemoScene.h" />
     <ClInclude Include="include\landscapemesh.h" />
     <ClInclude Include="include\watermesh.h" />
     <ClInclude Include="stdafx.h" />
@@ -134,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="src\cubemesh.cpp" />
     <ClCompile Include="src\landscapemesh.cpp" />
+    <ClCompile Include="src\WaterLandscapeDemoScene.cpp" />
     <ClCompile Include="src\watermesh.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

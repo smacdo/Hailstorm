@@ -125,6 +125,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\graphics\DemoScene.h" />
+    <ClInclude Include="include\graphics\DirectXExceptions.h" />
     <ClInclude Include="include\graphics\dxrenderer.h" />
     <ClInclude Include="include\graphics\dxutils.h" />
     <ClInclude Include="include\graphics\graphicscontentmanager.h" />
@@ -138,6 +140,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\DirectXExceptions.cpp" />
     <ClCompile Include="src\dxrenderer.cpp" />
     <ClCompile Include="src\dxutils.cpp" />
     <ClCompile Include="src\graphicscontentmanager.cpp" />

@@ -17,8 +17,10 @@
 #include "hailstorm_sandbox.h"
 #include "gameclient.h"
 #include "gui/mainwindow.h"
-
+#include "graphics/dxrenderer.h"
 #include "runtime/logging.h"
+
+#include "demos/WaterLandscapeDemoScene.h"
 
 // For console
 #include <fcntl.h>
@@ -65,14 +67,17 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
 
     MainWindow mainWindow( hInstance, "Hailstorm Tech Demo", 800u, 600u );
     mainWindow.create();
+
+    // Create the renderer (but do not initialize it yet).
+    DXRenderer renderer(&mainWindow, mainWindow.windowHandle());
     
     // Create the game client
     LOG_NOTICE("WinMain") << "Creating the game client";
-    GameClient game( &mainWindow );
+    GameClient game(&mainWindow, &renderer);
 
     // Run the game
     LOG_NOTICE("WinMain") << "Starting the game";
-    game.run();
+    game.Run(new WaterLandscapeDemoScene());
 
     return EXIT_SUCCESS;
 }

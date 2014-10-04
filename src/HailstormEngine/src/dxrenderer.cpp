@@ -23,10 +23,16 @@
 #include "runtime/logging.h"
 #include "runtime/delete.h"
 #include "runtime/mathutils.h"
+#include "graphics/DirectXExceptions.h"
+#include "graphics/DemoScene.h"
 
 #include <DXGI.h>
 #include <d3d10.h>
 #include <d3dx10.h>
+
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
 
 #define DXVERIFY(expr,msg) if (!verifyResult(expr,msg)) { return false; }
 
@@ -42,29 +48,15 @@ DXRenderer::DXRenderer(IWindow *pWindow, HWND hwnd)
       mpRenderTargetView( NULL ),
       mpDepthStencilBuffer( NULL ),
       mpDepthStencilView( NULL ),
-	  mpFX( NULL ),
-	  mpTechnique( NULL ),
-	  mpVertexLayout( NULL ),
-	  mpWVP( NULL ),
 	  mpWireframeRS( NULL ),
       mMultisampleCount( 4 ),
       mMultisampleQuality( 1 ),
       mWindowedMode( true ),
-	  mEyePos( 0.0f, 0.0f, 0.0f ),
-	  mRadius( 75 ),
-	  mLightType( 0 ),
-      mpContentManager( NULL ), // this is initialized later
-	  mpCubeMesh( NULL ),
-	  mpWaterMesh( NULL )
+      mpContentManager( NULL )  // this is initialized later
 {
     assert(mHwnd != nullptr);    // We need to have a valid window handle
 
-	D3DXMatrixIdentity( &mView );
-	D3DXMatrixIdentity( &mProjection );
-	D3DXMatrixIdentity( &mWVP );
-
-	D3DXMatrixIdentity( &mLandTransform );
-	D3DXMatrixIdentity( &mWaterTransform );
+    D3DXMatrixIdentity(&mProjection);
 }
 
 /**
@@ -74,13 +66,12 @@ DXRenderer::~DXRenderer()
 {
     // Kill the content manager first
     Delete( mpContentManager );
-	Delete( mpCubeMesh );
+	
 
     // Release the device view before destroying the view itself
     releaseDeviceViews();
 
-	SafeRelease( &mpFX );
-	SafeRelease( &mpVertexLayout );
+	
 	SafeRelease( &mpWireframeRS );
 
     SafeRelease( &mpSwapChain );
@@ -116,18 +107,11 @@ bool DXRenderer::onStartRenderer()
         return false;
     }
 
-	if (! buildFX() | !buildVertexLayout() )
-	{
-		return false;
-	}
-
 	buildRenderStates();
-	buildLights();
 
     // Content manager allows us to create and load graphics
     mpContentManager = new GraphicsContentManager( mpDevice, "..\\data" );
-	mpCubeMesh = new LandscapeMesh( mpDevice, 129, 129, 1.0f );
-	mpWaterMesh = new WaterMesh( mpDevice, 257, 257, 0.5f, 0.03f, 3.25f, 0.4f );
+
 
     // The renderer has been created and initialized properly
     return true;
@@ -135,7 +119,6 @@ bool DXRenderer::onStartRenderer()
 
 void DXRenderer::onStopRenderer()
 {
-
 }
 
 /**
@@ -166,129 +149,56 @@ bool DXRenderer::resizeRenderWindow( unsigned int width, unsigned int height )
 	float aspect = (float) width / (float) height;
 
 	D3DXMatrixPerspectiveFovLH( &mProjection, 0.25f * 3.1415927f, aspect, 1.0f, 1000.0f );
-
 	return true;
 }
 
-/**
- * Update animations and whatnot
- */
-void DXRenderer::onUpdate( double currentTime, double deltaTime )
+void DXRenderer::OnStartRenderFrame(TimeT currentTime, TimeT deltaTime)
 {
-	// Set up the light type based on user input
-	if ( GetKeyState( '1' & 0x8000 ) ) { mLightType = 0; LOG_DEBUG("Renderer") << "Switched to light type 0"; }
-	if ( GetKeyState( '2' & 0x8000 ) ) { mLightType = 1; LOG_DEBUG("Renderer") << "Switched to light type 1"; }
-	if ( GetKeyState( '3' & 0x8000 ) ) { mLightType = 2; LOG_DEBUG("Renderer") << "Switched to light type 2"; }
+    // Clear the back buffer and the depth stencil view before doing doing any
+    // rendering
+    mpDevice->ClearRenderTargetView(mpRenderTargetView,
+                                    D3DXCOLOR(0.f, 0.2f, 0.4f, 1.0f));
 
-	// Every quarter second, generate a random wave
-	static float t_base = 0.0f;
+    mpDevice->ClearDepthStencilView(mpDepthStencilView,
+                                    D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL,
+                                    1.0f,
+                                    0);
 
-	if ( currentTime - t_base >= 0.25f )
-	{
-		t_base += 0.25f;
+    // Restore the renderer's default states, input layout and primitive topology because
+    // mFont->DrawText chagnse them. Note that we can restore the default states by passing null.
+    mpDevice->OMSetDepthStencilState(0, 0);
 
-		unsigned int i = 5 + rand() % 250;
-		unsigned int j = 5 + rand() % 250;
+    float blendFactors[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
-		float r = randF( 1.0f, 2.0f );
+    mpDevice->OMSetBlendState(0, blendFactors, 0xffffffff);
 
-		mpWaterMesh->Perturb( i, j, r ) ;
-	}
-
-	// Make sure the water mesh is kept up to date with ripple animations
-	mpWaterMesh->Update( (float) deltaTime );
-
-	// Rotate camera around the landscape
-	mEyePos.x = mRadius * cosf( static_cast<float>( 0.5 * currentTime ) );
-	mEyePos.z = mRadius * sinf( static_cast<float>( 0.5 * currentTime ) );
-	mEyePos.y = 50.0f * sinf( static_cast<float>( 0.5 * currentTime ) ) + 75.0f;
-
-	// Rebuild view matrix with the new camera coordinates
-	D3DXVECTOR3 target( 0.0f, 0.0f, 0.0f );
-	D3DXVECTOR3 up( 0.0f, 1.0f, 0.0f );
-
-	D3DXMatrixLookAtLH( &mView, &mEyePos, &target, &up );
-
-
-	// The point light circles the scene as a function of time, staying seven units above the land's
-	// or water's surface.
-    mLights[1].pos.x = 50.0f * cosf((float)currentTime);
-    mLights[1].pos.z = 50.0f * sinf((float)currentTime);
-	mLights[1].pos.y = 7.0f + std::max(mpCubeMesh->GetHeight(mLights[1].pos.x, mLights[1].pos.z), 0.0f);
-
-	// The spotlight takes on the camera position and is aimed in the same direction as the camera is
-	// looking. In this way it looks like we are holding a flashlight.
-	mLights[2].pos = mEyePos;
-	D3DXVec3Normalize( &mLights[2].dir, &(target - mEyePos) );
 }
 
 /**
  * Time to draw something
  */
-void DXRenderer::onRenderFrame()
+void DXRenderer::OnRenderFrame(const DemoScene& scene, TimeT currentTime, TimeT deltaTime)
 {
-    // Clear the back buffer and the depth stencil view before doing doing any
-    // rendering
-    mpDevice->ClearRenderTargetView( mpRenderTargetView,
-                                     D3DXCOLOR( 0.f, 0.2f, 0.4f, 1.0f ) );
 
-    mpDevice->ClearDepthStencilView( mpDepthStencilView,
-                                     D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL,
-                                     1.0f,
-                                     0 );
+    OnStartRenderFrame(currentTime, deltaTime);
 
-	// Restore the renderer's default states, input layout and primitive topology because
-	// mFont->DrawText chagnse them. Note that we can restore the default states by passing null.
-	mpDevice->OMSetDepthStencilState( 0, 0 );
-
-	float blendFactors[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-	mpDevice->OMSetBlendState( 0, blendFactors, 0xffffffff );
-	mpDevice->IASetInputLayout( mpVertexLayout );
-	mpDevice->IASetPrimitiveTopology( D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-
-	// Set per frame constants
-	mpFxEyePosVar->SetRawValue( &mEyePos, 0, sizeof( D3DXVECTOR3 ) );
-	mpFxLightVar->SetRawValue( &mLights[mLightType], 0, sizeof( Light ) );
-	mpFxLightType->SetInt( mLightType );
-
-	// Load the effect technique for cube
-	D3D10_TECHNIQUE_DESC technique;
-	mpTechnique->GetDesc( &technique );
-
-	// Draw everything
-	for ( unsigned int passIndex = 0; passIndex < technique.Passes; ++passIndex )
-	{
-		ID3D10EffectPass * pPass = mpTechnique->GetPassByIndex( passIndex );
-		mpDevice->RSSetState( mpDefaultRasterizerState );
-
-		// Draw the landscape mesh first
-		mWVP =  mLandTransform * mView * mProjection;
-
-		mpWVP->SetMatrix( (float*) &mWVP );
-		mpWorldVar->SetMatrix( (float*) &mLandTransform );
-
-		pPass->Apply( 0 );
-		mpCubeMesh->Draw( mpDevice );
-
-		// Draw the water mesh
-		mWVP = mWaterTransform * mView * mProjection;
-		
-		mpWVP->SetMatrix( (float*) &mWVP );
-		mpWorldVar->SetMatrix( (float*) &mWaterTransform );
-
-//		mpDevice->RSSetState( mpWireframeRS );
-		pPass->Apply( 0 );
-		
-		mpWaterMesh->Draw( mpDevice );
-	}
+    scene.Render(*this, currentTime, deltaTime);
 
     // Draw some text
-    const D3DXCOLOR BLACK( 1.0f, 1.0f, 1.0f, 1.0f );
+    const D3DXCOLOR BLACK(1.0f, 1.0f, 1.0f, 1.0f);
     RECT R = { 5, 5, 0, 0 };
 
-    mpRendererFont->DrawTextW( 0, L"Hello world", -1, &R, DT_NOCLIP, BLACK );
-    mpSwapChain->Present( 0, 0 );
+    mpRendererFont->DrawTextW(0, L"Hello world", -1, &R, DT_NOCLIP, BLACK);
+
+    OnFinishRenderFrame(currentTime, deltaTime);
+
+
+    
+}
+
+void DXRenderer::OnFinishRenderFrame(TimeT currentTime, TimeT deltaTime)
+{
+    mpSwapChain->Present(0, 0);
 }
 
 /**
@@ -449,42 +359,17 @@ void DXRenderer::releaseDeviceViews()
     SafeRelease( &mpDepthStencilBuffer );
 }
 
-/**
- * Creates and sets up the vertex buffer.
- */
-bool DXRenderer::buildVertexLayout()
-{
-	// Describe the vertex input layout.
-	D3D10_INPUT_ELEMENT_DESC vertexDescription[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,  D3D10_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0 },
-		{ "DIFFUSE",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D10_INPUT_PER_VERTEX_DATA, 0 },
-		{ "SPECULAR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 40, D3D10_INPUT_PER_VERTEX_DATA, 0 }
-	};
-
-	// Load the default pass from the .fx file we loaded earlier
-	D3D10_PASS_DESC passDescription;
-	mpTechnique->GetPassByIndex( 0 )->GetDesc( &passDescription );
-
-	// Create the vertex input layout.
-	HRESULT result = mpDevice->CreateInputLayout( vertexDescription,
-		                                          4,
-												  passDescription.pIAInputSignature,
-												  passDescription.IAInputSignatureSize,
-												  &mpVertexLayout );
-	// Make sure it worked
-	verifyResult( result, "Creating the vertex input layout" );
-
-	LOG_DEBUG("Renderer") << "Created the vertex input layout.";
-	return true;
-}
 
 /**
- * Creates the .fx stuff
+ * Loads a .FX file from disk.
  */
-bool DXRenderer::buildFX()
+HRESULT DXRenderer::LoadFxFile(
+    const std::wstring& fxFilePath,
+    ID3D10Effect ** ppEffectOut) const
 {
+    VerifyNotNull(ppEffectOut);
+    *ppEffectOut = nullptr;
+
 	DWORD shaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;
 
 #if defined( DEBUG ) || defined( _DEBUG )
@@ -492,43 +377,40 @@ bool DXRenderer::buildFX()
 	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
 #endif
 
-	ID3D10Blob * pCompilationErrors = NULL;
-	HRESULT result = D3DX10CreateEffectFromFile(
-		L"../data/shaders/landscape.fx",
-		0,
-		0,
-		"fx_4_0",
-		shaderFlags,
-		0,
-		mpDevice,
-		0,
-		0,
-		&mpFX,
-		&pCompilationErrors,
-		0 );
+    Microsoft::WRL::ComPtr<ID3D10Blob> compilationErrors;
+    Microsoft::WRL::ComPtr<ID3D10Effect> loadedEffect;
 
-	if ( FAILED( result ) )
-	{
-		if ( pCompilationErrors != NULL )
-		{
-            // TODO: Make this an exception.
-//			App::raiseFatalError( (char*) pCompilationErrors->GetBufferPointer(), "Failed to compile cube shader" );
-			SafeRelease( &pCompilationErrors );
+	HRESULT hr = D3DX10CreateEffectFromFile(
+        fxFilePath.c_str(),     // Path to the FX file we want to load.
+		nullptr,                // Pointer to an array of shader macros.
+		nullptr,                // Pointer to an include interface for compiling.
+		"fx_4_0",               // HLSL profile to use when compiling.
+		shaderFlags,            // HLSL compiler flags.
+		0,                      // No options while compiling the shader.
+		mpDevice,               // D3D device that will use this effect.
+		nullptr,                // Pointer to an effect pool for sharing variables between threads.
+		nullptr,                // Address to a thread pump interface. Not needed.            
+        &loadedEffect,          // Load FX object into this guy.
+        &compilationErrors,     // Blob holding error string, if there was one.
+		nullptr);               // Pointer to out HRESULT. Not neeeded. (Ever?)
 
-			return false;
-		}
-	}
+    if (SUCCEEDED(hr))
+    {
+        *ppEffectOut = loadedEffect.Detach();
+    }
+    else
+    {
+        if (compilationErrors)
+        {
+            throw ShaderCompileFailedException(hr, fxFilePath, (const char*) compilationErrors->GetBufferPointer());
+        }
+        else
+        {
+            throw DirectXException(hr, L"Failed to create effect from FX file", fxFilePath);
+        }
+    }
 
-	mpTechnique = mpFX->GetTechniqueByName( "LandscapeTechnique" );
-
-	mpWVP         = mpFX->GetVariableByName( "gWVP" )->AsMatrix();
-	mpWorldVar    = mpFX->GetVariableByName( "gWorld" )->AsMatrix();
-	mpFxEyePosVar = mpFX->GetVariableByName( "gEyePosW" );
-	mpFxLightVar  = mpFX->GetVariableByName( "gLight" );
-	mpFxLightType = mpFX->GetVariableByName( "gLightType" )->AsScalar();
-
-	LOG_DEBUG("Renderer") << "Created effects data";
-	return true;
+	return hr;
 }
 
 /**
@@ -562,36 +444,6 @@ void DXRenderer::buildRenderStates()
 	DxUtils::CheckResult( mpDevice->CreateRasterizerState( &rasterizerDescription, &mpWireframeRS ), true, "Creating wireframe rasterizer state" );
 }
 
-/**
- * Populate light structs
- */
-void DXRenderer::buildLights()
-{
-	// Parallel light
-	mLights[0].dir = D3DXVECTOR3( 0.57735f, -0.57735f, 0.57735f );
-	mLights[0].ambient = D3DXCOLOR( 0.2f, 0.2f, 0.2f, 1.0f );
-	mLights[0].diffuse = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
-	mLights[0].specular = D3DXCOLOR ( 1.0f, 1.0f, 1.0f, 1.0f );
-
-	// Point light (position is changed every frame)
-	mLights[1].ambient = D3DXCOLOR( 0.4f, 0.4f, 0.4f, 1.0f );
-	mLights[1].diffuse = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
-	mLights[1].specular = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
-	mLights[1].att.x = 0.0f;
-	mLights[1].att.y = 0.1f;
-	mLights[1].att.z = 0.0f;
-	mLights[1].range = 50.0f;
-
-	// Spotlight -- position and direction changed every frame
-	mLights[2].ambient = D3DXCOLOR( 0.4f, 0.4f, 0.4f, 1.0f );
-	mLights[2].diffuse = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
-	mLights[2].specular = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
-	mLights[2].att.x = 1.0f;
-	mLights[2].att.y = 0.0f;
-	mLights[2].att.z = 0.0f;
-	mLights[2].spotPow = 64.0f;
-	mLights[2].range = 10000.0f;
-}
 
 /**
  * Creates a simple system font that the renderer can use to display simple
@@ -682,4 +534,21 @@ bool DXRenderer::verifyResult( HRESULT result, const std::string& action )
     // TODO: Make this an exception. Actually just rewrite this.
     //App::raiseError( "Failed to perform: " + action, errorText );
     return false;
+}
+
+void DXRenderer::SetDefaultRendering()
+{
+    // TODO: error check?
+    mpDevice->RSSetState(mpDefaultRasterizerState);
+}
+
+void DXRenderer::SetWireframeRendering()
+{
+    mpDevice->RSSetState(mpWireframeRS);
+}
+
+void DXRenderer::GetProjectionMatrix(D3DXMATRIX *projectionOut) const
+{
+    VerifyNotNull(projectionOut);
+    *projectionOut = mProjection;
 }

@@ -15,6 +15,7 @@
  */
 #include "stdafx.h"
 #include "graphics/irenderer.h"
+#include "graphics/DemoScene.h"
 #include "gui/iwindow.h"
 #include "runtime/logging.h"
 
@@ -63,7 +64,7 @@ bool IRenderer::initialize()
 /**
  * Ticks the graphics renderer
  */
-void IRenderer::tick( TimeT currentTime, TimeT deltaTime )
+void IRenderer::Update(const DemoScene& scene, TimeT currentTime, TimeT deltaTime)
 {
     // Do not do anything if the renderer is not running
     if (! mRendererCreatedAndRunning )
@@ -91,8 +92,7 @@ void IRenderer::tick( TimeT currentTime, TimeT deltaTime )
     }
 
     // Keep rendering whatever is going on
-	onUpdate( currentTime, deltaTime );
-    onRenderFrame();
+    OnRenderFrame(scene, currentTime, deltaTime);
 }
 
 /**
