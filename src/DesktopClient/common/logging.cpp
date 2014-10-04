@@ -79,7 +79,8 @@ Log::Log( std::ostream *pConsoleStream, std::ofstream* pFileStream )
  */
 Log::~Log()
 {
-    boost::checked_delete( mDebugStream );
+    delete mDebugStream;
+//    boost::checked_delete( mDebugStream );
 }
 
 /**

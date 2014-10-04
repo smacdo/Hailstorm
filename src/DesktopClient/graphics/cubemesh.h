@@ -17,7 +17,6 @@
 #define SCOTT_HAILSTORM_CUBE_MESH_H
 
 // Includes
-#include <boost/noncopyable.hpp>
 
 // Forward declarations
 struct ID3D10Buffer;
@@ -27,11 +26,14 @@ struct StaticMeshVertex;
 /**
  * Contains information on rendering a cube mesh.
  */
-class CubeMesh : boost::noncopyable
+class CubeMesh
 {
 public:
     CubeMesh( ID3D10Device * pRenderDevice );
+    CubeMesh(const CubeMesh&) = delete;
     ~CubeMesh();
+
+    CubeMesh& operator =(const CubeMesh&) = delete;
 
     void draw( ID3D10Device *pDevice ) const;
 

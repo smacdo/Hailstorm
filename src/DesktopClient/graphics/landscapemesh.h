@@ -17,7 +17,6 @@
 #define SCOTT_HAILSTORM_LANDSCAPE_MESH_H
 
 // Includes
-#include <boost/noncopyable.hpp>
 
 // Forward declarations
 struct ID3D10Buffer;
@@ -27,14 +26,17 @@ struct StaticMeshVertex;
 /**
  * Contains information on rendering a cube mesh.
  */
-class LandscapeMesh : boost::noncopyable
+class LandscapeMesh
 {
 public:
     LandscapeMesh( ID3D10Device * pRenderDevice,
 		           unsigned int rows,
 				   unsigned int cols,
 				   float spatialStep );
+    LandscapeMesh(const LandscapeMesh&) = delete;
     ~LandscapeMesh();
+
+    const LandscapeMesh& operator =(const LandscapeMesh&) = delete;
 
     void draw( ID3D10Device *pDevice ) const;
 

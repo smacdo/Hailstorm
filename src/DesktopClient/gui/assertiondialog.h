@@ -17,7 +17,6 @@
 #define SCOTT_ASSERTION_DIALOG_H
 
 #include <string>
-#include <boost/utility.hpp>
 
 /**
  * Assertion dialog is a class that encapsulates the user facing display and
@@ -28,13 +27,16 @@
  * The dialog offers built in support for the player to save out a text report
  * of an assertion failure.
  */
-class AssertionDialog : boost::noncopyable
+class AssertionDialog
 {
 public:
     AssertionDialog( const std::string& expression,
                      const std::string& filename,
                      unsigned int lineNumber );
+    AssertionDialog(const AssertionDialog&) = delete;
     ~AssertionDialog();
+
+    AssertionDialog& operator =(const AssertionDialog&) = delete;
 
     void setMessage( const std::string& message );
     bool show() const;

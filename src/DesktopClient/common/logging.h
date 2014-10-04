@@ -18,7 +18,6 @@
 
 #include <ostream>
 #include <string>
-#include <boost/noncopyable.hpp>
 #include <iostream>
 
 // Forward declarations
@@ -103,12 +102,15 @@ private:
 /**
  * A object that can log information to files and the console
  */
-class Log : boost::noncopyable
+class Log
 {
 public:
     Log();
     Log( std::ostream *pConsoleStream, std::ofstream* pFileStream );
+    Log(const Log&) = delete;
     ~Log();
+
+    Log& operator = (const Log&) = delete;
 
     LogEntry trace( const std::string& system ) const;
     LogEntry debug( const std::string& system ) const;
@@ -127,9 +129,11 @@ private:
 /**
  * Logging singleton, used in conjunction with the logging macros
  */
-class GlobalLog : boost::noncopyable
+class GlobalLog
 {
 public:
+    GlobalLog(const GlobalLog&) = delete;
+    GlobalLog& operator =(const GlobalLog&) = delete;
     static void start();
     static Log& getInstance();
 

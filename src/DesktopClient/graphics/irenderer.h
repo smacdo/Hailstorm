@@ -16,7 +16,6 @@
 #ifndef SCOTT_HAILSTORM_GRAPHICS_IRENDERER_H
 #define SCOTT_HAILSTORM_GRAPHICS_IRENDERER_H
 
-#include <boost/utility.hpp>
 #include "common/gametime.h"
 
 class IWindow;
@@ -24,11 +23,14 @@ class IWindow;
 /**
  * This is an abstract renderer
  */
-class IRenderer : boost::noncopyable
+class IRenderer
 {
 public:
     explicit IRenderer( IWindow *pWindow );
+    IRenderer(const IRenderer&) = delete;
     virtual ~IRenderer();
+
+    IRenderer& operator =(const IRenderer&) = delete;
 
     bool initialize();
     void stop();

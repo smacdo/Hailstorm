@@ -18,7 +18,6 @@
 
 #include "common/gametime.h"
 #include "common/platform.h"
-#include <boost/noncopyable.hpp>
 
 class MainWindow;
 class IRenderer;
@@ -27,7 +26,7 @@ class IRenderer;
  * This is the foundation class for a hailstorm game client. A custom game
  * shall inherit from this class to provide custom game play and functionality
  */
-class GameClient : boost::noncopyable
+class GameClient
 {
 public:
     GameClient( MainWindow *pMainWindow );

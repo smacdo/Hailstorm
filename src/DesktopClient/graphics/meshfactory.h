@@ -18,7 +18,6 @@
 
 // Required includes
 #include <memory>
-#include <boost/noncopyable.hpp>
 #include <string>
 
 // Forward declarations
@@ -31,12 +30,15 @@ struct ID3D10InputLayout;
 /**
  * Creates simple geometric static meshes at run time
  */
-class MeshFactory : boost::noncopyable
+class MeshFactory
 {
 public:
     MeshFactory( const std::string& dataDir,
                  ID3D10Device * pRenderDevice );
+    MeshFactory(const MeshFactory&) = delete;
     ~MeshFactory();
+
+    MeshFactory operator =(const MeshFactory&) = delete;
 
     std::shared_ptr<StaticMesh> createBox( float scale ) const;
 

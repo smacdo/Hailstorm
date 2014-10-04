@@ -17,14 +17,16 @@
 #define SCOTT_HAILSTORM_GUI_ERRORDIALOG_H
 
 #include <string>
-#include <boost/noncopyable.hpp>
 
-class ErrorDialog : boost::noncopyable
+class ErrorDialog
 {
 public:
     ErrorDialog( const std::string& message );
     ErrorDialog( const std::string& message, const std::string& details );
+    ErrorDialog(const ErrorDialog&) = delete;
     ~ErrorDialog();
+
+    ErrorDialog& operator =(const ErrorDialog&) = delete;
 
     void setIsFatal( bool isFatal );
     bool isFatal() const;

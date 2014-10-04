@@ -35,8 +35,6 @@
 #include <vector>
 #include <algorithm>
 
-#include <boost/utility.hpp>
-
 // TODO: reference additional headers your program requires here
 #include "common/debugging.h"
 #include "common/platform.h"

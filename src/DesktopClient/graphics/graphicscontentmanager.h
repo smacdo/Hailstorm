@@ -16,7 +16,6 @@
 #ifndef SCOTT_HAILSTORM_GRAPHICS_CONTENT_MANAGER_H
 #define SCOTT_HAILSTORM_GRAPHICS_CONTENT_MANAGER_H
 
-#include <boost/utility.hpp>
 #include <string>
 
 #include "graphics/meshfactory.h"
@@ -32,7 +31,10 @@ class GraphicsContentManager
 public:
     GraphicsContentManager( ID3D10Device * pRenderDevice,
                             const std::string& mContentDir );
+    GraphicsContentManager(const GraphicsContentManager&) = delete;
     ~GraphicsContentManager();
+
+    GraphicsContentManager& operator =(const GraphicsContentManager&) = delete;
 
     // Get a reference to the mesh factory that constructs meshes on the fly
     MeshFactory& meshFactory();

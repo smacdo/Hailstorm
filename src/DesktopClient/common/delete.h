@@ -18,7 +18,6 @@
 
 #include <map>
 #include <vector>
-#include <boost/checked_delete.hpp>
 #include <algorithm>
 
 /**
@@ -30,7 +29,8 @@
 template<typename T>
 void Delete( T& pointer )
 {
-    boost::checked_delete( pointer );
+//    boost::checked_delete( pointer );
+    delete(pointer);
     pointer = NULL;
 }
 
@@ -43,7 +43,8 @@ void Delete( T& pointer )
 template<typename T>
 void DeleteArray( T& arrayPointer )
 {
-    boost::checked_array_delete( arrayPointer );
+//    boost::checked_array_delete( arrayPointer );
+    delete[] arrayPointer;
     arrayPointer = NULL;
 }
 
@@ -91,7 +92,8 @@ void DeleteMapPointers( std::map<T,U>& container )
 
     for ( itr = container.begin(); itr != container.end(); ++itr )
     {
-        boost::checked_delete( itr->second );
+        Delete(itr->second);
+//        boost::checked_delete( itr->second );
     }
 
     container.clear();

@@ -17,7 +17,6 @@
 #define SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH
 
 // Includes
-#include <boost/noncopyable.hpp>
 
 // Forward declarations
 struct ID3D10Buffer;
@@ -27,7 +26,8 @@ struct StaticMeshVertex;
 /**
  * [DESCRIPTION]
  */
-class StaticMesh : boost::noncopyable
+// TODO: Support copying?
+class StaticMesh
 {
 public:
     StaticMesh();
@@ -35,7 +35,10 @@ public:
                 const StaticMeshVertex * pVertexArray,
                 unsigned int vertexCount,
                 const std::vector<unsigned int>& indexArray );
+    StaticMesh(const StaticMesh&) = delete;
     ~StaticMesh();
+
+    StaticMesh& operator =(const StaticMesh&) = delete;
 
     void draw( ID3D10Device *pDevice ) const;
 

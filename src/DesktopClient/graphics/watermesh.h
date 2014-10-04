@@ -17,7 +17,6 @@
 #define SCOTT_HAILSTORM_WATER_MESH_H
 
 // Includes
-#include <boost/noncopyable.hpp>
 #include <vector>
 #include <d3dx10.h>
 
@@ -40,7 +39,7 @@ struct WaterMeshVertex
 /**
  * Contains information on rendering a water plane with ripples.
  */
-class WaterMesh : boost::noncopyable
+class WaterMesh
 {
 public:
     WaterMesh( ID3D10Device * pRenderDevice,
@@ -50,7 +49,10 @@ public:
 			   float timeStep,
 			   float speed,
 			   float damping );
+    WaterMesh(const WaterMesh&) = delete;
     ~WaterMesh();
+
+    WaterMesh& operator =(const WaterMesh&) = delete;
 
     void draw( ID3D10Device *pDevice ) const;
 

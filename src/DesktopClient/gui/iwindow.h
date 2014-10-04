@@ -17,18 +17,22 @@
 #define SCOTT_WINDOW_H
 
 #include <string>
-#include <boost/utility.hpp>
 
 /**
  * Platform independent window class
  */
-class IWindow : boost::noncopyable
+class IWindow
 {
 public:
     IWindow( const std::string& windowTitle,
              unsigned int width,
              unsigned int height );
+    IWindow(IWindow&) = delete;
+    
     virtual ~IWindow();
+
+    IWindow& operator = (const IWindow&) = delete;
+
     virtual void create() = 0;
     virtual void show() = 0;
     virtual bool processMessages() = 0;
