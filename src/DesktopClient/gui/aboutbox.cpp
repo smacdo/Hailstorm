@@ -22,9 +22,9 @@
 
 INT_PTR CALLBACK AboutDlgWndProc(HWND, UINT, WPARAM, LPARAM);
 
-AboutBox::AboutBox( HINSTANCE hInstance, HWND hWnd )
-    : mAppInstance( hInstance ),
-      mParentWindow( hWnd )
+AboutBox::AboutBox(HINSTANCE hInstance, HWND hWnd)
+    : mAppInstance(hInstance),
+      mParentWindow(hWnd)
 {
 }
 
@@ -32,12 +32,13 @@ AboutBox::~AboutBox()
 {
 }
 
-void AboutBox::show()
+void AboutBox::Show()
 {
-    DialogBox( mAppInstance,
-               MAKEINTRESOURCE(IDD_ABOUTBOX),
-               mParentWindow,
-               AboutDlgWndProc );
+    DialogBox(
+        mAppInstance,
+        MAKEINTRESOURCE(IDD_ABOUTBOX),
+        mParentWindow,
+        AboutDlgWndProc);
 }
 
 // Message handler for about box.
@@ -46,16 +47,17 @@ INT_PTR CALLBACK AboutDlgWndProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
     {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
-
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
+        case WM_INITDIALOG:
             return (INT_PTR)TRUE;
-        }
-        break;
+
+        case WM_COMMAND:
+            if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+            {
+                EndDialog(hDlg, LOWORD(wParam));
+                return (INT_PTR)TRUE;
+            }
+            break;
     }
+
     return (INT_PTR)FALSE;
 }
