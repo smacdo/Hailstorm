@@ -17,8 +17,8 @@
 #include "graphics/dxrenderer.h"
 #include "graphics/dxutils.h"
 #include "graphics/graphicscontentmanager.h"
-#include "graphics/landscapemesh.h"
-#include "graphics/watermesh.h"
+#include "landscapemesh.h"                  // TODO: Don't use this file directly
+#include "watermesh.h"                      // TODO: Don't use this file directly.
 #include "gui/iwindow.h"
 #include "runtime/logging.h"
 #include "runtime/delete.h"

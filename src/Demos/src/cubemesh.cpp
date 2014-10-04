@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 #include "stdafx.h"
-#include "graphics/cubemesh.h"
+#include "cubemesh.h"
+#include "runtime/debugging.h"
 
 #include <DXGI.h>
 #include <d3d10.h>

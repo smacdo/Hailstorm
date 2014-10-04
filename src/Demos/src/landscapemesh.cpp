@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 #include "stdafx.h"
-#include "graphics/landscapemesh.h"
+#include "landscapemesh.h"
+#include "runtime/debugging.h"
 
 #include <DXGI.h>
 #include <d3d10.h>
@@ -70,7 +71,7 @@ namespace
 		{
 			*pDiffuse  = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
 			*pSpecular = D3DXCOLOR( 0.8f, 0.8f, 0.8f, 64.0f );
-		}		
+		}
 	}
 }
 

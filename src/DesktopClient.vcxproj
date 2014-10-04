@@ -238,6 +238,9 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Demos\Demos.vcxproj">
+      <Project>{22229656-7525-4c4e-8413-002482d019ff}</Project>
+    </ProjectReference>
     <ProjectReference Include="HailstormEngine\HailstormEngine.vcxproj">
       <Project>{28fd9656-7525-4c4e-8413-002482d019ff}</Project>
     </ProjectReference>

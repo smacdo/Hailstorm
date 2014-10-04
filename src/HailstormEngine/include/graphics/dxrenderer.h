@@ -21,6 +21,7 @@
 
 // temporary while we host the camera matrices
 #include <d3dx10.h>
+#include <string>
 
 // Forward declarations
 class MainWindow;
