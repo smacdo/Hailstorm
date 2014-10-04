@@ -110,8 +110,8 @@ void IWindow::setResized( bool wasResized, unsigned int width, unsigned int heig
     // If the window was resized, then save the new width and height of the window
     if ( mResizedFlag )
     {
-        assert2( width  > 0, "Window width cannot be zero" );
-        assert2( height > 0, "Window height cannot be zero" );
+        Assert2(width  > 0, L"Window width cannot be zero");
+        Assert2(height > 0, L"Window height cannot be zero");
 
         mWidth  = width;
         mHeight = height;
