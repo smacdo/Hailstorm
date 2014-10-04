@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011-2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@
 #include "graphics/graphicscontentmanager.h"
 #include "graphics/landscapemesh.h"
 #include "graphics/watermesh.h"
-#include "gui/mainwindow.h"
-#include "common/logging.h"
-#include "common/delete.h"
-#include "common/mathutils.h"
+#include "gui/iwindow.h"
+#include "runtime/logging.h"
+#include "runtime/delete.h"
+#include "runtime/mathutils.h"
 
 #include <DXGI.h>
 #include <d3d10.h>
@@ -33,8 +33,9 @@
 /**
  * DirectX renderer constructor
  */
-DXRenderer::DXRenderer( MainWindow *pWindow )
+DXRenderer::DXRenderer(IWindow *pWindow, HWND hwnd)
     : IRenderer( pWindow ),
+      mHwnd(hwnd),
 	  mpMainWindow( pWindow ),
       mpDevice( NULL ),
       mpSwapChain( NULL ),
@@ -56,8 +57,7 @@ DXRenderer::DXRenderer( MainWindow *pWindow )
 	  mpCubeMesh( NULL ),
 	  mpWaterMesh( NULL )
 {
-    // We need to have a valid window handle
-    assert( pWindow->windowHandle() != NULL );
+    assert(mHwnd != nullptr);    // We need to have a valid window handle
 
 	D3DXMatrixIdentity( &mView );
 	D3DXMatrixIdentity( &mProjection );
@@ -311,7 +311,7 @@ bool DXRenderer::createRenderDevice()
     scd.BufferDesc.Height  = mpMainWindow->height();
     scd.BufferDesc.Format  = DXGI_FORMAT_R8G8B8A8_UNORM; // 32 bit color
     scd.BufferUsage        = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    scd.OutputWindow       = mpMainWindow->windowHandle();
+    scd.OutputWindow       = mHwnd;
     scd.SampleDesc.Count   = 1; // mMultisampleCount;
     scd.SampleDesc.Quality = 0; // mMultisampleQuality;
     scd.Windowed           = true;
@@ -511,7 +511,8 @@ bool DXRenderer::buildFX()
 	{
 		if ( pCompilationErrors != NULL )
 		{
-			App::raiseFatalError( (char*) pCompilationErrors->GetBufferPointer(), "Failed to compile cube shader" );
+            // TODO: Make this an exception.
+//			App::raiseFatalError( (char*) pCompilationErrors->GetBufferPointer(), "Failed to compile cube shader" );
 			SafeRelease( &pCompilationErrors );
 
 			return false;
@@ -611,7 +612,7 @@ bool DXRenderer::createRenderFont()
     font.Quality = DEFAULT_QUALITY;
     font.PitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
 
-    wcscpy( font.FaceName, L"Courier New" );
+    wcscpy_s( font.FaceName, L"Courier New" );
 
     // Now create that font
     HRESULT result = D3DX10CreateFontIndirect( mpDevice, &font, &mpRendererFont );
@@ -678,6 +679,7 @@ bool DXRenderer::verifyResult( HRESULT result, const std::string& action )
     }
 
     // Raise the error with the application before returning false
-    App::raiseError( "Failed to perform: " + action, errorText );
+    // TODO: Make this an exception. Actually just rewrite this.
+    //App::raiseError( "Failed to perform: " + action, errorText );
     return false;
 }

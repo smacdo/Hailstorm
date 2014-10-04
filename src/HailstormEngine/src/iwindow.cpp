@@ -15,9 +15,7 @@
  */
 #include "stdafx.h"
 #include "gui\iwindow.h"
-#include "common\platform_windows.h"
-#include "common\logging.h"
-#include "resource.h"
+#include "runtime\logging.h"
 
 #include <string>
 #include <cassert>

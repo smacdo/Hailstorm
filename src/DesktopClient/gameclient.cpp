@@ -15,11 +15,12 @@
  */
 #include "stdafx.h"
 #include "gameclient.h"
-#include "common/delete.h"
-#include "common/gametime.h"
-#include "common/logging.h"
+#include "runtime/delete.h"
+#include "runtime/gametime.h"
+#include "runtime/logging.h"
 #include "gui/mainwindow.h"
 #include "graphics/dxrenderer.h"
+#include "runtime/exceptions.h"
 
 #include <Winnt.h>
 
@@ -84,7 +85,7 @@ void GameClient::setUpdateFrequency( int numUpdatesPerSecond )
  * Starts up and runs the game. This method will not return until after the
  * player has quit the game
  */
-App::EProgramStatus GameClient::run()
+void GameClient::run()
 {
     // Show the main window before we set up our rendering system or load
     // any resources
@@ -93,13 +94,15 @@ App::EProgramStatus GameClient::run()
     // Let the game initialize core systems
     if ( initializeClient() == false || initialize() == false )
     {
-        return App::EPROGRAM_FATAL_ERROR;
+        // TODO: Catch exceptions and report them.
+        return;
     }
 
     // Now load resources before entering the main game loop
     if (! loadContent() )
     {
-        return App::EPROGRAM_FATAL_ERROR;
+        // TODO: Catch exceptions and report them.
+        return;
     }
 
     // Enter the game
@@ -108,13 +111,12 @@ App::EProgramStatus GameClient::run()
     // Make sure we unload all of our game's resources before the game client
     // exits
     unloadContent();
-    return App::EPROGRAM_OK;
 }
 
 /**
  * Core game loop logic
  */
-App::EProgramStatus GameClient::runMainGameLoop()
+void GameClient::runMainGameLoop()
 {
     LOG_INFO("GameClient") << "Entering the main game loop";
 
@@ -191,7 +193,7 @@ App::EProgramStatus GameClient::runMainGameLoop()
     }
 
     LOG_NOTICE("GameClient") << "Game has left the main game loop";
-    return App::EPROGRAM_OK;
+    return;
 }
 
 /**
@@ -208,7 +210,7 @@ bool GameClient::initializeClient()
     calculateSystemTimerFrequency();
 
     // Create the DirectX renderer
-    mpRenderer = new DXRenderer( mpMainWindow );
+    mpRenderer = new DXRenderer(mpMainWindow, mpMainWindow->windowHandle());
     return mpRenderer->initialize();
 }
 
@@ -285,8 +287,8 @@ void GameClient::calculateSystemTimerFrequency()
 
     if (! result )
     {
-        App::raiseFatalError( "Unable to query performance timer frequency" );
-        App::quit( App::EPROGRAM_FATAL_ERROR, "Unable to query performance timer frequency" );
+        // TODO: Throw more specific exception.
+        throw HailstormException(L"Unable to query performance frequency");
     }
 
     assert( procFreq.QuadPart > 0 );
@@ -308,9 +310,8 @@ TimeT GameClient::getCurrentTime() const
 
     if (! ::QueryPerformanceCounter( &now ) )
     {
-        App::raiseFatalError( "Failed to query performance counter for time" );
-        App::quit( App::EPROGRAM_FATAL_ERROR,
-                   "Failed to query performance counter for time" );
+        // TODO: Throw more specific exception.
+        throw HailstormException(L"Unable  to query performance counter for time");
     }
 
     ::SetThreadAffinityMask( ::GetCurrentThread(), oldmask );

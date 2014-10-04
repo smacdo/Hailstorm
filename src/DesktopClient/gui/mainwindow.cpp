@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@
 #include "gui/aboutbox.h"
 #include "gui/errordialog.h"
 #include "common/platform_windows.h"
-#include "common/logging.h"
+#include "runtime/logging.h"
 #include "resource.h"
+
+LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 
 /**
  * Constructor
@@ -293,4 +295,55 @@ LRESULT MainWindow::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )
     }
 
     return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Application message loop
+/////////////////////////////////////////////////////////////////////////////
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    MainWindow * pMainWindow = NULL;
+
+    //
+    // Grab a pointer to the Window* instance that is sending this message.
+    //  Either a window was created, in which case we need to save the pointer,
+    //  or we need to look up the saved value
+    //
+    if (message == WM_NCCREATE)
+    {
+        // We need to intercept the WM_NCCREATE message, since it is the first
+        // message that a newly create window will send.  Once we get it, we will
+        // grab the encoded Window* pointer and use SetWindowLong to save it for
+        // future use
+        LPCREATESTRUCT cs = reinterpret_cast<LPCREATESTRUCT>(lParam);
+        pMainWindow = reinterpret_cast<MainWindow*>(cs->lpCreateParams);
+        assert(pMainWindow != NULL && "Failed to find window pointer");
+
+        // Store the window pointer
+        ::SetWindowLongPtr(
+            hWnd,
+            GWLP_USERDATA,
+            reinterpret_cast<LONG_PTR>(pMainWindow));
+
+        // Also store the assigned HWND value
+        pMainWindow->setWindowHandle(hWnd);
+    }
+    else
+    {
+        // Try to look up the pointer that is stored in the window's userdata
+        // field
+        pMainWindow =
+            reinterpret_cast<MainWindow*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    }
+
+    // Route the message to the correct window instance. If we could not decipher
+    // the instance, then just let windows perform a default action
+    if (pMainWindow != NULL)
+    {
+        return pMainWindow->handleMessage(message, wParam, lParam);
+    }
+    else
+    {
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
 }

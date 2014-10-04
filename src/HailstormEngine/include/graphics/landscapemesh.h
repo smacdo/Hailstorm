@@ -23,6 +23,8 @@ struct ID3D10Buffer;
 struct ID3D10Device;
 struct StaticMeshVertex;
 
+// TODO: Move to Demos
+
 /**
  * Contains information on rendering a cube mesh.
  */

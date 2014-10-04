@@ -16,7 +16,7 @@
 #ifndef SCOTT_COMMON_LOGGING_IMPLEMENTATION_H
 #define SCOTT_COMMON_LOGGING_IMPLEMENTATION_H
 
-#include "common/logging.h"
+#include "runtime/logging.h"
 #include <ostream>
 #include <streambuf>
 #include <string>
@@ -99,7 +99,7 @@ private:
     const char * mModuleName;
 };
 
-#include "common/debugstreambuf.inl"
+#include "runtime/debugstreambuf.inl"
 
 /**
  * A null stream buffer, great for redirecting C++ output streams

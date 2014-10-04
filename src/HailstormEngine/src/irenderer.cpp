@@ -16,7 +16,7 @@
 #include "stdafx.h"
 #include "graphics/irenderer.h"
 #include "gui/iwindow.h"
-#include "common/logging.h"
+#include "runtime/logging.h"
 
 /**
  * Renderer constructor
@@ -45,7 +45,7 @@ IRenderer::~IRenderer()
 bool IRenderer::initialize()
 {
     // Make sure we don't start the renderer more than once
-    assert2( mRendererCreatedAndRunning == false, "Cannot start when already running" );
+//    assert2( mRendererCreatedAndRunning == false, "Cannot start when already running" );
 
     // Let the renderer perform any needed start up code
     LOG_INFO("Renderer") << "Initializing the renderer";

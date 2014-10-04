@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SCOTT_PLATFORM_WINDOWS_H
-#define SCOTT_PLATFORM_WINDOWS_H
+#ifndef SCOTT_STRING_UTILS_H
+#define SCOTT_STRING_UTILS_H
 
-#include "stdafx.h"
+#include <string>
 
-namespace WinApp
+namespace Utils
 {
-    std::wstring ToWideString( const std::string& str );
-    void CreateConsoleWindow( bool redirectStdout );
+    std::wstring ConvertUtf8ToWideString(const std::string& text);
+    std::string ConvertWideStringToUtf8(const std::wstring& text);
 }
-
-
 
 #endif

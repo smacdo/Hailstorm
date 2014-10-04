@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011-2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 #define SCOTT_HAILSTORM_GRAPHICS_DXRENDERER_H
 
 #include "graphics/irenderer.h"
+#include "light.h"		// temporary, remove this eventually
 
 // temporary while we host the camera matrices
 #include <d3dx10.h>
-#include "light.h"		// temporary, remove this eventually
 
 // Forward declarations
 class MainWindow;
@@ -45,7 +45,7 @@ struct ID3D10EffectMatrixVariable;
 class DXRenderer : public IRenderer
 {
 public:
-    explicit DXRenderer( MainWindow *pWindow );
+    explicit DXRenderer(IWindow *pWindow, HWND hwnd);
     virtual ~DXRenderer();
 
 protected:
@@ -68,8 +68,11 @@ private:
     static bool verifyResult( HRESULT result, const std::string& action );
 
 private:
+    /// Handle to render window.
+    HWND mHwnd;
+
     /// Pointer to the main rendering window
-    MainWindow * mpMainWindow;
+    IWindow * mpMainWindow;
 
     /// Pointer to the D3D 10 device
     ID3D10Device * mpDevice;

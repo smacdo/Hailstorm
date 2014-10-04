@@ -16,6 +16,9 @@
 #ifndef SCOTT_HAILSTORM_DEBUGGING_H
 #define SCOTT_HAILSTORM_DEBUGGING_H
 
+#include <cassert>      // TODO: Remove this
+                        // TODO: Change all assert to Assert
+
 /////////////////////////////////////////////////////////////////////////////
 // Platform specific debug trigger
 /////////////////////////////////////////////////////////////////////////////
@@ -48,20 +51,23 @@
             }                               \
         } while( 0 )
 
-#   define assert2(expr,msg) scott_assert(msg,expr)
-#   define assert_null(var) scott_assert("Pointer was expected to be null",#var##" == NULL")
-#   define assert_notNull(var) scott_assert("Pointer was expected to be non-null",#var##" != NULL")
-
+//#   define assert2(expr,msg) scott_assert(msg,expr)
+//#   define assert_null(var) scott_assert("Pointer was expected to be null",#var##" == NULL")
+//#   define assert_notNull(var) scott_assert("Pointer was expected to be non-null",#var##" != NULL")
+#   define assert2(expr,msg) assert((expr) && (msg))
+#   define assert_null(var) assert((var) == nullptr)
+#   define assert_notNull(var) assert((var) != nullptr)
 #   ifdef ASSERTS_VERIFY        // only enabled for full sanity checks
-#       define verify(expression)  scott_assert(NULL,expression)
+//#       define verify(expression)  scott_assert(NULL,expression)
+#       define verify(expression)  assert(expression)
 #   else
 #       define verify(expression)  do { (void)sizeof(x); } while(0)
 #   endif
 
-#   ifdef assert                // detect if the builtin assert has been defined
-#       undef assert            // remove the built in assert
-#   endif
-#   define assert(x) scott_assert(NULL,x)
+//#   ifdef assert                // detect if the builtin assert has been defined
+//#       undef assert            // remove the built in assert
+//#   endif
+//#   define assert(x) scott_assert(NULL,x)
 
 #else
 #   define assert(x)          do { (void)sizeof(x); } while(0)

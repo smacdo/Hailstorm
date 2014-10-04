@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011-2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public:
 
     void setMinimized( bool wasMinimized );
     void setMaximized( bool wasMaximized );
-    void setResized( bool wasResized, unsigned int width=0, unsigned int height=0 );
+    void setResized( bool wasResized, unsigned int width, unsigned int height);
 
     void clearResizedFlag();
 

@@ -29,27 +29,27 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -106,12 +106,17 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>$(WindowsSDK_IncludePath);$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include;$(DXSDK_DIR)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>COMCTL32.LIB;d3d10.lib;d3dx10d.lib;d3d10_1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -120,12 +125,17 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include;$(DXSDK_DIR)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>COMCTL32.LIB;d3d10.lib;d3dx10d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -138,6 +148,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalIncludeDirectories>$(WindowsSDK_IncludePath);$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include;$(DXSDK_DIR)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,6 +169,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalIncludeDirectories>$(WindowsSDK_IncludePath);$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include;$(DXSDK_DIR)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -174,22 +186,6 @@
     <None Include="..\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DesktopClient\common\logging_impl.h" />
-    <ClInclude Include="DesktopClient\common\logging_stream.h" />
-    <ClInclude Include="DesktopClient\common\debugstreambuf.inl" />
-    <ClInclude Include="DesktopClient\common\mathutils.h" />
-    <ClInclude Include="DesktopClient\graphics\cubemesh.h" />
-    <ClInclude Include="DesktopClient\graphics\graphicscontentmanager.h" />
-    <ClInclude Include="DesktopClient\graphics\landscapemesh.h" />
-    <ClInclude Include="DesktopClient\graphics\light.h" />
-    <ClInclude Include="DesktopClient\graphics\meshfactory.h" />
-    <ClInclude Include="DesktopClient\graphics\staticmesh.h" />
-    <ClInclude Include="DesktopClient\graphics\staticmeshvertex.h" />
-    <ClInclude Include="DesktopClient\graphics\watermesh.h" />
-    <ClInclude Include="DesktopClient\common\gametime.h" />
-    <ClInclude Include="DesktopClient\graphics\dxrenderer.h" />
-    <ClInclude Include="DesktopClient\graphics\dxutils.h" />
-    <ClInclude Include="DesktopClient\graphics\irenderer.h" />
     <ClInclude Include="DesktopClient\gameclient.h" />
     <ClInclude Include="DesktopClient\gui\aboutbox.h" />
     <ClInclude Include="DesktopClient\gui\assertiondialog.h" />
@@ -198,28 +194,12 @@
     <ClInclude Include="DesktopClient\hailstorm_sandbox.h" />
     <ClInclude Include="DesktopClient\common\platform_windows.h" />
     <ClInclude Include="DesktopClient\Resource.h" />
-    <ClInclude Include="DesktopClient\common\debugging.h" />
-    <ClInclude Include="DesktopClient\common\delete.h" />
-    <ClInclude Include="DesktopClient\common\logging.h" />
-    <ClInclude Include="DesktopClient\common\platform.h" />
     <ClInclude Include="DesktopClient\stdafx.h" />
     <ClInclude Include="DesktopClient\targetver.h" />
-    <ClInclude Include="DesktopClient\gui\iwindow.h" />
     <ClInclude Include="DesktopClient\version.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DesktopClient\common\logstream.cpp" />
-    <ClCompile Include="DesktopClient\graphics\cubemesh.cpp" />
-    <ClCompile Include="DesktopClient\graphics\dxrenderer.cpp" />
-    <ClCompile Include="DesktopClient\graphics\dxutils.cpp" />
-    <ClCompile Include="DesktopClient\graphics\graphicscontentmanager.cpp" />
-    <ClCompile Include="DesktopClient\graphics\irenderer.cpp" />
     <ClCompile Include="DesktopClient\gameclient.cpp" />
-    <ClCompile Include="DesktopClient\graphics\landscapemesh.cpp" />
-    <ClCompile Include="DesktopClient\graphics\light.cpp" />
-    <ClCompile Include="DesktopClient\graphics\meshfactory.cpp" />
-    <ClCompile Include="DesktopClient\graphics\staticmesh.cpp" />
-    <ClCompile Include="DesktopClient\graphics\watermesh.cpp" />
     <ClCompile Include="DesktopClient\gui\aboutbox.cpp" />
     <ClCompile Include="DesktopClient\gui\assertiondialog.cpp" />
     <ClCompile Include="DesktopClient\gui\errordialog.cpp" />
@@ -227,14 +207,12 @@
     <ClCompile Include="DesktopClient\hailstorm_sandbox.cpp" />
     <ClCompile Include="DesktopClient\common\platform_windows.cpp" />
     <ClCompile Include="DesktopClient\pragmas.cpp" />
-    <ClCompile Include="DesktopClient\common\logging.cpp" />
     <ClCompile Include="DesktopClient\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="DesktopClient\gui\iwindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DesktopClient\assets\hailstorm.rc" />
@@ -258,6 +236,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="HailstormEngine\HailstormEngine.vcxproj">
+      <Project>{28fd9656-7525-4c4e-8413-002482d019ff}</Project>
+    </ProjectReference>
+    <ProjectReference Include="HailstormRuntime\HailstormRuntime.vcxproj">
+      <Project>{11119656-7525-4c4e-8413-002482d019ff}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

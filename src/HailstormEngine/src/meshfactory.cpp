@@ -15,6 +15,7 @@
  */
 #include "stdafx.h"
 #include "graphics/meshfactory.h"
+#include "runtime\exceptions.h"
 
 #include <d3d10.h>
 #include <d3dx10.h>
@@ -24,8 +25,7 @@
 #include "graphics/dxutils.h"
 #include "graphics/staticmesh.h"
 #include "graphics/staticmeshvertex.h"
-#include "common/platform_windows.h"
-#include "common/platform.h"
+#include "runtime/StringUtils.h"
 
 /**
  * Mesh factory constructor. Initializes the mesh factory with a pointer to the
@@ -120,7 +120,7 @@ void MeshFactory::init( const std::string& dataDir )
     assert( mpRenderDevice != NULL );
 
     // Create string that contains file path to effects file
-    std::wstring fxfilepath = WinApp::ToWideString(dataDir) +
+    std::wstring fxfilepath = Utils::ConvertUtf8ToWideString(dataDir) +
                               std::wstring( L"\\shaders\\cube.fx" );
 
     // Load the shader FX file from disk
@@ -144,20 +144,7 @@ void MeshFactory::init( const std::string& dataDir )
     // Check if there were errors while loading the shader from disk
     if ( FAILED(result) )
     {
-        if ( pError != NULL )
-        {
-            // Convert the error blob into a string
-            std::string error = reinterpret_cast<const char*>( pError->GetBufferPointer() );
-
-            // Now report the error to the player, and then exit since we can't
-            // recover from this
-            App::raiseFatalError( "Failed to load static mesh shader", error );
-            App::quit( App::EPROGRAM_FATAL_ERROR, "Failed to load static mesh shader" );
-        }
-        else
-        {
-            DxUtils::CheckResult( result, true, "Load static mesh shader" );
-        }
+        throw DirectXException(result);
     }
 
     // Make sure the effect file was loaded

@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{28FD9656-7525-4C4E-8413-002482D019FF}</ProjectGuid>
+    <ProjectGuid>{22229656-7525-4C4E-8413-002482D019FF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>HailstormEngine</RootNamespace>
+    <RootNamespace>Demos</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -38,14 +38,12 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -59,19 +57,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\HailstormEngine\$(Configuration)\$(PlatformName)\</IntDir>
+    <IntDir>$(SolutionDir)build\Demos\$(Configuration)\$(PlatformName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\HailstormEngine\$(Configuration)\$(PlatformName)\</IntDir>
+    <IntDir>$(SolutionDir)build\Demos\$(Configuration)\$(PlatformName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\HailstormEngine\$(Configuration)\$(PlatformName)\</IntDir>
+    <IntDir>$(SolutionDir)build\Demos\$(Configuration)\$(PlatformName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\HailstormEngine\$(Configuration)\$(PlatformName)\</IntDir>
+    <IntDir>$(SolutionDir)build\Demos\$(Configuration)\$(PlatformName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -80,9 +78,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(SolutionDir)\src\HailstormRuntime\include;$(DXSDK_DIR)\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)\Include;$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -98,7 +95,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(SolutionDir)\src\HailstormRuntime\include;$(DXSDK_DIR)\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)\Include;$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -109,49 +106,25 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(SolutionDir)\src\HailstormRuntime\include;$(DXSDK_DIR)\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)\Include;$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
-      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\include;$(SolutionDir)\src\HailstormRuntime\include;$(DXSDK_DIR)\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)\Include;$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\graphics\cubemesh.h" />
-    <ClInclude Include="include\graphics\dxrenderer.h" />
-    <ClInclude Include="include\graphics\dxutils.h" />
-    <ClInclude Include="include\graphics\graphicscontentmanager.h" />
-    <ClInclude Include="include\graphics\irenderer.h" />
-    <ClInclude Include="include\graphics\landscapemesh.h" />
-    <ClInclude Include="include\graphics\light.h" />
-    <ClInclude Include="include\graphics\meshfactory.h" />
-    <ClInclude Include="include\graphics\staticmesh.h" />
-    <ClInclude Include="include\graphics\staticmeshvertex.h" />
-    <ClInclude Include="include\graphics\watermesh.h" />
-    <ClInclude Include="include\gui\iwindow.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\cubemesh.cpp" />
-    <ClCompile Include="src\dxrenderer.cpp" />
-    <ClCompile Include="src\dxutils.cpp" />
-    <ClCompile Include="src\graphicscontentmanager.cpp" />
-    <ClCompile Include="src\irenderer.cpp" />
-    <ClCompile Include="src\iwindow.cpp" />
-    <ClCompile Include="src\landscapemesh.cpp" />
-    <ClCompile Include="src\light.cpp" />
-    <ClCompile Include="src\meshfactory.cpp" />
-    <ClCompile Include="src\staticmesh.cpp" />
-    <ClCompile Include="src\watermesh.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

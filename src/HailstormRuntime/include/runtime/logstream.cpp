@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 #include "stdafx.h"
-#include "common/logging.h"
-#include "common/logging_impl.h"
-#include "common/logging_stream.h"
+#include "runtime/logging.h"
+#include "runtime/logging_impl.h"
+#include "runtime/logging_stream.h"
 #include <string>
 #include <iostream>
 #include <fstream>

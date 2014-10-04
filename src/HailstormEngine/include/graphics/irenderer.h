@@ -16,7 +16,7 @@
 #ifndef SCOTT_HAILSTORM_GRAPHICS_IRENDERER_H
 #define SCOTT_HAILSTORM_GRAPHICS_IRENDERER_H
 
-#include "common/gametime.h"
+#include "runtime/gametime.h"
 
 class IWindow;
 

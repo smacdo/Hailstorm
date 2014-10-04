@@ -16,8 +16,7 @@
 #ifndef SCOTT_GAME_CLIENT_H
 #define SCOTT_GAME_CLIENT_H
 
-#include "common/gametime.h"
-#include "common/platform.h"
+#include "runtime/gametime.h"
 
 class MainWindow;
 class IRenderer;
@@ -32,7 +31,7 @@ public:
     GameClient( MainWindow *pMainWindow );
     virtual ~GameClient();
 
-    App::EProgramStatus run();
+    void run();
     void setUpdateFrequency( int numUpdatesPerSecond );
 
 protected:
@@ -43,7 +42,7 @@ protected:
     virtual void draw( TimeT simulationTime, double interpolation );
 
 private:
-    App::EProgramStatus runMainGameLoop();
+    void runMainGameLoop();
     TimeT getCurrentTime() const;
     void calculateSystemTimerFrequency();
     bool initializeClient();

@@ -15,8 +15,8 @@
  */
 #ifndef SCOTT_COMMON_LOGGING_IMPLEMENTATION_INL_H
 #define SCOTT_COMMON_LOGGING_IMPLEMENTATION_INL_H
-#include "common/logging.h"
-#include "common/logging_impl.h"
+#include "runtime/logging.h"
+#include "runtime/logging_impl.h"
 #include <sstream>
 #include <ctime>
 #include <cassert>

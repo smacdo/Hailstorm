@@ -35,6 +35,5 @@
 #include <vector>
 #include <algorithm>
 
-// TODO: reference additional headers your program requires here
-#include "common/debugging.h"
-#include "common/platform.h"
+// Common application headers.
+#include "runtime/debugging.h"

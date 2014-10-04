@@ -17,8 +17,7 @@
 #include "graphics/dxutils.h"
 #include "graphics/dxrenderer.h"
 #include "graphics/dxutils.h"
-#include "gui/mainwindow.h"
-#include "common/logging.h"
+#include "runtime/logging.h"
 
 #include <d3d10.h>
 #include <d3dx10.h>
@@ -36,12 +35,12 @@ namespace DxUtils
      */
     bool CheckResult( HRESULT result, bool shouldExit, const std::string& action )
     {
-        // Don't do anything if it worked
+       // Don't do anything if it worked
         if ( result == S_OK )
         {
             return true;
         }
-
+/* 
         // Now figure out what the error status code is
         std::string errorText;
 
@@ -94,7 +93,7 @@ namespace DxUtils
         else
         {
             App::raiseError( "Failed to perform: " + action, errorText );
-        }
+        }*/
 
         return false;
     }
