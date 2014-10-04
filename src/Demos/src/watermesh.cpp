@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Scott MacDonald
+ * Copyright 2013 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,10 @@ WaterMesh::WaterMesh( ID3D10Device * pRenderDevice,
 	  mPreviousSolution( rows * cols ),
 	  mCurrentSolution( rows * cols ),
 	  mNormals( rows * cols ),
-      mpVertexBuffer( NULL ),
-      mpIndexBuffer( NULL )
+      mVertexBuffer(),
+      mIndexBuffer()
 {
-	init( pRenderDevice );
+	Init( pRenderDevice );
 }
 
 /**
@@ -63,15 +63,13 @@ WaterMesh::WaterMesh( ID3D10Device * pRenderDevice,
  */
 WaterMesh::~WaterMesh()
 {
-    SafeRelease( &mpVertexBuffer );
-    SafeRelease( &mpIndexBuffer );
 }
 
 /**
  * Takes an array of vertices and indices, uploads them to the video hardware
  * and places their data buffers in mVertexbuffer/mIndexBuffer
  */
-void WaterMesh::init( ID3D10Device * pRenderDevice )
+void WaterMesh::Init(ID3D10Device * pRenderDevice)
 {
 	const float dx = 1.0f;
 
@@ -123,8 +121,7 @@ void WaterMesh::init( ID3D10Device * pRenderDevice )
 	vInitData.pSysMem = &vertices[0];
 
 	// Upload the vertex buffer to the graphics card.
-	HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mpVertexBuffer );
-
+	HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mVertexBuffer );
 	DxUtils::CheckResult( result, true, "Creating the water vertex buffer" );
 
 	// Generate the landscape index buffer
@@ -161,8 +158,7 @@ void WaterMesh::init( ID3D10Device * pRenderDevice )
     iInitData.pSysMem = &indices[0];
 
 	// Upload the index buffer to the graphics card.
-    result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mpIndexBuffer );
-
+    result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mIndexBuffer );
     DxUtils::CheckResult( result, true, "Creating the water index buffer" );
 }
 
@@ -171,7 +167,7 @@ void WaterMesh::init( ID3D10Device * pRenderDevice )
  *
  *  TODO: this is terrible code from the book... rewrite it
  */
-void WaterMesh::update( float deltaTime )
+void WaterMesh::Update( float deltaTime )
 {
 	static float t = 0.0f;
 
@@ -224,7 +220,7 @@ void WaterMesh::update( float deltaTime )
 
 		// Update the vertex buffer with the new solution
 		WaterMeshVertex * pVertices = NULL;
-		DxUtils::CheckResult( mpVertexBuffer->Map( D3D10_MAP_WRITE_DISCARD, 0, (void**) &pVertices ), true, "Uploading new water vertices" );
+		DxUtils::CheckResult( mVertexBuffer->Map( D3D10_MAP_WRITE_DISCARD, 0, (void**) &pVertices ), true, "Uploading new water vertices" );
 
 		for ( unsigned int i = 0; i < mCurrentSolution.size(); ++i )
 		{
@@ -234,14 +230,14 @@ void WaterMesh::update( float deltaTime )
 			pVertices[i].normal  = mNormals[i];
 		}
 
-		mpVertexBuffer->Unmap();
+		mVertexBuffer->Unmap();
 	}
 }
 
 /**
  * Puts a ripple into the water
  */
-void WaterMesh::perturb( unsigned int i, unsigned int j, float magnitude )
+void WaterMesh::Perturb( unsigned int i, unsigned int j, float magnitude )
 {
 	// Do not disturb boundaries
 	assert( i > 1 && i < mNumRows - 2 );
@@ -260,9 +256,9 @@ void WaterMesh::perturb( unsigned int i, unsigned int j, float magnitude )
 /**
  * Render the cube
  */
-void WaterMesh::draw( ID3D10Device * pDevice ) const
+void WaterMesh::Draw(ID3D10Device * pDevice) const
 {
-    assert( pDevice != NULL );
+    assert(pDevice != NULL);
 
     const unsigned int stride = sizeof( WaterMeshVertex );
     const unsigned int offset = 0;
@@ -270,8 +266,8 @@ void WaterMesh::draw( ID3D10Device * pDevice ) const
     if ( mFaceCount > 0 )
     {
         // Need to cast away const-ness when calling DirectX... /sigh
-        ID3D10Buffer * pVertexBuffer = const_cast<ID3D10Buffer*>( mpVertexBuffer );
-        ID3D10Buffer * pIndexBuffer  = const_cast<ID3D10Buffer*>( mpIndexBuffer  );
+        ID3D10Buffer * pVertexBuffer = const_cast<ID3D10Buffer*>(mVertexBuffer.Get());
+        ID3D10Buffer * pIndexBuffer  = const_cast<ID3D10Buffer*>(mIndexBuffer.Get());
 
         pDevice->IASetVertexBuffers( 0, 1, &pVertexBuffer, &stride, &offset );
         pDevice->IASetIndexBuffer( pIndexBuffer, DXGI_FORMAT_R32_UINT, 0 );

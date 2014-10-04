@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,15 @@
 #define SCOTT_HAILSTORM_LANDSCAPE_MESH_H
 
 // Includes
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
 
 // Forward declarations
 struct ID3D10Buffer;
 struct ID3D10Device;
 struct StaticMeshVertex;
-
-// TODO: Move to Demos
+struct D3DXCOLOR;
 
 /**
  * Contains information on rendering a cube mesh.
@@ -36,27 +38,27 @@ public:
 				   unsigned int cols,
 				   float spatialStep );
     LandscapeMesh(const LandscapeMesh&) = delete;
-    ~LandscapeMesh();
+    virtual ~LandscapeMesh();
 
     const LandscapeMesh& operator =(const LandscapeMesh&) = delete;
 
-    void draw( ID3D10Device *pDevice ) const;
+    void Draw( ID3D10Device *pDevice ) const;
 
-    unsigned int vertexCount() const;
-    unsigned int faceCount() const;
-	float getHeight( float x, float y ) const;
+    unsigned int VertexCount() const { return mVertexCount; }
+    unsigned int FaceCount() const { return mFaceCount; }
+	float GetHeight( float x, float y ) const;
 
 private:
-	void init( ID3D10Device * pDevice, float dx );
-	
+	void Init( ID3D10Device * pDevice, float dx );
+    static void FindVertexColor(float y, D3DXCOLOR * pDiffuse, D3DXCOLOR * pSpecular);
 
 private:
 	unsigned int mNumRows;
 	unsigned int mNumCols;
     unsigned int mVertexCount;
     unsigned int mFaceCount;
-    ID3D10Buffer * mpVertexBuffer;
-    ID3D10Buffer * mpIndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D10Buffer> mVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D10Buffer> mIndexBuffer;
 };
 
 #endif

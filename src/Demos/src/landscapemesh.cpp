@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 #include "stdafx.h"
-#include "landscapemesh.h"
-#include "runtime/debugging.h"
 
 #include <DXGI.h>
 #include <d3d10.h>
 #include <d3dx10.h>
 
-#include <vector>
-
+#include "runtime/debugging.h"
+#include "landscapemesh.h"
 #include "graphics/dxrenderer.h"
 #include "graphics/dxutils.h"
+
+#include <vector>
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
 
 const int CUBE_VERTEX_COUNT = 8;
 const int CUBE_FACE_COUNT = 12;
@@ -40,72 +43,36 @@ struct LandscapeVertex
 	D3DXCOLOR   spec; // (r, g, b, specPower);
 };
 
-namespace
-{
-	/**
-     * Returns an appropriate color for the landscape height.
-     */
-	void FindVertexColor( float y, D3DXCOLOR * pDiffuse, D3DXCOLOR * pSpecular )
-	{
-		if ( y < -10.0f )
-		{
-			*pDiffuse  = D3DXCOLOR( 1.0f, 0.96f, 0.62f, 1.0f );
-			*pSpecular = D3DXCOLOR( 0.2f, 0.2f, 0.2f, 32.0f );
-		}
-		else if ( y < 5.0f )
-		{
-			*pDiffuse  = D3DXCOLOR( 0.48f, 0.77f, 0.46f, 1.0f );
-			*pSpecular = D3DXCOLOR( 0.2f, 0.2f, 0.2f, 32.0f );
-		}
-		else if ( y < 12.0f )
-		{
-			*pDiffuse  = D3DXCOLOR( 0.1f, 0.48f, 0.19f, 1.0f );
-			*pSpecular = D3DXCOLOR( 0.2f, 0.2f, 0.2f, 32.0f );
-		}
-		else if ( y < 20.0f )
-		{
-			*pDiffuse  = D3DXCOLOR( 0.45f, 0.39f, 0.34f, 1.0f );
-			*pSpecular = D3DXCOLOR( 0.4f, 0.4f, 0.4f, 64.0f );
-		}
-		else
-		{
-			*pDiffuse  = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 1.0f );
-			*pSpecular = D3DXCOLOR( 0.8f, 0.8f, 0.8f, 64.0f );
-		}
-	}
-}
-
 /**
  * Static mesh constructor that takes an already constructed vertex and index
  * buffer.
  */
-LandscapeMesh::LandscapeMesh( ID3D10Device * pRenderDevice,
-							  unsigned int rows,
-							  unsigned int cols,
-							  float spatialStep )
+LandscapeMesh::LandscapeMesh(
+    ID3D10Device * pRenderDevice,
+	unsigned int rows,
+	unsigned int cols,
+	float spatialStep)
     : mNumRows( rows ),
 	  mNumCols( cols ),
 	  mVertexCount( 0 ),
       mFaceCount( 0 ),
-      mpVertexBuffer( NULL ),
-      mpIndexBuffer( NULL )
+      mVertexBuffer(),
+      mIndexBuffer()
 {
-	init( pRenderDevice, spatialStep );
+	Init(pRenderDevice, spatialStep);
 }
 
 /**
- * Static mesh destructor
+ * Destructoor.
  */
 LandscapeMesh::~LandscapeMesh()
 {
-    SafeRelease( &mpVertexBuffer );
-    SafeRelease( &mpIndexBuffer );
 }
 
 /**
  * Magic.
  */
-float LandscapeMesh::getHeight( float x, float z ) const
+float LandscapeMesh::GetHeight(float x, float z) const
 {
 	return 0.3f * ( z * sinf( 0.1f * x ) + x * cosf( 0.1f * z ) ) + 8.0f;
 }
@@ -114,9 +81,8 @@ float LandscapeMesh::getHeight( float x, float z ) const
  * Takes an array of vertices and indices, uploads them to the video hardware
  * and places their data buffers in mVertexbuffer/mIndexBuffer
  */
-void LandscapeMesh::init( ID3D10Device * pRenderDevice, float dx )
+void LandscapeMesh::Init(ID3D10Device * pRenderDevice, float dx)
 {
-
 	// Initialize a vertex buffer that contains all the vertices making up our cube
 	mVertexCount = mNumRows * mNumCols;
 	mFaceCount = ( mNumRows - 1 ) * ( mNumCols - 1 ) * 2;
@@ -137,7 +103,7 @@ void LandscapeMesh::init( ID3D10Device * pRenderDevice, float dx )
 			float x = -halfWidth + j * dx;
 
 			// Graph of this function looks like a mountain range.
-			float y = getHeight( x, z );
+			float y = GetHeight( x, z );
 
 			vertices[index].pos = D3DXVECTOR3( x, y, z );
 			FindVertexColor( y, &vertices[index].diffuse, &vertices[index].spec );
@@ -171,7 +137,7 @@ void LandscapeMesh::init( ID3D10Device * pRenderDevice, float dx )
     vInitData.pSysMem = &vertices[0];
 
 	// Upload the vertex buffer to the graphics card.
-	HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mpVertexBuffer );
+	HRESULT result = pRenderDevice->CreateBuffer(&vbd, &vInitData, &mVertexBuffer);
 
 	if (! DxUtils::CheckResult( result, true, "Creating the landscape vertex buffer" ) )
 	{
@@ -212,7 +178,7 @@ void LandscapeMesh::init( ID3D10Device * pRenderDevice, float dx )
     iInitData.pSysMem = &indices[0];
 
 	// Upload the index buffer to the graphics card.
-    result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mpIndexBuffer );
+    result = pRenderDevice->CreateBuffer(&ibd, &iInitData, &mIndexBuffer);
 
     if (! DxUtils::CheckResult( result, true, "Creating the landscape index buffer" ) )
     {
@@ -223,7 +189,7 @@ void LandscapeMesh::init( ID3D10Device * pRenderDevice, float dx )
 /**
  * Render the cube
  */
-void LandscapeMesh::draw( ID3D10Device * pDevice ) const
+void LandscapeMesh::Draw(ID3D10Device * pDevice) const
 {
     assert( pDevice != NULL );
 
@@ -233,11 +199,43 @@ void LandscapeMesh::draw( ID3D10Device * pDevice ) const
     if ( mFaceCount > 0 )
     {
         // Need to cast away const-ness when calling DirectX... /sigh
-        ID3D10Buffer * pVertexBuffer = const_cast<ID3D10Buffer*>( mpVertexBuffer );
-        ID3D10Buffer * pIndexBuffer  = const_cast<ID3D10Buffer*>( mpIndexBuffer  );
+        ID3D10Buffer * pVertexBuffer = const_cast<ID3D10Buffer*>(mVertexBuffer.Get());
+        ID3D10Buffer * pIndexBuffer  = const_cast<ID3D10Buffer*>(mIndexBuffer.Get());
 
         pDevice->IASetVertexBuffers( 0, 1, &pVertexBuffer, &stride, &offset );
         pDevice->IASetIndexBuffer( pIndexBuffer, DXGI_FORMAT_R32_UINT, 0 );
         pDevice->DrawIndexed( mFaceCount * 3, 0, 0 );
+    }
+}
+
+/**
+* Returns an appropriate color for the landscape height.
+*/
+void LandscapeMesh::FindVertexColor(float y, D3DXCOLOR * pDiffuse, D3DXCOLOR * pSpecular)
+{
+    if (y < -10.0f)
+    {
+        *pDiffuse = D3DXCOLOR(1.0f, 0.96f, 0.62f, 1.0f);
+        *pSpecular = D3DXCOLOR(0.2f, 0.2f, 0.2f, 32.0f);
+    }
+    else if (y < 5.0f)
+    {
+        *pDiffuse = D3DXCOLOR(0.48f, 0.77f, 0.46f, 1.0f);
+        *pSpecular = D3DXCOLOR(0.2f, 0.2f, 0.2f, 32.0f);
+    }
+    else if (y < 12.0f)
+    {
+        *pDiffuse = D3DXCOLOR(0.1f, 0.48f, 0.19f, 1.0f);
+        *pSpecular = D3DXCOLOR(0.2f, 0.2f, 0.2f, 32.0f);
+    }
+    else if (y < 20.0f)
+    {
+        *pDiffuse = D3DXCOLOR(0.45f, 0.39f, 0.34f, 1.0f);
+        *pSpecular = D3DXCOLOR(0.4f, 0.4f, 0.4f, 64.0f);
+    }
+    else
+    {
+        *pDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+        *pSpecular = D3DXCOLOR(0.8f, 0.8f, 0.8f, 64.0f);
     }
 }

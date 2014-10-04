@@ -1,24 +1,67 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="include\runtime\logging.cpp" />
-    <ClCompile Include="include\runtime\logstream.cpp" />
-    <ClCompile Include="src\exceptions.cpp" />
-    <ClCompile Include="src\StringUtils.cpp" />
+    <ClCompile Include="src\exceptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\runtime\logging.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\runtime\logstream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StringUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="include\runtime\debugging.h" />
-    <ClInclude Include="include\runtime\delete.h" />
-    <ClInclude Include="include\runtime\logging.h" />
-    <ClInclude Include="include\runtime\logging_impl.h" />
-    <ClInclude Include="include\runtime\logging_stream.h" />
-    <ClInclude Include="include\runtime\mathutils.h" />
-    <ClInclude Include="include\runtime\exceptions.h" />
-    <ClInclude Include="include\runtime\StringUtils.h" />
+    <ClInclude Include="include\runtime\debugging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\runtime\delete.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\runtime\exceptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\runtime\gametime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\runtime\logging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\runtime\logging_impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\runtime\logging_stream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\runtime\mathutils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\runtime\StringUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\runtime\debugstreambuf.inl" />
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{a6a568c7-0dde-4f9f-9ccc-563c50627d6b}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{c738f34e-9a4d-4bc1-a7f6-da77c0f6ecc4}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\runtime\debugstreambuf.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

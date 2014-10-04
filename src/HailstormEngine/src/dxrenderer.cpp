@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,11 +192,11 @@ void DXRenderer::onUpdate( double currentTime, double deltaTime )
 
 		float r = randF( 1.0f, 2.0f );
 
-		mpWaterMesh->perturb( i, j, r ) ;
+		mpWaterMesh->Perturb( i, j, r ) ;
 	}
 
 	// Make sure the water mesh is kept up to date with ripple animations
-	mpWaterMesh->update( (float) deltaTime );
+	mpWaterMesh->Update( (float) deltaTime );
 
 	// Rotate camera around the landscape
 	mEyePos.x = mRadius * cosf( static_cast<float>( 0.5 * currentTime ) );
@@ -212,9 +212,9 @@ void DXRenderer::onUpdate( double currentTime, double deltaTime )
 
 	// The point light circles the scene as a function of time, staying seven units above the land's
 	// or water's surface.
-	mLights[1].pos.x = 50.0f * cosf( (float) currentTime );
-	mLights[1].pos.z = 50.0f * sinf( (float) currentTime );
-	mLights[1].pos.y = 7.0f + std::max( mpCubeMesh->getHeight( mLights[1].pos.x, mLights[1].pos.z ), 0.0f );
+    mLights[1].pos.x = 50.0f * cosf((float)currentTime);
+    mLights[1].pos.z = 50.0f * sinf((float)currentTime);
+	mLights[1].pos.y = 7.0f + std::max(mpCubeMesh->GetHeight(mLights[1].pos.x, mLights[1].pos.z), 0.0f);
 
 	// The spotlight takes on the camera position and is aimed in the same direction as the camera is
 	// looking. In this way it looks like we are holding a flashlight.
@@ -269,7 +269,7 @@ void DXRenderer::onRenderFrame()
 		mpWorldVar->SetMatrix( (float*) &mLandTransform );
 
 		pPass->Apply( 0 );
-		mpCubeMesh->draw( mpDevice );
+		mpCubeMesh->Draw( mpDevice );
 
 		// Draw the water mesh
 		mWVP = mWaterTransform * mView * mProjection;
@@ -280,7 +280,7 @@ void DXRenderer::onRenderFrame()
 //		mpDevice->RSSetState( mpWireframeRS );
 		pPass->Apply( 0 );
 		
-		mpWaterMesh->draw( mpDevice );
+		mpWaterMesh->Draw( mpDevice );
 	}
 
     // Draw some text

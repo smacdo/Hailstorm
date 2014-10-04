@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,10 @@
 #include "graphics/dxrenderer.h"
 #include "graphics/dxutils.h"
 
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
+
 const int CUBE_VERTEX_COUNT = 8;
 const int CUBE_FACE_COUNT = 12;
 
@@ -40,13 +44,13 @@ struct CubeMeshVertex
  * Static mesh constructor that takes an already constructed vertex and index
  * buffer.
  */
-CubeMesh::CubeMesh( ID3D10Device * pRenderDevice )
-    : mVertexCount( 0 ),
-      mFaceCount( 0 ),
-      mpVertexBuffer( NULL ),
-      mpIndexBuffer( NULL )
+CubeMesh::CubeMesh(ID3D10Device * pRenderDevice)
+    : mVertexCount(0),
+      mFaceCount(0),
+      mVertexBuffer(),
+      mIndexBuffer()
 {
-	init( pRenderDevice );
+	Init( pRenderDevice );
 }
 
 /**
@@ -54,15 +58,13 @@ CubeMesh::CubeMesh( ID3D10Device * pRenderDevice )
  */
 CubeMesh::~CubeMesh()
 {
-    SafeRelease( &mpVertexBuffer );
-    SafeRelease( &mpIndexBuffer );
 }
 
 /**
  * Takes an array of vertices and indices, uploads them to the video hardware
  * and places their data buffers in mVertexbuffer/mIndexBuffer
  */
-void CubeMesh::init( ID3D10Device * pRenderDevice )
+void CubeMesh::Init(ID3D10Device * pRenderDevice)
 {
 	// Initialize a vertex buffer that contains all the vertices making up our cube
 	mVertexCount = 8;
@@ -124,7 +126,7 @@ void CubeMesh::init( ID3D10Device * pRenderDevice )
     vInitData.pSysMem = &VERTICES[0];
 
 	// Upload the vertex buffer to the graphics card.
-	HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mpVertexBuffer );
+	HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mVertexBuffer );
 
 	if (! DxUtils::CheckResult( result, true, "Creating a vertex buffer" ) )
 	{
@@ -145,7 +147,7 @@ void CubeMesh::init( ID3D10Device * pRenderDevice )
     iInitData.pSysMem = &INDICES[0];
 
 	// Upload the index buffer to the graphics card.
-    result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mpIndexBuffer );
+    result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mIndexBuffer );
 
     if (! DxUtils::CheckResult( result, true, "Creating an index buffer" ) )
     {
@@ -156,7 +158,7 @@ void CubeMesh::init( ID3D10Device * pRenderDevice )
 /**
  * Render the cube
  */
-void CubeMesh::draw( ID3D10Device * pDevice ) const
+void CubeMesh::Draw( ID3D10Device * pDevice ) const
 {
     assert( pDevice != NULL );
 
@@ -166,8 +168,8 @@ void CubeMesh::draw( ID3D10Device * pDevice ) const
     if ( mFaceCount > 0 )
     {
         // Need to cast away const-ness when calling DirectX... /sigh
-        ID3D10Buffer * pVertexBuffer = const_cast<ID3D10Buffer*>( mpVertexBuffer );
-        ID3D10Buffer * pIndexBuffer  = const_cast<ID3D10Buffer*>( mpIndexBuffer  );
+        ID3D10Buffer * pVertexBuffer = const_cast<ID3D10Buffer*>(mVertexBuffer.Get());
+        ID3D10Buffer * pIndexBuffer  = const_cast<ID3D10Buffer*>(mIndexBuffer.Get());
 
         pDevice->IASetVertexBuffers( 0, 1, &pVertexBuffer, &stride, &offset );
         pDevice->IASetIndexBuffer( pIndexBuffer, DXGI_FORMAT_R32_UINT, 0 );

@@ -17,6 +17,7 @@
 #define SCOTT_GAME_CLIENT_H
 
 #include "runtime/gametime.h"
+#include <memory>               // Smart pointer.
 
 class MainWindow;
 class IRenderer;

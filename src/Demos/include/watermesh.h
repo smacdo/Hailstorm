@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 #define SCOTT_HAILSTORM_WATER_MESH_H
 
 // Includes
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
 #include <vector>
 #include <d3dx10.h>
 
@@ -42,30 +45,30 @@ struct WaterMeshVertex
 class WaterMesh
 {
 public:
-    WaterMesh( ID3D10Device * pRenderDevice,
-		       unsigned int rows,
-			   unsigned int cols,
-			   float spatialStep,
-			   float timeStep,
-			   float speed,
-			   float damping );
+    WaterMesh(ID3D10Device * pRenderDevice,
+              unsigned int rows,
+              unsigned int cols,
+              float spatialStep,
+              float timeStep,
+              float speed,
+              float damping);
     WaterMesh(const WaterMesh&) = delete;
     ~WaterMesh();
 
     WaterMesh& operator =(const WaterMesh&) = delete;
 
-    void draw( ID3D10Device *pDevice ) const;
+    void Draw(ID3D10Device *pDevice) const;
 
-    unsigned int vertexCount() const;
-    unsigned int faceCount() const;
+    unsigned int VertexCount() const { return mVertexCount; }
+    unsigned int FaceCount() const { return mFaceCount; }
 
-	void perturb( unsigned int i, unsigned int j, float magnitude );
-	void update( float deltaTime );
+    void Perturb(unsigned int i, unsigned int j, float magnitude);
+
+    void Update(float deltaTime);
 
 private:
-	void init( ID3D10Device * pDevice );
+    void Init(ID3D10Device * pDevice);
 	
-
 private:
 	unsigned int mNumRows;
 	unsigned int mNumCols;
@@ -85,8 +88,8 @@ private:
 	std::vector<D3DXVECTOR3> mCurrentSolution;
 	std::vector<D3DXVECTOR3> mNormals;
 
-    ID3D10Buffer * mpVertexBuffer;
-    ID3D10Buffer * mpIndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D10Buffer> mVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D10Buffer> mIndexBuffer;
 };
 
 #endif

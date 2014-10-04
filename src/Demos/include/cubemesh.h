@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 #define SCOTT_HAILSTORM_CUBE_MESH_H
 
 // Includes
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
 
 // Forward declarations
 struct ID3D10Buffer;
@@ -29,25 +32,25 @@ struct StaticMeshVertex;
 class CubeMesh
 {
 public:
-    CubeMesh( ID3D10Device * pRenderDevice );
+    CubeMesh(ID3D10Device * pRenderDevice);
     CubeMesh(const CubeMesh&) = delete;
-    ~CubeMesh();
+    virtual ~CubeMesh();
 
     CubeMesh& operator =(const CubeMesh&) = delete;
 
-    void draw( ID3D10Device *pDevice ) const;
+    void Draw( ID3D10Device *pDevice ) const;
 
-    unsigned int vertexCount() const;
-    unsigned int faceCount() const;
+    unsigned int VertexCount() const { return mVertexCount; }
+    unsigned int FaceCount() const { return mFaceCount; }
 
 private:
-	void init( ID3D10Device * pDevice );
+	void Init( ID3D10Device * pDevice );
 
 private:
     unsigned int mVertexCount;
     unsigned int mFaceCount;
-    ID3D10Buffer * mpVertexBuffer;
-    ID3D10Buffer * mpIndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D10Buffer> mVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D10Buffer> mIndexBuffer;
 };
 
 #endif
