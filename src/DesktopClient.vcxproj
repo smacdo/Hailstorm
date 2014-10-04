@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -21,35 +21,35 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4B68EECE-6AF8-4A31-8E06-821F67EC3E3F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>hailstorm</RootNamespace>
-    <ProjectName>Sandbox</ProjectName>
+    <RootNamespace>Hailstorm</RootNamespace>
+    <ProjectName>DesktopClient</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110_xp</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -168,92 +168,91 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="assets\hailstorm.ico" />
-    <None Include="LICENSE.txt" />
-    <None Include="NOTICE.txt" />
-    <None Include="ReadMe.txt" />
+    <None Include="..\assets\hailstorm.ico" />
+    <None Include="..\LICENSE.txt" />
+    <None Include="..\NOTICE.txt" />
+    <None Include="..\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\common\logging_impl.h" />
-    <ClInclude Include="src\common\logging_stream.h" />
-    <ClInclude Include="src\common\debugstreambuf.inl" />
-    <ClInclude Include="src\common\mathutils.h" />
-    <ClInclude Include="src\graphics\cubemesh.h" />
-    <ClInclude Include="src\graphics\graphicscontentmanager.h" />
-    <ClInclude Include="src\graphics\landscapemesh.h" />
-    <ClInclude Include="src\graphics\light.h" />
-    <ClInclude Include="src\graphics\meshfactory.h" />
-    <ClInclude Include="src\graphics\staticmesh.h" />
-    <ClInclude Include="src\graphics\staticmeshvertex.h" />
-    <ClInclude Include="src\graphics\watermesh.h" />
-    <ClInclude Include="src\resource.h" />
-    <ClInclude Include="src\common\gametime.h" />
-    <ClInclude Include="src\graphics\dxrenderer.h" />
-    <ClInclude Include="src\graphics\dxutils.h" />
-    <ClInclude Include="src\graphics\irenderer.h" />
-    <ClInclude Include="src\gameclient.h" />
-    <ClInclude Include="src\gui\aboutbox.h" />
-    <ClInclude Include="src\gui\assertiondialog.h" />
-    <ClInclude Include="src\gui\errordialog.h" />
-    <ClInclude Include="src\gui\mainwindow.h" />
-    <ClInclude Include="src\hailstorm_sandbox.h" />
-    <ClInclude Include="src\common\platform_windows.h" />
-    <ClInclude Include="src\Resource.h" />
-    <ClInclude Include="src\common\debugging.h" />
-    <ClInclude Include="src\common\delete.h" />
-    <ClInclude Include="src\common\logging.h" />
-    <ClInclude Include="src\common\platform.h" />
-    <ClInclude Include="src\stdafx.h" />
-    <ClInclude Include="src\targetver.h" />
-    <ClInclude Include="src\gui\iwindow.h" />
-    <ClInclude Include="src\version.h" />
+    <ClInclude Include="DesktopClient\common\logging_impl.h" />
+    <ClInclude Include="DesktopClient\common\logging_stream.h" />
+    <ClInclude Include="DesktopClient\common\debugstreambuf.inl" />
+    <ClInclude Include="DesktopClient\common\mathutils.h" />
+    <ClInclude Include="DesktopClient\graphics\cubemesh.h" />
+    <ClInclude Include="DesktopClient\graphics\graphicscontentmanager.h" />
+    <ClInclude Include="DesktopClient\graphics\landscapemesh.h" />
+    <ClInclude Include="DesktopClient\graphics\light.h" />
+    <ClInclude Include="DesktopClient\graphics\meshfactory.h" />
+    <ClInclude Include="DesktopClient\graphics\staticmesh.h" />
+    <ClInclude Include="DesktopClient\graphics\staticmeshvertex.h" />
+    <ClInclude Include="DesktopClient\graphics\watermesh.h" />
+    <ClInclude Include="DesktopClient\common\gametime.h" />
+    <ClInclude Include="DesktopClient\graphics\dxrenderer.h" />
+    <ClInclude Include="DesktopClient\graphics\dxutils.h" />
+    <ClInclude Include="DesktopClient\graphics\irenderer.h" />
+    <ClInclude Include="DesktopClient\gameclient.h" />
+    <ClInclude Include="DesktopClient\gui\aboutbox.h" />
+    <ClInclude Include="DesktopClient\gui\assertiondialog.h" />
+    <ClInclude Include="DesktopClient\gui\errordialog.h" />
+    <ClInclude Include="DesktopClient\gui\mainwindow.h" />
+    <ClInclude Include="DesktopClient\hailstorm_sandbox.h" />
+    <ClInclude Include="DesktopClient\common\platform_windows.h" />
+    <ClInclude Include="DesktopClient\Resource.h" />
+    <ClInclude Include="DesktopClient\common\debugging.h" />
+    <ClInclude Include="DesktopClient\common\delete.h" />
+    <ClInclude Include="DesktopClient\common\logging.h" />
+    <ClInclude Include="DesktopClient\common\platform.h" />
+    <ClInclude Include="DesktopClient\stdafx.h" />
+    <ClInclude Include="DesktopClient\targetver.h" />
+    <ClInclude Include="DesktopClient\gui\iwindow.h" />
+    <ClInclude Include="DesktopClient\version.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\common\logstream.cpp" />
-    <ClCompile Include="src\graphics\cubemesh.cpp" />
-    <ClCompile Include="src\graphics\dxrenderer.cpp" />
-    <ClCompile Include="src\graphics\dxutils.cpp" />
-    <ClCompile Include="src\graphics\graphicscontentmanager.cpp" />
-    <ClCompile Include="src\graphics\irenderer.cpp" />
-    <ClCompile Include="src\gameclient.cpp" />
-    <ClCompile Include="src\graphics\landscapemesh.cpp" />
-    <ClCompile Include="src\graphics\light.cpp" />
-    <ClCompile Include="src\graphics\meshfactory.cpp" />
-    <ClCompile Include="src\graphics\staticmesh.cpp" />
-    <ClCompile Include="src\graphics\watermesh.cpp" />
-    <ClCompile Include="src\gui\aboutbox.cpp" />
-    <ClCompile Include="src\gui\assertiondialog.cpp" />
-    <ClCompile Include="src\gui\errordialog.cpp" />
-    <ClCompile Include="src\gui\mainwindow.cpp" />
-    <ClCompile Include="src\hailstorm_sandbox.cpp" />
-    <ClCompile Include="src\common\platform_windows.cpp" />
-    <ClCompile Include="src\pragmas.cpp" />
-    <ClCompile Include="src\common\logging.cpp" />
-    <ClCompile Include="src\stdafx.cpp">
+    <ClCompile Include="DesktopClient\common\logstream.cpp" />
+    <ClCompile Include="DesktopClient\graphics\cubemesh.cpp" />
+    <ClCompile Include="DesktopClient\graphics\dxrenderer.cpp" />
+    <ClCompile Include="DesktopClient\graphics\dxutils.cpp" />
+    <ClCompile Include="DesktopClient\graphics\graphicscontentmanager.cpp" />
+    <ClCompile Include="DesktopClient\graphics\irenderer.cpp" />
+    <ClCompile Include="DesktopClient\gameclient.cpp" />
+    <ClCompile Include="DesktopClient\graphics\landscapemesh.cpp" />
+    <ClCompile Include="DesktopClient\graphics\light.cpp" />
+    <ClCompile Include="DesktopClient\graphics\meshfactory.cpp" />
+    <ClCompile Include="DesktopClient\graphics\staticmesh.cpp" />
+    <ClCompile Include="DesktopClient\graphics\watermesh.cpp" />
+    <ClCompile Include="DesktopClient\gui\aboutbox.cpp" />
+    <ClCompile Include="DesktopClient\gui\assertiondialog.cpp" />
+    <ClCompile Include="DesktopClient\gui\errordialog.cpp" />
+    <ClCompile Include="DesktopClient\gui\mainwindow.cpp" />
+    <ClCompile Include="DesktopClient\hailstorm_sandbox.cpp" />
+    <ClCompile Include="DesktopClient\common\platform_windows.cpp" />
+    <ClCompile Include="DesktopClient\pragmas.cpp" />
+    <ClCompile Include="DesktopClient\common\logging.cpp" />
+    <ClCompile Include="DesktopClient\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\gui\iwindow.cpp" />
+    <ClCompile Include="DesktopClient\src\gui\iwindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="assets\hailstorm.rc" />
+    <ResourceCompile Include="DesktopClient\assets\hailstorm.rc" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="game\data\shaders\cube.fx">
+    <FxCompile Include="..\game\data\shaders\cube.fx">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="game\data\shaders\landscape.fx">
+    <FxCompile Include="..\game\data\shaders\landscape.fx">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="game\data\shaders\light.fx">
+    <FxCompile Include="..\game\data\shaders\light.fx">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
