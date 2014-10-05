@@ -20,6 +20,7 @@
 
 class IWindow;
 class DemoScene;
+class Size;
 
 /**
  * This is an abstract renderer
@@ -33,17 +34,17 @@ public:
 
     IRenderer& operator =(const IRenderer&) = delete;
 
-    bool initialize();
+    void initialize();
     void stop();
     void Update(const DemoScene& demo, TimeT currentTime, TimeT deltaTime);
 
 protected:
-    virtual bool onStartRenderer() = 0;
-    virtual void onStopRenderer() = 0;
+    virtual void OnStartRenderer() = 0;
+    virtual void OnStopRenderer() = 0;
     
     virtual void OnRenderFrame(const DemoScene& demo, TimeT currentTime, TimeT deltaTime) = 0;
 
-    virtual bool resizeRenderWindow( unsigned int width, unsigned int height ) = 0;
+    virtual void OnWindowResized(const Size& screenSize) = 0;
 
     IWindow *renderWindow();
 

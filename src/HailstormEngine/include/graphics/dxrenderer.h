@@ -57,64 +57,78 @@ public:
     void SetWireframeRendering();
 
     // DONT STORE THIS POINTER WHEN CALLING
-    ID3D10Device * GetDevice() { return mpDevice; }
+    ID3D10Device * GetDevice() { return mDevice.Get(); }
 
     // TODO: THIS IS A TERRIBLE HACK FIGURE OUT HOW TO NOT DO THIS
     void GetProjectionMatrix(D3DXMATRIX *projectionOut) const;
 
-    static bool verifyResult(HRESULT result, const std::string& action);
+    // Create a font that can be used for drawing text.
+    HRESULT CreateRenderFont(
+        const std::wstring& fontName,
+        int fontSize,
+        ID3D10Device * pDevice,
+        ID3DX10Font ** ppFontOut) const;
 
 protected:
-    virtual bool onStartRenderer() override;
-    virtual void onStopRenderer() override;
-
-    
+    virtual void OnStartRenderer() override;
+    virtual void OnStopRenderer() override;
     virtual void OnRenderFrame(const DemoScene& scene, TimeT currentTime, TimeT deltaTime) override;
-
-    void OnStartRenderFrame(TimeT currentTime, TimeT deltaTime);
-    void OnFinishRenderFrame(TimeT currentTime, TimeT deltaTime);
-
-    virtual bool resizeRenderWindow( unsigned int width, unsigned int height );
+    virtual void OnWindowResized(const Size& screenSize) override;
 
 private:
-    bool createDeviceViews();
-    void releaseDeviceViews();
-    bool createRenderDevice();
-	bool buildVertexLayout();
+    HRESULT CreateRenderDevice(ID3D10Device **ppDeviceOut, IDXGISwapChain **ppSwapChainOut) const;
+    HRESULT CreateDefaultRasterizerState(ID3D10Device *pDevice, ID3D10RasterizerState **ppRasterStateOut) const;
+    HRESULT CreateWireframeRasterizerrState(ID3D10Device *pDevice, ID3D10RasterizerState **ppRasterStateOut) const;
     
-	void buildRenderStates();
-	void buildLights();
-    void destroyRenderDevice();
-    bool createRenderFont();
-    
+    HRESULT CreateDeviceViews(
+        ID3D10Device *pDevice,
+        ID3D10RenderTargetView **ppRenderTargetViewOut,
+        ID3D10Texture2D **ppDepthStencilBufferOut,
+        ID3D10DepthStencilView **ppDepthStencilViewOut) const;
+
+    void UpdateDeviceViews(
+        ID3D10Device *pDevice,
+        ID3D10RenderTargetView *pRenderTargetView,
+        ID3D10DepthStencilView *pDepthStencilView,
+        const Size& viewportSize);
+
+    void SetViewport(ID3D10Device *pDevice, const Size& viewportSize);
+
+    void ReleaseDeviceViews();
+
+    HRESULT OnStartRenderFrame(TimeT currentTime, TimeT deltaTime);
+    HRESULT OnFinishRenderFrame(TimeT currentTime, TimeT deltaTime);
 
 private:
     /// Handle to render window.
     HWND mHwnd;
 
+    /// Flag that is set when frame rendering is underway.
+    bool mIsFrameBeingRendered;
+
     /// Pointer to the main rendering window
-    IWindow * mpMainWindow;
+    std::shared_ptr<IWindow> mWindow;
 
     /// Pointer to the D3D 10 device
-    ID3D10Device * mpDevice;
+    Microsoft::WRL::ComPtr<ID3D10Device> mDevice;
 
     /// Pointer to the renderer swap chain
-    IDXGISwapChain * mpSwapChain;
+    Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
 
     /// Pointer to the render target view
-    ID3D10RenderTargetView * mpRenderTargetView;
+    Microsoft::WRL::ComPtr<ID3D10RenderTargetView> mRenderTargetView;
 
     /// Pointer to the depth stencil texture buffer
-    ID3D10Texture2D * mpDepthStencilBuffer;
+    Microsoft::WRL::ComPtr<ID3D10Texture2D> mDepthStencilBuffer;
 
     /// Pointer to the depth stencil view
-    ID3D10DepthStencilView * mpDepthStencilView;
+    Microsoft::WRL::ComPtr<ID3D10DepthStencilView> mDepthStencilView;
 
-	ID3D10RasterizerState * mpDefaultRasterizerState;
-	ID3D10RasterizerState * mpWireframeRS;
+    Microsoft::WRL::ComPtr<ID3D10RasterizerState> mDefaultRasterizerState;
+    Microsoft::WRL::ComPtr<ID3D10RasterizerState> mWireframeRasterizerState;
 
     /// Pointer to the renderer font
-    ID3DX10Font * mpRendererFont;
+    Microsoft::WRL::ComPtr<ID3DX10Font> mRendererFont;
 
     /// Number of multi samples (Anti aliasing)
     UINT mMultisampleCount;
@@ -124,10 +138,9 @@ private:
 
     /// Flag if we are rendering in windowed mode or full screen
     bool mWindowedMode;
-
 	
     /// The currently running graphics content manager
-    GraphicsContentManager* mpContentManager;
+    std::unique_ptr<GraphicsContentManager> mContentManager;
     D3DXMATRIX mProjection;
 };
 

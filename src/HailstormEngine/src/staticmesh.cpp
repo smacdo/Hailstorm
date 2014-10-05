@@ -15,6 +15,7 @@
  */
 #include "stdafx.h"
 #include "graphics/staticmesh.h"
+#include "graphics/DirectXExceptions.h"
 
 #include <DXGI.h>
 #include <d3d10.h>
@@ -22,7 +23,6 @@
 
 #include "graphics/dxrenderer.h"
 #include "graphics/staticmeshvertex.h"
-#include "graphics/dxutils.h"
 
 /**
  * Default static mesh constructor. Creates an empty static mesh that has no
@@ -31,8 +31,8 @@
 StaticMesh::StaticMesh()
     : mVertexCount( 0 ),
       mFaceCount( 0 ),
-      mpVertexBuffer( NULL ),
-      mpIndexBuffer( NULL )
+      mVertexBuffer(),
+      mIndexBuffer()
 {
 
 }
@@ -47,8 +47,8 @@ StaticMesh::StaticMesh( ID3D10Device * pRenderDevice,
                         const std::vector<unsigned int>& indexArray )
     : mVertexCount( vertexCount ),
       mFaceCount( static_cast<unsigned int>( indexArray.size() / 3 ) ),
-      mpVertexBuffer( NULL ),
-      mpIndexBuffer( NULL )
+      mVertexBuffer(),
+      mIndexBuffer()
 {
     assert( pRenderDevice != NULL );
     assert( (mVertexCount == 0 && mFaceCount == 0        ) || (mVertexCount > 0 && mFaceCount > 0 ) );
@@ -67,8 +67,6 @@ StaticMesh::StaticMesh( ID3D10Device * pRenderDevice,
  */
 StaticMesh::~StaticMesh()
 {
-    SafeRelease( &mpVertexBuffer );
-    SafeRelease( &mpIndexBuffer );
 }
 
 /**
@@ -110,18 +108,16 @@ void StaticMesh::uploadMesh( ID3D10Device * pRenderDevice,
     iInitData.pSysMem = &indexArray[0];
 
     // Now upload both the vertex buffer and index buffer
-    HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mpVertexBuffer );
+    HRESULT hr = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mVertexBuffer );
 
-    if (! DxUtils::CheckResult( result, true, "Creating a vertex buffer" ) )
+    if (SUCCEEDED(hr))
     {
-        return;
+        hr = pRenderDevice->CreateBuffer(&ibd, &iInitData, &mIndexBuffer);
     }
 
-    result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mpIndexBuffer );
-
-    if (! DxUtils::CheckResult( result, true, "Creating an index buffer" ) )
+    if (FAILED(hr))
     {
-        return;
+        throw new DirectXException(hr, L"Uploading static mesh", L"", __FILE__, __LINE__);
     }
 
     // Update the instance variables by replacing them with this mesh's values
@@ -142,8 +138,8 @@ void StaticMesh::draw( ID3D10Device * pDevice ) const
     if ( mFaceCount > 0 )
     {
         // Need to cast away const-ness when calling DirectX... /sigh
-        ID3D10Buffer * pVertexBuffer = const_cast<ID3D10Buffer*>( mpVertexBuffer );
-        ID3D10Buffer * pIndexBuffer  = const_cast<ID3D10Buffer*>( mpIndexBuffer  );
+        ID3D10Buffer * pVertexBuffer = const_cast<ID3D10Buffer*>(mVertexBuffer.Get());
+        ID3D10Buffer * pIndexBuffer  = const_cast<ID3D10Buffer*>(mIndexBuffer.Get());
 
         pDevice->IASetVertexBuffers( 0, 1, &pVertexBuffer, &stride, &offset );
         pDevice->IASetIndexBuffer( pIndexBuffer, DXGI_FORMAT_R32_UINT, 0 );

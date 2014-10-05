@@ -16,33 +16,29 @@
 #include "stdafx.h"
 #include "demos\WaterLandscapeDemoScene.h"
 
-#include "graphics/dxrenderer.h"
-#include "graphics/dxutils.h"
-#include "graphics/graphicscontentmanager.h"
-#include "landscapemesh.h"
-#include "watermesh.h"
-
-#include "runtime/debugging.h"
-#include "runtime/gametime.h"
-#include "runtime/logging.h"
-#include "runtime/delete.h"
-#include "runtime/mathutils.h"
-
 #include <DXGI.h>
 #include <d3d10.h>
 #include <d3dx10.h>
 #include <algorithm>
 
+#include "landscapemesh.h"
+#include "watermesh.h"
+
+#include "HailstormRuntime.h"
+#include "runtime/mathutils.h"
+#include "graphics/dxrenderer.h"
+#include "graphics/DirectXExceptions.h"
+
 #undef max
 
 WaterLandscapeDemoScene::WaterLandscapeDemoScene()
     : DemoScene(),
-      mpVertexLayout(),                 // TODO: Ensure this init list follows what is in class.
+      mVertexLayout(),                 // TODO: Ensure this init list follows what is in class.
       mEyePos(0.0f, 0.0f, 0.0f),
       mRadius(75),
       mLightType(0),
-      mpCubeMesh(NULL),
-      mpWaterMesh(NULL)
+      mTerrainMesh(),
+      mWaterMesh()
 {
     D3DXMatrixIdentity(&mView);
     D3DXMatrixIdentity(&mLandTransform);
@@ -51,8 +47,6 @@ WaterLandscapeDemoScene::WaterLandscapeDemoScene()
 
 WaterLandscapeDemoScene::~WaterLandscapeDemoScene()
 {
-    SafeRelease(&mpVertexLayout);
-    Delete(mpCubeMesh);
 }
 
 void WaterLandscapeDemoScene::OnInitialize(DXRenderer& dx)
@@ -62,8 +56,8 @@ void WaterLandscapeDemoScene::OnInitialize(DXRenderer& dx)
     BuildLights();
     BuildInputLayout(dx);
 
-    mpCubeMesh = new LandscapeMesh(dx.GetDevice(), 129, 129, 1.0f);
-    mpWaterMesh = new WaterMesh(dx.GetDevice(), 257, 257, 0.5f, 0.03f, 3.25f, 0.4f);
+    mTerrainMesh.reset(new LandscapeMesh(dx.GetDevice(), 129, 129, 1.0f));
+    mWaterMesh.reset(new WaterMesh(dx.GetDevice(), 257, 257, 0.5f, 0.03f, 3.25f, 0.4f));
 }
 
 void WaterLandscapeDemoScene::OnUpdate(TimeT currentTime, TimeT deltaTime)
@@ -85,11 +79,11 @@ void WaterLandscapeDemoScene::OnUpdate(TimeT currentTime, TimeT deltaTime)
 
         float r = randF(1.0f, 2.0f);
 
-        mpWaterMesh->Perturb(i, j, r);
+        mWaterMesh->Perturb(i, j, r);
     }
 
     // Make sure the water mesh is kept up to date with ripple animations
-    mpWaterMesh->Update(deltaTime);
+    //mpWaterMesh->Update(deltaTime);
 
     // Rotate camera around the landscape
     mEyePos.x = mRadius * cosf(static_cast<float>(0.5 * currentTime));
@@ -107,7 +101,7 @@ void WaterLandscapeDemoScene::OnUpdate(TimeT currentTime, TimeT deltaTime)
     // or water's surface.
     mLights[1].pos.x = 50.0f * cosf((float)currentTime);
     mLights[1].pos.z = 50.0f * sinf((float)currentTime);
-    mLights[1].pos.y = 7.0f + std::max(mpCubeMesh->GetHeight(mLights[1].pos.x, mLights[1].pos.z), 0.0f);
+    mLights[1].pos.y = 7.0f + std::max(mTerrainMesh->GetHeight(mLights[1].pos.x, mLights[1].pos.z), 0.0f);
 
     // The spotlight takes on the camera position and is aimed in the same direction as the camera is
     // looking. In this way it looks like we are holding a flashlight.
@@ -118,7 +112,7 @@ void WaterLandscapeDemoScene::OnUpdate(TimeT currentTime, TimeT deltaTime)
 void WaterLandscapeDemoScene::OnRender(DXRenderer& dx, TimeT currentTime, TimeT deltaTime) const
 {
     // Set the device up for rendering our landscape mesh.
-    dx.GetDevice()->IASetInputLayout(mpVertexLayout);
+    dx.GetDevice()->IASetInputLayout(mVertexLayout.Get());
     dx.GetDevice()->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     D3DXMATRIX projectionMatrix;
@@ -160,7 +154,7 @@ void WaterLandscapeDemoScene::OnRender(DXRenderer& dx, TimeT currentTime, TimeT 
         pWorldVar->SetMatrix((float*)&mLandTransform);
 
         pPass->Apply(0);
-        mpCubeMesh->Draw(dx.GetDevice());
+        mTerrainMesh->Draw(dx.GetDevice());
 
         // Draw the water mesh
         wvp = mWaterTransform * mView * projectionMatrix;
@@ -168,10 +162,8 @@ void WaterLandscapeDemoScene::OnRender(DXRenderer& dx, TimeT currentTime, TimeT 
         pWVP->SetMatrix((float*)&wvp);
         pWorldVar->SetMatrix((float*)&mWaterTransform);
 
-        // SetWireframeRendering();
         pPass->Apply(0);
-
-        mpWaterMesh->Draw(dx.GetDevice());
+        mWaterMesh->Draw(dx.GetDevice());
     }
 }
 
@@ -232,12 +224,18 @@ void WaterLandscapeDemoScene::BuildInputLayout(DXRenderer& dx)
     pTechnique->GetPassByIndex(0)->GetDesc(&passDescription);
 
     // Create the vertex input layout.
-    HRESULT result = dx.GetDevice()->CreateInputLayout(vertexDescription,
-                                                    4,
-                                                    passDescription.pIAInputSignature,
-                                                    passDescription.IAInputSignatureSize,
-                                                    &mpVertexLayout);
+    HRESULT hr = dx.GetDevice()->CreateInputLayout(
+        vertexDescription,
+        4,
+        passDescription.pIAInputSignature,
+        passDescription.IAInputSignatureSize,
+        &mVertexLayout);
+
     // Make sure it worked
-    DXRenderer::verifyResult(result, "Creating the vertex input layout");
+    if (FAILED(hr))
+    {
+        throw new DirectXException(hr, L"Creating input layout", L"Water landscape demo scene", __FILE__, __LINE__);
+    }
+
     LOG_DEBUG("Renderer") << "Created the vertex input layout.";
 }

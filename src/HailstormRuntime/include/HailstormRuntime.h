@@ -13,31 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SCOTT_HAILSTORM_GRAPHICS_DXUTILS_H
-#define SCOTT_HAILSTORM_GRAPHICS_DXUTILS_H
+#ifndef SCOTT_HAILSTORM_RUNTIME_H
+#define SCOTT_HAILSTORM_RUNTIME_H
 
-#include <string>
-
-/**
- * Helper method that safely releases a directx COM object
- */
-template< class T >
-void SafeRelease( T** pObj )
-{
-    if ( *pObj != NULL )
-    {
-        (*pObj)->Release();
-        (*pObj) = NULL;
-    }
-}
-
-/**
- * Method that checks DirectX return values and deals with error conditions
- * in a way that is helpful to programmers and the end user
- */
-namespace DxUtils
-{
-    bool CheckResult( HRESULT result, bool shouldExit, const std::string& action );
-}
+// Includes the most commonly used runtime classes.
+#include "runtime/debugging.h"
+#include "runtime/exceptions.h"
+#include "runtime/logging.h"
+#include "runtime/Size.h"
+#include "runtime/gametime.h"
 
 #endif

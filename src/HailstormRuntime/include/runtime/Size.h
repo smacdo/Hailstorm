@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Scott MacDonald
+ * Copyright 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "stdafx.h"
-#include "graphics/light.h"
+#ifndef SCOTT_HAILSTORM_SIZE_H
+#define SCOTT_HAILSTORM_SIZE_H
 
-#include <DXGI.h>
-#include <d3d10.h>
-#include <d3dx10.h>
-
-Light::Light()
+/**
+ * Very simple struct that stores a width and height tuple.
+ */
+struct Size
 {
+    Size(unsigned int w, unsigned int h)
+        : width(w), height(h)
+    {
+    }
 
-}
+    Size(int w, int h)
+        : width(w), height(h)
+    {
+    }
 
-Light::~Light()
-{
+    const unsigned int width;
+    const unsigned int height;
+};
 
-}
+#endif

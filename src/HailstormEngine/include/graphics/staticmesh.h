@@ -16,7 +16,9 @@
 #ifndef SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH
 #define SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH
 
-// Includes
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
 
 // Forward declarations
 struct ID3D10Buffer;
@@ -54,8 +56,8 @@ private:
 private:
     unsigned int mVertexCount;
     unsigned int mFaceCount;
-    ID3D10Buffer * mpVertexBuffer;
-    ID3D10Buffer * mpIndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D10Buffer> mVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D10Buffer> mIndexBuffer;
 };
 
 #endif

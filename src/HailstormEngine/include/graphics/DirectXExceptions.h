@@ -20,22 +20,44 @@
 #include <string>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// Renderer exceptions.
+//  TODO: Move these into another file.
+///////////////////////////////////////////////////////////////////////////////////////////////////
+class RendererException : public HailstormException
+{
+public:
+    RendererException(
+        const std::wstring& title,
+        const std::wstring& details,
+        const std::wstring& context,
+        const char * fileName,
+        unsigned int lineNumber);
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 // DirectX Exceptions.
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 class DirectXException : public HailstormException
 {
 public:
     DirectXException(unsigned long errorCode)
-        : HailstormException(L"DirectX Exception")
+        : DirectXException(errorCode, L"", L"")
     {
     }
 
-    DirectXException(unsigned long errorCode, const std::wstring& details, const std::wstring& context)
-        : HailstormException(L"DirectX Exception", details, context)
-    {
-    }
+    DirectXException(
+        unsigned long errorCode,
+        const std::wstring& details,
+        const std::wstring& context);
 
-private:
+    DirectXException(
+        unsigned long errorCode,
+        const std::wstring& details,
+        const std::wstring& context,
+        const char * fileName,
+        unsigned int lineNumber);
+
+    static std::wstring ErrorCodeToString(unsigned long errorCode);
 };
 
 class ShaderCompileFailedException : public DirectXException
@@ -45,8 +67,6 @@ public:
         unsigned long errorCode,
         const std::wstring& shaderFileName,
         const char * errorText);
-
-private:
 };
 
 #endif

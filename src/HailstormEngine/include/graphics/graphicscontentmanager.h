@@ -30,7 +30,7 @@ class GraphicsContentManager
 {
 public:
     GraphicsContentManager( ID3D10Device * pRenderDevice,
-                            const std::string& mContentDir );
+                            const std::wstring& mContentDir );
     GraphicsContentManager(const GraphicsContentManager&) = delete;
     ~GraphicsContentManager();
 
@@ -41,7 +41,7 @@ public:
 
 private:
     MeshFactory mMeshFactory;
-    std::string mContentDir;
+    std::wstring mContentDir;
 };
 
 #endif

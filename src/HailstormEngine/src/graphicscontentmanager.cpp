@@ -20,18 +20,16 @@
 #include <d3d10.h>
 #include <d3dx10.h>
 
-#include "graphics/dxutils.h"
 #include "graphics/meshfactory.h"
 
 /**
  * Graphics content manager constructor
  */
 GraphicsContentManager::GraphicsContentManager( ID3D10Device *pRenderDevice,
-                                                const std::string& contentDir )
+                                                const std::wstring& contentDir )
     : mContentDir( contentDir ),
       mMeshFactory( contentDir, pRenderDevice )
 {
-
 }
 
 /**

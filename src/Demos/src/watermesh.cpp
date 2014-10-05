@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "graphics/dxrenderer.h"
-#include "graphics/dxutils.h"
+#include "graphics/DirectXExceptions.h"
 
 /**
  * Static mesh constructor that takes an already constructed vertex and index
@@ -121,8 +121,12 @@ void WaterMesh::Init(ID3D10Device * pRenderDevice)
 	vInitData.pSysMem = &vertices[0];
 
 	// Upload the vertex buffer to the graphics card.
-	HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mVertexBuffer );
-	DxUtils::CheckResult( result, true, "Creating the water vertex buffer" );
+	HRESULT hr = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mVertexBuffer );
+
+    if (FAILED(hr))
+    {
+        throw new DirectXException(hr, L"Creating vertex buffer for water mesh", L"", __FILE__, __LINE__);
+    }
 
 	// Generate the landscape index buffer
 	std::vector<DWORD> indices( mFaceCount * 3 );
@@ -158,8 +162,12 @@ void WaterMesh::Init(ID3D10Device * pRenderDevice)
     iInitData.pSysMem = &indices[0];
 
 	// Upload the index buffer to the graphics card.
-    result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mIndexBuffer );
-    DxUtils::CheckResult( result, true, "Creating the water index buffer" );
+    hr = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mIndexBuffer );
+
+    if (FAILED(hr))
+    {
+        throw new DirectXException(hr, L"Creating index buffer for water mesh", L"", __FILE__, __LINE__);
+    }
 }
 
 /**
@@ -220,15 +228,22 @@ void WaterMesh::Update( float deltaTime )
 
 		// Update the vertex buffer with the new solution
 		WaterMeshVertex * pVertices = NULL;
-		DxUtils::CheckResult( mVertexBuffer->Map( D3D10_MAP_WRITE_DISCARD, 0, (void**) &pVertices ), true, "Uploading new water vertices" );
+		HRESULT hr = mVertexBuffer->Map( D3D10_MAP_WRITE_DISCARD, 0, (void**) &pVertices );
 
-		for ( unsigned int i = 0; i < mCurrentSolution.size(); ++i )
-		{
-			pVertices[i].pos     = mCurrentSolution[ i ];
-			pVertices[i].diffuse = D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f );
-			pVertices[i].spec    = D3DXCOLOR( 1.0f, 1.0f, 1.0f, 128.0f );
-			pVertices[i].normal  = mNormals[i];
-		}
+        if (SUCCEEDED(hr))
+        {
+            for (unsigned int i = 0; i < mCurrentSolution.size(); ++i)
+            {
+                pVertices[i].pos = mCurrentSolution[i];
+                pVertices[i].diffuse = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);
+                pVertices[i].spec = D3DXCOLOR(1.0f, 1.0f, 1.0f, 128.0f);
+                pVertices[i].normal = mNormals[i];
+            }
+        }
+        else
+        {
+            throw new DirectXException(hr, L"Updating water mesh vertex buffer", L"", __FILE__, __LINE__);
+        }
 
 		mVertexBuffer->Unmap();
 	}

@@ -57,7 +57,7 @@ private:
     void BuildInputLayout(DXRenderer& dx);
 
 private:
-    ID3D10InputLayout * mpVertexLayout;
+    Microsoft::WRL::ComPtr<ID3D10InputLayout> mVertexLayout;
 
     D3DXMATRIX mView;
     
@@ -70,8 +70,8 @@ private:
     int mLightType;
     float mRadius;
 
-    LandscapeMesh * mpCubeMesh;
-    WaterMesh * mpWaterMesh;
+    std::unique_ptr<LandscapeMesh> mTerrainMesh;
+    std::unique_ptr<WaterMesh> mWaterMesh;
 
 private:
     Microsoft::WRL::ComPtr<ID3D10Effect> mLandscapeEffect;

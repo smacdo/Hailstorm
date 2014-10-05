@@ -18,6 +18,7 @@
 #include "graphics/DemoScene.h"
 #include "gui/iwindow.h"
 #include "runtime/logging.h"
+#include "runtime/Size.h"
 
 /**
  * Renderer constructor
@@ -43,22 +44,12 @@ IRenderer::~IRenderer()
  *
  * \return  True if the renderer started up properly, false otherwise
  */
-bool IRenderer::initialize()
+void IRenderer::initialize()
 {
-    // Make sure we don't start the renderer more than once
-//    assert2( mRendererCreatedAndRunning == false, "Cannot start when already running" );
-
     // Let the renderer perform any needed start up code
     LOG_INFO("Renderer") << "Initializing the renderer";
-
-    if ( onStartRenderer() )
-    {
-        mRendererCreatedAndRunning = true;
-    }
-
-    // Now let the 
-    LOG_NOTICE("Renderer") << "The renderer has been initialized";
-    return mRendererCreatedAndRunning;
+    mRendererCreatedAndRunning = true;
+    OnStartRenderer();
 }
 
 /**
@@ -82,10 +73,10 @@ void IRenderer::Update(const DemoScene& scene, TimeT currentTime, TimeT deltaTim
 
         // Raise the onResize event which will let a derived renderer handle this
         // event
-        assert( mpWindow->width() > 0 );
-        assert( mpWindow->height() > 0 );
+        assert(mpWindow->width() > 0);
+        assert(mpWindow->height() > 0);
 
-        resizeRenderWindow( mpWindow->width(), mpWindow->height() );
+        OnWindowResized(Size{ mpWindow->width(), mpWindow->height() });
 
         // Clear the resize flag so we do not constantly resize
         mpWindow->clearResizedFlag();
@@ -105,7 +96,7 @@ void IRenderer::stop()
     if ( mRendererCreatedAndRunning )
     {
         LOG_INFO("Renderer") << "Stopping the renderer";
-        onStopRenderer();
+        OnStopRenderer();
 
         mRendererCreatedAndRunning = false;
     }

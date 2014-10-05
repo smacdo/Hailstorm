@@ -16,9 +16,10 @@
 #ifndef SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH_FACTORY
 #define SCOTT_HAILSTORM_GRAPHICS_STATIC_MESH_FACTORY
 
-// Required includes
-#include <memory>
 #include <string>
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
 
 // Forward declarations
 class StaticMesh;
@@ -33,8 +34,7 @@ struct ID3D10InputLayout;
 class MeshFactory
 {
 public:
-    MeshFactory( const std::string& dataDir,
-                 ID3D10Device * pRenderDevice );
+    MeshFactory(const std::wstring& dataDir, ID3D10Device * pRenderDevice);
     MeshFactory(const MeshFactory&) = delete;
     ~MeshFactory();
 
@@ -43,14 +43,13 @@ public:
     std::shared_ptr<StaticMesh> createBox( float scale ) const;
 
 private:
-    // Initialize the mesh factory. Only call once
-    void init( const std::string& dataDir );
+    void Init(const std::wstring& dataDir);
 
 private:
-    ID3D10Device * mpRenderDevice;
-    ID3D10Effect * mpStaticMeshFX;
+    Microsoft::WRL::ComPtr<ID3D10Device> mRenderDevice;
+    Microsoft::WRL::ComPtr<ID3D10Effect> mStaticMeshFX;
+    Microsoft::WRL::ComPtr<ID3D10InputLayout> mStaticMeshInputLayout;
     ID3D10EffectTechnique * mpStaticMeshTechnique;
-    ID3D10InputLayout * mpStaticMeshInputLayout;
 };
 
 #endif

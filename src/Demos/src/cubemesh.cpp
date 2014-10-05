@@ -22,7 +22,7 @@
 #include <d3dx10.h>
 
 #include "graphics/dxrenderer.h"
-#include "graphics/dxutils.h"
+#include "graphics/DirectXExceptions.h"
 
 #include <memory>                       // Shared pointers.
 #include <wrl\wrappers\corewrappers.h>  // ComPtr.
@@ -126,32 +126,30 @@ void CubeMesh::Init(ID3D10Device * pRenderDevice)
     vInitData.pSysMem = &VERTICES[0];
 
 	// Upload the vertex buffer to the graphics card.
-	HRESULT result = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mVertexBuffer );
-
-	if (! DxUtils::CheckResult( result, true, "Creating a vertex buffer" ) )
-	{
-		return;
-	}
-
-    // Describe the layout of the index buffer and create it.
-    D3D10_BUFFER_DESC ibd;
-    ZeroMemory( &ibd, sizeof(D3D10_BUFFER_DESC) );
-
-    ibd.Usage     = D3D10_USAGE_IMMUTABLE;
-    ibd.ByteWidth = sizeof(DWORD) * mFaceCount * 3;
-    ibd.BindFlags = D3D10_BIND_INDEX_BUFFER;
+	HRESULT hr = pRenderDevice->CreateBuffer( &vbd, &vInitData, &mVertexBuffer );
     
-    D3D10_SUBRESOURCE_DATA iInitData;
-    ZeroMemory( &iInitData, sizeof(D3D10_SUBRESOURCE_DATA) );
-
-    iInitData.pSysMem = &INDICES[0];
-
-	// Upload the index buffer to the graphics card.
-    result = pRenderDevice->CreateBuffer( &ibd, &iInitData, &mIndexBuffer );
-
-    if (! DxUtils::CheckResult( result, true, "Creating an index buffer" ) )
+    if (SUCCEEDED(hr))
     {
-        return;
+        // Describe the layout of the index buffer and create it.
+        D3D10_BUFFER_DESC ibd;
+        ZeroMemory(&ibd, sizeof(D3D10_BUFFER_DESC));
+
+        ibd.Usage = D3D10_USAGE_IMMUTABLE;
+        ibd.ByteWidth = sizeof(DWORD) * mFaceCount * 3;
+        ibd.BindFlags = D3D10_BIND_INDEX_BUFFER;
+
+        D3D10_SUBRESOURCE_DATA iInitData;
+        ZeroMemory(&iInitData, sizeof(D3D10_SUBRESOURCE_DATA));
+
+        iInitData.pSysMem = &INDICES[0];
+
+        // Upload the index buffer to the graphics card.
+        hr = pRenderDevice->CreateBuffer(&ibd, &iInitData, &mIndexBuffer);
+    }
+
+    if (FAILED(hr))
+    {
+        throw new DirectXException(hr, L"Initializing cube mesh", L"", __FILE__, __LINE__);
     }
 }
 

@@ -22,7 +22,6 @@
 #include <memory>
 #include <string>
 
-#include "graphics/dxutils.h"
 #include "graphics/staticmesh.h"
 #include "graphics/staticmeshvertex.h"
 #include "runtime/StringUtils.h"
@@ -31,15 +30,14 @@
  * Mesh factory constructor. Initializes the mesh factory with a pointer to the
  * active Direct3d renderer
  */
-MeshFactory::MeshFactory( const std::string& dataDir,
-                          ID3D10Device * pRenderDevice )
-    : mpRenderDevice( pRenderDevice ),
-      mpStaticMeshFX( NULL ),
-      mpStaticMeshTechnique( NULL ),
-      mpStaticMeshInputLayout( NULL )
+MeshFactory::MeshFactory(const std::wstring& dataDir, ID3D10Device * pRenderDevice)
+    : mRenderDevice( pRenderDevice ),
+      mStaticMeshFX(),
+      mStaticMeshInputLayout(),
+      mpStaticMeshTechnique(nullptr)
 {
-    assert( pRenderDevice != NULL );
-    init( dataDir );
+    AssertNotNull(pRenderDevice);
+    Init(dataDir);
 }
 
 /**
@@ -47,8 +45,6 @@ MeshFactory::MeshFactory( const std::string& dataDir,
  */
 MeshFactory::~MeshFactory()
 {
-    SafeRelease( &mpStaticMeshFX );
-    SafeRelease( &mpStaticMeshInputLayout );
 }
 
 /**
@@ -56,8 +52,6 @@ MeshFactory::~MeshFactory()
  */
 std::shared_ptr<StaticMesh> MeshFactory::createBox( float scale ) const
 {
-    assert( mpRenderDevice != NULL );
-
     const unsigned int VERTEX_COUNT = 8;
     const unsigned int FACE_COUNT   = 12;
 
@@ -104,40 +98,37 @@ std::shared_ptr<StaticMesh> MeshFactory::createBox( float scale ) const
 
     // Construct and return the static mesh object
     std::vector<unsigned int> indices( &INDICES[0], &INDICES[FACE_COUNT*3] );
-
-    return std::shared_ptr<StaticMesh>(
-            new StaticMesh( mpRenderDevice, VERTICES, VERTEX_COUNT, indices ) );
+    return std::shared_ptr<StaticMesh>(new StaticMesh(mRenderDevice.Get(), VERTICES, VERTEX_COUNT, indices));
 }
 
 /**
  * Initializes the mesh factory. Only call this once, and call it from the
  * class constructor
  */
-void MeshFactory::init( const std::string& dataDir )
+void MeshFactory::Init(const std::wstring& dataDir)
 {
-    // Make sure we are initializing only once
-    assert( mpStaticMeshTechnique == NULL );
-    assert( mpRenderDevice != NULL );
+    // TODO: Make sure we are initializing only once
+    // TODO - Follow example from dxrenderer for this code. What's here isn't correct.
+    AssertNotNull(mpStaticMeshTechnique);
 
     // Create string that contains file path to effects file
-    std::wstring fxfilepath = Utils::ConvertUtf8ToWideString(dataDir) +
-                              std::wstring( L"\\shaders\\cube.fx" );
+    std::wstring fxfilepath = dataDir + std::wstring( L"\\shaders\\cube.fx" );
 
     // Load the shader FX file from disk
     ID3D10Blob *pError = NULL;
     HRESULT result     = S_OK;
     DWORD shaderFlags  = D3D10_SHADER_ENABLE_STRICTNESS | D3D10_SHADER_DEBUG;
 
-    result = D3DX10CreateEffectFromFile( fxfilepath.c_str(),
+    result = D3DX10CreateEffectFromFileW( fxfilepath.c_str(),
                                          NULL,
                                          NULL,
                                          "fx_4_0",
                                          shaderFlags,
                                          NULL,
-                                         mpRenderDevice,
+                                         mRenderDevice.Get(),
                                          NULL,
                                          NULL,
-                                         &mpStaticMeshFX,
+                                         &mStaticMeshFX,
                                          &pError,
                                          NULL );
 
@@ -148,11 +139,11 @@ void MeshFactory::init( const std::string& dataDir )
     }
 
     // Make sure the effect file was loaded
-    assert( mpStaticMeshFX != NULL );
+    AssertNotNull(mpStaticMeshFX);
 
     // Now grab the technique
-    mpStaticMeshTechnique = mpStaticMeshFX->GetTechniqueByName( "DefaultCubeTechnique" );
-    assert( mpStaticMeshTechnique != NULL );
+    mpStaticMeshTechnique = mStaticMeshFX->GetTechniqueByName("DefaultCubeTechnique");
+    VerifyNotNull(mpStaticMeshTechnique);
 
     // Create the vertex layout expected in a static mesh
     const unsigned int NUM_VERTEX_ELEMENTS = 2;
@@ -165,17 +156,16 @@ void MeshFactory::init( const std::string& dataDir )
     // Grab a description struct from the loaded effects file for the first stage.
     // We'll use this to create an input layout
     D3D10_PASS_DESC staticPassDesc;
-    assert( mpStaticMeshTechnique->GetPassByIndex( 0 ) != NULL );
+    AssertNotNull( mStaticMeshTechnique->GetPassByIndex( 0 ) != NULL );
 
     mpStaticMeshTechnique->GetPassByIndex( 0 )->GetDesc( &staticPassDesc );
     
     // Now use the vertex description and the effects pass description to create
     // an input layout we can bind vertices to
-    result = mpRenderDevice->CreateInputLayout( staticVertexDesc,
+    result = mRenderDevice->CreateInputLayout( staticVertexDesc,
                                                 NUM_VERTEX_ELEMENTS,
                                                 staticPassDesc.pIAInputSignature,
                                                 staticPassDesc.IAInputSignatureSize,
-                                                &mpStaticMeshInputLayout );
-
-    DxUtils::CheckResult( result, true, "Creating a static mesh input layout" );
+                                                &mStaticMeshInputLayout );
+    // TODO: Check HR
 }

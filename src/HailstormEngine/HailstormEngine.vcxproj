@@ -128,7 +128,6 @@
     <ClInclude Include="include\graphics\DemoScene.h" />
     <ClInclude Include="include\graphics\DirectXExceptions.h" />
     <ClInclude Include="include\graphics\dxrenderer.h" />
-    <ClInclude Include="include\graphics\dxutils.h" />
     <ClInclude Include="include\graphics\graphicscontentmanager.h" />
     <ClInclude Include="include\graphics\irenderer.h" />
     <ClInclude Include="include\graphics\light.h" />
@@ -142,7 +141,6 @@
   <ItemGroup>
     <ClCompile Include="src\DirectXExceptions.cpp" />
     <ClCompile Include="src\dxrenderer.cpp" />
-    <ClCompile Include="src\dxutils.cpp" />
     <ClCompile Include="src\graphicscontentmanager.cpp" />
     <ClCompile Include="src\irenderer.cpp" />
     <ClCompile Include="src\iwindow.cpp" />

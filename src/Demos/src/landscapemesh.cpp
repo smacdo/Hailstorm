@@ -22,7 +22,7 @@
 #include "runtime/debugging.h"
 #include "landscapemesh.h"
 #include "graphics/dxrenderer.h"
-#include "graphics/dxutils.h"
+#include "graphics/DirectXExceptions.h"
 
 #include <vector>
 #include <memory>                       // Shared pointers.
@@ -137,12 +137,12 @@ void LandscapeMesh::Init(ID3D10Device * pRenderDevice, float dx)
     vInitData.pSysMem = &vertices[0];
 
 	// Upload the vertex buffer to the graphics card.
-	HRESULT result = pRenderDevice->CreateBuffer(&vbd, &vInitData, &mVertexBuffer);
+	HRESULT hr = pRenderDevice->CreateBuffer(&vbd, &vInitData, &mVertexBuffer);
 
-	if (! DxUtils::CheckResult( result, true, "Creating the landscape vertex buffer" ) )
-	{
-		return;
-	}
+    if (FAILED(hr))
+    {
+        throw new DirectXException(hr, L"Creating vertex buffer for landscape mesh", L"", __FILE__, __LINE__);
+    }
 
 	// Generate the landscape index buffer
 	std::vector<DWORD> indices( mFaceCount * 3 );
@@ -178,11 +178,11 @@ void LandscapeMesh::Init(ID3D10Device * pRenderDevice, float dx)
     iInitData.pSysMem = &indices[0];
 
 	// Upload the index buffer to the graphics card.
-    result = pRenderDevice->CreateBuffer(&ibd, &iInitData, &mIndexBuffer);
+    hr = pRenderDevice->CreateBuffer(&ibd, &iInitData, &mIndexBuffer);
 
-    if (! DxUtils::CheckResult( result, true, "Creating the landscape index buffer" ) )
+    if (FAILED(hr))
     {
-        return;
+        throw new DirectXException(hr, L"Creating index buffer for landscape mesh", L"", __FILE__, __LINE__);
     }
 }
 
