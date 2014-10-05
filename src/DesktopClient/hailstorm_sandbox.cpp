@@ -19,6 +19,7 @@
 #include "gui/mainwindow.h"
 #include "graphics/dxrenderer.h"
 #include "runtime/logging.h"
+#include "camera/RotationalCamera.h"
 
 #include "demos/WaterLandscapeDemoScene.h"
 
@@ -57,6 +58,10 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
     // We need a console window
     CreateConsoleWindow(true);
 
+    // A camra is important! We can't see without one, and what kind of graphics demo would this be if we couldn't
+    // see anything??
+    std::shared_ptr<RotationalCamera> camera(new RotationalCamera());
+
     // Make sure the logging system is initialized first before any of the
     // other critical system services
     GlobalLog::start();
@@ -69,15 +74,15 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
     mainWindow->create();
 
     // Create the renderer (but do not initialize it yet).
-    DXRenderer renderer(mainWindow, mainWindow->windowHandle());
+    DXRenderer renderer(camera, mainWindow, mainWindow->windowHandle());
     
     // Create the game client
     LOG_NOTICE("WinMain") << "Creating the game client";
-    GameClient game(mainWindow, &renderer);
+    GameClient game(camera, mainWindow, &renderer);
 
     // Run the game
     LOG_NOTICE("WinMain") << "Starting the game";
-    game.Run(new WaterLandscapeDemoScene());
+    game.Run(new WaterLandscapeDemoScene(camera));
 
     return EXIT_SUCCESS;
 }

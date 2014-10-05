@@ -22,6 +22,7 @@
 class IWindow;
 class DXRenderer;
 class DemoScene;
+class Camera;
 
 /**
  * This is the foundation class for a hailstorm game client. A custom game
@@ -30,7 +31,10 @@ class DemoScene;
 class GameClient
 {
 public:
-    GameClient(std::shared_ptr<IWindow> window, DXRenderer *pRenderer);
+    GameClient(
+        std::shared_ptr<Camera> camera,
+        std::shared_ptr<IWindow> window,
+        DXRenderer *pRenderer);
     virtual ~GameClient();
 
     void Run(DemoScene *pDemoScene);
@@ -58,6 +62,9 @@ private:
 
     /// Pointer to the graphics renderer
     std::shared_ptr<DXRenderer> mRenderer;
+
+    /// Pointer to active camera.
+    std::shared_ptr<Camera> mCamera;
 
     /// Demo scene to show.
     std::unique_ptr<DemoScene> mDemoScene;

@@ -18,6 +18,7 @@
 #include "gui/iwindow.h"
 #include "graphics/dxrenderer.h"
 #include "graphics/DemoScene.h"
+#include "camera/Camera.h"
 
 #include "runtime/gametime.h"
 #include "runtime/logging.h"
@@ -46,9 +47,13 @@
 /**
  * Game client constructor
  */
-GameClient::GameClient(std::shared_ptr<IWindow> window, DXRenderer *pRenderer)
+GameClient::GameClient(
+    std::shared_ptr<Camera> camera,
+    std::shared_ptr<IWindow> window,
+    DXRenderer *pRenderer)
     : mWindow(window),
       mRenderer(pRenderer),
+      mCamera(camera),
       mDemoScene(),
       mIsGameRunning(false),
       mIsRunningSlowly(false),
@@ -230,6 +235,7 @@ void GameClient::UnloadContent()
  */
 void GameClient::Update(TimeT simulationTime, TimeT deltaTime)
 {
+    mCamera->Update(simulationTime, deltaTime);
     mDemoScene->Update(simulationTime, deltaTime);
 }
 

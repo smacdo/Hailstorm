@@ -17,7 +17,6 @@
 #define SCOTT_HAILSTORM_GRAPHICS_DXRENDERER_H
 
 #include "graphics/irenderer.h"
-#include <d3dx10.h>             // temporary while we host the camera matrices
 #include <string>
 
 #include <memory>                       // Shared pointers.
@@ -30,6 +29,7 @@ class DemoScene;
 class GraphicsContentManager;
 class LandscapeMesh;
 class WaterMesh;
+class Camera;
 
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
@@ -49,7 +49,10 @@ struct ID3D10RasterizerState;
 class DXRenderer : public IRenderer
 {
 public:
-    explicit DXRenderer(std::shared_ptr<IWindow> window, HWND hwnd);
+    explicit DXRenderer(
+        std::shared_ptr<Camera> camera,
+        std::shared_ptr<IWindow> window,
+        HWND hwnd);
     virtual ~DXRenderer();
 
     HRESULT LoadFxFile(const std::wstring& fxFilePath, ID3D10Effect ** ppEffectOut) const;
@@ -58,9 +61,6 @@ public:
 
     // DONT STORE THIS POINTER WHEN CALLING
     ID3D10Device * GetDevice() { return mDevice.Get(); }
-
-    // TODO: THIS IS A TERRIBLE HACK FIGURE OUT HOW TO NOT DO THIS
-    void GetProjectionMatrix(D3DXMATRIX *projectionOut) const;
 
     // Create a font that can be used for drawing text.
     HRESULT CreateRenderFont(
@@ -138,7 +138,7 @@ private:
 	
     /// The currently running graphics content manager
     std::unique_ptr<GraphicsContentManager> mContentManager;
-    D3DXMATRIX mProjection;
+    std::shared_ptr<Camera> mCamera;
 };
 
 #endif

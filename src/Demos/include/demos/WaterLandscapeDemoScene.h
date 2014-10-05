@@ -17,7 +17,6 @@
 #define SCOTT_HAILSTORM_LANDSCAPE_DEMO_SCENE_H
 
 #include "graphics/light.h"		// temporary, remove this eventually  (make DXRenderer have a light manager)
-#include <d3dx10.h>             // temporary while we host the camera matrices
 
 #include "graphics/DemoScene.h"
 #include "runtime\gametime.h"
@@ -32,6 +31,7 @@ class WaterMesh;
 // Forward declarations
 struct ID3D10Effect;
 class DXRenderer;
+class Camera;
 
 /**
  * Chapter 6 demo.
@@ -39,7 +39,7 @@ class DXRenderer;
 class WaterLandscapeDemoScene : public DemoScene
 {
 public:
-    WaterLandscapeDemoScene();
+    WaterLandscapeDemoScene(std::shared_ptr<Camera> camera);
     WaterLandscapeDemoScene(const WaterLandscapeDemoScene&) = delete;
     virtual ~WaterLandscapeDemoScene() override;
 
@@ -53,28 +53,22 @@ private:
     virtual void OnUnloadContent(DXRenderer& dx) override;
 
 private:
+    void UpdateInput();
+    void GenerateRandomWave();
+
     void BuildLights();
     void BuildInputLayout(DXRenderer& dx);
 
 private:
     Microsoft::WRL::ComPtr<ID3D10InputLayout> mVertexLayout;
-
-    D3DXMATRIX mView;
-    
-    D3DXVECTOR3 mEyePos;
-
-    D3DXMATRIX mLandTransform;
-    D3DXMATRIX mWaterTransform;
+    Microsoft::WRL::ComPtr<ID3D10Effect> mLandscapeEffect;
+    std::shared_ptr<Camera> mCamera;
 
     Light mLights[3];
     int mLightType;
-    float mRadius;
 
     std::unique_ptr<LandscapeMesh> mTerrainMesh;
     std::unique_ptr<WaterMesh> mWaterMesh;
-
-private:
-    Microsoft::WRL::ComPtr<ID3D10Effect> mLandscapeEffect;
 };
 
 #endif

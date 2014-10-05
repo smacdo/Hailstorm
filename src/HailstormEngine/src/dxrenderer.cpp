@@ -21,6 +21,7 @@
 #include "runtime/Size.h"
 #include "graphics/DirectXExceptions.h"
 #include "graphics/DemoScene.h"
+#include "camera/RotationalCamera.h"
 
 #include <DXGI.h>
 #include <d3d10.h>
@@ -30,12 +31,13 @@
 #include <wrl\wrappers\corewrappers.h>  // ComPtr.
 #include <wrl\client.h>                 // ComPtr friends.
 
-#define DXVERIFY(expr,msg) if (!verifyResult(expr,msg)) { return false; }
-
 /**
  * DirectX renderer constructor
  */
-DXRenderer::DXRenderer(std::shared_ptr<IWindow> window, HWND hwnd)
+DXRenderer::DXRenderer(
+    std::shared_ptr<Camera> camera,
+    std::shared_ptr<IWindow> window,
+    HWND hwnd)
     : IRenderer(window),
       mHwnd(hwnd),
       mIsFrameBeingRendered(false),
@@ -49,10 +51,10 @@ DXRenderer::DXRenderer(std::shared_ptr<IWindow> window, HWND hwnd)
       mMultisampleCount(4),
       mMultisampleQuality(1),
       mWindowedMode(true),
-      mContentManager()  // this is initialized later
+      mContentManager(),
+      mCamera(camera)
 {
     assert(mHwnd != nullptr);    // We need to have a valid window handle
-    D3DXMatrixIdentity(&mProjection);
 }
 
 /**
@@ -447,9 +449,8 @@ void DXRenderer::OnWindowResized(const Size& screenSize)
             // Reset our aspect ratio and the perspective matrix
             //  TODO: Clean this up, use constants and explain what is going on.
             float aspect = static_cast<float>(screenSize.width) / static_cast<float>(screenSize.height);
-            D3DXMatrixPerspectiveFovLH(&mProjection, 0.25f * 3.1415927f, aspect, 1.0f, 1000.0f);
+            mCamera->SetLens(0.25f * 3.1415927f, aspect, 1.0f, 1000.0f);
         }
-
     }
 
     // If we failed, there's no point in sending the error code back to our caller. We screwed up, it's over. Time
@@ -590,10 +591,4 @@ void DXRenderer::SetDefaultRendering()
 void DXRenderer::SetWireframeRendering()
 {
     mDevice->RSSetState(mWireframeRasterizerState.Get());
-}
-
-void DXRenderer::GetProjectionMatrix(D3DXMATRIX *projectionOut) const
-{
-    VerifyNotNull(projectionOut);
-    *projectionOut = mProjection;
 }

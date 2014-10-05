@@ -125,6 +125,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\camera\Camera.h" />
+    <ClInclude Include="include\camera\RotationalCamera.h" />
     <ClInclude Include="include\graphics\DemoScene.h" />
     <ClInclude Include="include\graphics\DirectXExceptions.h" />
     <ClInclude Include="include\graphics\dxrenderer.h" />
@@ -146,6 +148,7 @@
     <ClCompile Include="src\iwindow.cpp" />
     <ClCompile Include="src\light.cpp" />
     <ClCompile Include="src\meshfactory.cpp" />
+    <ClCompile Include="src\RotationalCamera.cpp" />
     <ClCompile Include="src\staticmesh.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
