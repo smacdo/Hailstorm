@@ -184,8 +184,9 @@
   <ItemGroup>
     <None Include="..\assets\hailstorm.ico" />
     <None Include="..\LICENSE.txt" />
-    <None Include="..\NOTICE.txt" />
-    <None Include="..\ReadMe.txt" />
+    <None Include="..\ReadMe.md" />
+    <None Include="..\Contributing.md" />
+    <None Include="..\ReleaseNotes.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DesktopClient\gameclient.h" />
