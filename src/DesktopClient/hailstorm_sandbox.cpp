@@ -72,17 +72,21 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
 
     std::shared_ptr<MainWindow> mainWindow( new MainWindow(hInstance, "Hailstorm Tech Demo", 800u, 600u));
     mainWindow->create();
-
-    // Create the renderer (but do not initialize it yet).
-    DXRenderer renderer(camera, mainWindow, mainWindow->windowHandle());
     
     // Create the game client
     LOG_NOTICE("WinMain") << "Creating the game client";
-    GameClient game(camera, mainWindow, &renderer);
+    std::unique_ptr<GameClient> game(
+        new GameClient(
+            camera,
+            mainWindow, 
+            new DXRenderer(
+                camera,
+                mainWindow,
+                mainWindow->windowHandle())));
 
     // Run the game
     LOG_NOTICE("WinMain") << "Starting the game";
-    game.Run(new WaterLandscapeDemoScene(camera));
+    game->Run(new WaterLandscapeDemoScene(camera));
 
     return EXIT_SUCCESS;
 }
