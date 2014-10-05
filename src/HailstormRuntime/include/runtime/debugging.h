@@ -56,6 +56,7 @@
 #   define scott_assert2(msg,cond) \
         do { if (!(cond)) { throw AssertionFailedException(msg, #cond, __FILE__, __LINE__); } } while(0)
 
+#   define Assert(x) scott_assert(AssertionFailedException,x)
 #   define Assert2(expr,msg) scott_assert2(msg,expr)
 #   define AssertNull(var) scott_assert(IsNullAssertionFailedException, #var##" == nullptr")
 #   define AssertNotNull(var) scott_assert(IsNotNullAssertionFailedException, #var##" != nullptr")
@@ -66,12 +67,13 @@
 #   define assert(x) scott_assert(AssertionFailedException,x)
 
 #else
-#   define assert(x)          do { (void)sizeof(x); } while(0)
-#   define assert2(x,m)       do { (void)sizeof(x); } while(0)
-#   define assert_null(x)     do { (void)sizeof(x); } while(0)
-#   define assert_notNull(x)  do { (void)sizeof(x); } while(0)
-#   define verify(x)          do { (void)sizeof(x); } while(0)
+#   ifndef assert
+#       define assert(x)      do { (void)sizeof(x); } while(0)
+#   endif
+#   define Assert(x)          do { (void)sizeof(x); } while(0)
+#   define Assert2(x,m)       do { (void)sizeof(x); } while(0)
+#   define AssertNull(x)      do { (void)sizeof(x); } while(0)
+#   define AssertNotNull(x)   do { (void)sizeof(x); } while(0)
 #endif
-
 
 #endif

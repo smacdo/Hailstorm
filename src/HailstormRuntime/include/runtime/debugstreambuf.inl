@@ -272,18 +272,18 @@ bool DebugStreambuf<C,T>::writeEntryHeaderConsole() const
     const size_t TIME_STR_LEN = 10;
     char timeString[TIME_STR_LEN];
 
-    time_t currentTime  = std::time( NULL );
+    time_t currentTime = std::time( NULL );
+    tm localTime = { 0 };
 
-    std::strftime( timeString, TIME_STR_LEN,
-                   "%H:%M:%S",
-                   localtime(&currentTime) );
+    localtime_s(&localTime, &currentTime);
+    std::strftime(timeString, TIME_STR_LEN, "%H:%M:%S", &localTime);
 
     // Generate the log entry header before we hand it over to our
     // underlying buffer object
     const size_t BUFFER_LEN = 32;
     char bufferString[BUFFER_LEN];
 
-    int length = _snprintf( bufferString, BUFFER_LEN,
+    int length = _snprintf_s(bufferString, BUFFER_LEN,
                             "%8s [%c %-12s] ",
                             timeString,
                             getLogLevelString( mLogLevel )[0],
@@ -310,18 +310,18 @@ bool DebugStreambuf<C,T>::writeEntryHeaderFile() const
     const size_t TIME_STR_LEN = 20;
     char timeString[TIME_STR_LEN];
 
-    time_t currentTime  = std::time( NULL );
+    time_t currentTime = std::time(NULL);
+    tm localTime = { 0 };
 
-    std::strftime( timeString, TIME_STR_LEN,
-                   "%Y.%m.%d-%H:%M:%S",
-                   localtime(&currentTime) );
+    localtime_s(&localTime, &currentTime);
+    std::strftime(timeString, TIME_STR_LEN, "%Y.%m.%d-%H:%M:%S", &localTime);
 
     // Generate the log entry header before we hand it over to our
     // underlying buffer object
     const size_t BUFFER_LEN = 48;
     char bufferString[BUFFER_LEN];
 
-    int length = _snprintf( bufferString, BUFFER_LEN,
+    int length = _snprintf_s(bufferString, BUFFER_LEN,
                             "%s %s %s ",
                             timeString,
                             getLogLevelString( mLogLevel ),

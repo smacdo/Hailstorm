@@ -56,20 +56,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\Demos\$(Configuration)\$(PlatformName)\</IntDir>
+    <OutDir>$(SolutionDir)game\bin-$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(ProjectName)\$(Configuration)\$(PlatformName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\Demos\$(Configuration)\$(PlatformName)\</IntDir>
+    <OutDir>$(SolutionDir)game\bin-$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(ProjectName)\$(Configuration)\$(PlatformName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\Demos\$(Configuration)\$(PlatformName)\</IntDir>
+    <OutDir>$(SolutionDir)game\bin-$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(ProjectName)\$(Configuration)\$(PlatformName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\Demos\$(Configuration)\$(PlatformName)\</IntDir>
+    <OutDir>$(SolutionDir)game\bin-$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(ProjectName)\$(Configuration)\$(PlatformName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

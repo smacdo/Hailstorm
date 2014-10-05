@@ -70,34 +70,34 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)\DesktopClient;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)\$(PlatformName)\</IntDir>
-    <TargetName>$(ProjectName)$(PlatformArchitecture)-debug</TargetName>
+    <OutDir>$(SolutionDir)game\bin-$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(ProjectName)\$(Configuration)\$(PlatformName)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
     <LibraryPath>$(DXSDK_DIR)\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)\DesktopClient;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)\$(PlatformName)\</IntDir>
-    <TargetName>$(ProjectName)$(PlatformArchitecture)-debug</TargetName>
+    <OutDir>$(SolutionDir)game\bin-$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(ProjectName)\$(Configuration)\$(PlatformName)\</IntDir>
+    <TargetName>$(ProjectName)</TargetName>
     <LibraryPath>$(DXSDK_DIR)\lib\x$(PlatformArchitecture);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)\$(PlatformName)\</IntDir>
+    <OutDir>$(SolutionDir)game\bin-$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(ProjectName)\$(Configuration)\$(PlatformName)\</IntDir>
     <IncludePath>$(ProjectDir)\DesktopClient;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
-    <TargetName>$(ProjectName)$(PlatformArchitecture)</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
     <LibraryPath>$(DXSDK_DIR)\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)game\bin\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)\$(PlatformName)\</IntDir>
+    <OutDir>$(SolutionDir)game\bin-$(PlatformShortName)-$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(ProjectName)\$(Configuration)\$(PlatformName)\</IntDir>
     <IncludePath>$(ProjectDir)\DesktopClient;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)\lib\x$(PlatformArchitecture);$(LibraryPath)</LibraryPath>
-    <TargetName>$(ProjectName)$(PlatformArchitecture)</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -146,9 +146,10 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>$(SolutionDir)src\Demos\include;$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include;$(DXSDK_DIR)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -167,9 +168,10 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>$(SolutionDir)src\Demos\include;$(SolutionDir)\src\HailstormRuntime\include;$(SolutionDir)\src\HailstormEngine\include;$(DXSDK_DIR)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -219,22 +221,22 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\game\data\shaders\cube.fx">
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      <EntryPointName>
       </EntryPointName>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType>Effect</ShaderType>
+      <ShaderModel>4.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="..\game\data\shaders\landscape.fx">
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      <EntryPointName>
       </EntryPointName>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType>Effect</ShaderType>
+      <ShaderModel>4.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="..\game\data\shaders\light.fx">
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      <EntryPointName>
       </EntryPointName>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType>Effect</ShaderType>
+      <ShaderModel>4.0</ShaderModel>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

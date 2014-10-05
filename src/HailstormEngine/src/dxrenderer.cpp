@@ -157,10 +157,10 @@ HRESULT DXRenderer::CreateRenderDevice(ID3D10Device **ppDeviceOut, IDXGISwapChai
 
     // Set up windows flags that we will be passing to directx
     UINT flags =
-        D3D10_CREATE_DEVICE_SINGLETHREADED	    // No need to use threads at the moment.
 #if defined(DEBUG) || defined(_DEBUG)  
-        | D3D10_CREATE_DEVICE_DEBUG;            // Enable DirectX debug layer.
+        D3D10_CREATE_DEVICE_DEBUG |            // Enable DirectX debug layer.
 #endif
+        D3D10_CREATE_DEVICE_SINGLETHREADED;    // No need to use threads at the moment.
 
     // Create a device, device context and swap chain
     Microsoft::WRL::ComPtr<ID3D10Device> device;

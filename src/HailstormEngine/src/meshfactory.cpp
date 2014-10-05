@@ -139,7 +139,7 @@ void MeshFactory::Init(const std::wstring& dataDir)
     }
 
     // Make sure the effect file was loaded
-    AssertNotNull(mpStaticMeshFX);
+    AssertNotNull(mStaticMeshFX.Get());
 
     // Now grab the technique
     mpStaticMeshTechnique = mStaticMeshFX->GetTechniqueByName("DefaultCubeTechnique");
@@ -156,7 +156,7 @@ void MeshFactory::Init(const std::wstring& dataDir)
     // Grab a description struct from the loaded effects file for the first stage.
     // We'll use this to create an input layout
     D3D10_PASS_DESC staticPassDesc;
-    AssertNotNull( mStaticMeshTechnique->GetPassByIndex( 0 ) != NULL );
+    AssertNotNull(mpStaticMeshTechnique->GetPassByIndex(0) != NULL);
 
     mpStaticMeshTechnique->GetPassByIndex( 0 )->GetDesc( &staticPassDesc );
     
