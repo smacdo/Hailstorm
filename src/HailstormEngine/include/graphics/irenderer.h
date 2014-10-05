@@ -17,10 +17,13 @@
 #define SCOTT_HAILSTORM_GRAPHICS_IRENDERER_H
 
 #include "runtime/gametime.h"
+#include <memory>                       // Shared pointers.
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
 
 class IWindow;
 class DemoScene;
-class Size;
+struct Size;
 
 /**
  * This is an abstract renderer
@@ -28,7 +31,7 @@ class Size;
 class IRenderer
 {
 public:
-    explicit IRenderer( IWindow *pWindow );
+    explicit IRenderer(std::shared_ptr<IWindow> window);
     IRenderer(const IRenderer&) = delete;
     virtual ~IRenderer();
 
@@ -46,10 +49,11 @@ protected:
 
     virtual void OnWindowResized(const Size& screenSize) = 0;
 
-    IWindow *renderWindow();
+    std::shared_ptr<IWindow> GetWindow() { return mWindow; }
+    std::shared_ptr<const IWindow> GetWindow() const { return mWindow; }
 
 private:
-    IWindow *mpWindow;
+    std::shared_ptr<IWindow> mWindow;
     bool mRendererCreatedAndRunning;
 };
 

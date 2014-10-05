@@ -26,7 +26,7 @@ public:
                 const std::string& title,
                 unsigned int width,
                 unsigned int height );
-    ~MainWindow();
+    virtual ~MainWindow();
 
     virtual void create();
     virtual void show();

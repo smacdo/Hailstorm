@@ -17,6 +17,7 @@
 #define SCOTT_WINDOW_H
 
 #include <string>
+#include "runtime/Size.h"
 
 /**
  * Platform independent window class
@@ -58,6 +59,8 @@ public:
 
     // Returns the height of the window
     unsigned int height() const;
+
+    Size Size() const;
 
 protected:
     void setUserQuit();

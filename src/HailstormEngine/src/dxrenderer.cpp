@@ -35,11 +35,10 @@
 /**
  * DirectX renderer constructor
  */
-DXRenderer::DXRenderer(IWindow *pWindow, HWND hwnd)
-    : IRenderer( pWindow ),
+DXRenderer::DXRenderer(std::shared_ptr<IWindow> window, HWND hwnd)
+    : IRenderer(window),
       mHwnd(hwnd),
       mIsFrameBeingRendered(false),
-	  mWindow(pWindow),
       mDevice(),
       mSwapChain(),
       mRenderTargetView(),
@@ -89,7 +88,7 @@ void DXRenderer::OnStartRenderer()
                 mDevice.Get(),
                 mRenderTargetView.Get(),
                 mDepthStencilView.Get(),
-                Size{ mWindow->width(), mWindow->height() });
+                GetWindow()->Size());
         }
     }
 
@@ -142,8 +141,8 @@ HRESULT DXRenderer::CreateRenderDevice(ID3D10Device **ppDeviceOut, IDXGISwapChai
     ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
 
     scd.BufferCount = 1;                 // One back buffer plz.
-    scd.BufferDesc.Width = mWindow->width();
-    scd.BufferDesc.Height = mWindow->height();
+    scd.BufferDesc.Width = GetWindow()->width();
+    scd.BufferDesc.Height = GetWindow()->height();
     scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // 32 bit color
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     scd.OutputWindow = mHwnd;
@@ -229,8 +228,8 @@ HRESULT DXRenderer::CreateDeviceViews(
         D3D10_TEXTURE2D_DESC depthStencilDesc;
         ZeroMemory(&depthStencilDesc, sizeof(D3D10_TEXTURE2D_DESC));
 
-        depthStencilDesc.Width = mWindow->width();
-        depthStencilDesc.Height = mWindow->height();
+        depthStencilDesc.Width = GetWindow()->width();
+        depthStencilDesc.Height = GetWindow()->height();
         depthStencilDesc.MipLevels = 1;
         depthStencilDesc.ArraySize = 1;
         depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -443,7 +442,7 @@ void DXRenderer::OnWindowResized(const Size& screenSize)
                 mDevice.Get(),
                 mRenderTargetView.Get(),
                 mDepthStencilView.Get(),
-                Size{ mWindow->width(), mWindow->height() });
+                GetWindow()->Size());
 
             // Reset our aspect ratio and the perspective matrix
             //  TODO: Clean this up, use constants and explain what is going on.

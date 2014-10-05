@@ -16,6 +16,7 @@
 #include "stdafx.h"
 #include "gui\iwindow.h"
 #include "runtime\logging.h"
+#include "runtime\size.h"
 
 #include <string>
 #include <cassert>
@@ -191,4 +192,9 @@ unsigned int IWindow::width() const
 unsigned int IWindow::height() const
 {
     return mHeight;
+}
+
+Size IWindow::Size() const
+{
+    return { mWidth, mHeight };
 }

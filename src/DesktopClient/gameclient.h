@@ -30,7 +30,7 @@ class DemoScene;
 class GameClient
 {
 public:
-    GameClient(IWindow *pWindow, DXRenderer *pRenderer);
+    GameClient(std::shared_ptr<IWindow> window, DXRenderer *pRenderer);
     virtual ~GameClient();
 
     void Run(DemoScene *pDemoScene);

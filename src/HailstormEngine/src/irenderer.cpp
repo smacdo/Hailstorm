@@ -23,11 +23,11 @@
 /**
  * Renderer constructor
  */
-IRenderer::IRenderer( IWindow *pWindow )
-    : mpWindow( pWindow ),
+IRenderer::IRenderer(std::shared_ptr<IWindow> window)
+    : mWindow(window),
       mRendererCreatedAndRunning( false )
 {
-    assert( pWindow != NULL && "The renderer needs a window" );
+    AssertNotNull(window.get());
 }
 
 /**
@@ -63,23 +63,25 @@ void IRenderer::Update(const DemoScene& scene, TimeT currentTime, TimeT deltaTim
         return;
     }
 
-    // Was the window resized? Make sure to let give the renderer a chance to
-    // intercept this event before we start the next frame
-    if ( mpWindow->wasResized() && (!mpWindow->isResizing()) && (!mpWindow->isPaused()) )
+    // Was the window resized? Make sure to let give the renderer a chance to intercept this event before we start the
+    // next frame.
+    std::shared_ptr<IWindow> renderWindow = GetWindow();
+
+    if (renderWindow->wasResized() && (!renderWindow->isResizing()) && (!renderWindow->isPaused()))
     {
         LOG_NOTICE("Renderer")
-            << "Renderer resized to " << mpWindow->width()
-            << " x "                  << mpWindow->height();
+            << "Renderer resized to " << renderWindow->width()
+            << " x " << renderWindow->height();
 
         // Raise the onResize event which will let a derived renderer handle this
         // event
-        assert(mpWindow->width() > 0);
-        assert(mpWindow->height() > 0);
+        assert(renderWindow->width() > 0);
+        assert(renderWindow->height() > 0);
 
-        OnWindowResized(Size{ mpWindow->width(), mpWindow->height() });
+        OnWindowResized(Size{ renderWindow->width(), renderWindow->height() });
 
         // Clear the resize flag so we do not constantly resize
-        mpWindow->clearResizedFlag();
+        renderWindow->clearResizedFlag();
     }
 
     // Keep rendering whatever is going on
@@ -102,12 +104,4 @@ void IRenderer::stop()
     }
 
     LOG_NOTICE("Renderer") << "The renderer has been stopped";
-}
-
-/**
- * Return a pointer to the renderer's main window
- */
-IWindow* IRenderer::renderWindow()
-{
-    return mpWindow;
 }

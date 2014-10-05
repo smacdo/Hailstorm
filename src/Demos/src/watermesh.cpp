@@ -49,9 +49,9 @@ WaterMesh::WaterMesh( ID3D10Device * pRenderDevice,
 	  mTimeStep( timeStep ),
 	  mSpatialStep( spatialStep ),
 	  mSimulationTime( 0.0f ),
-	  mPreviousSolution( rows * cols ),
-	  mCurrentSolution( rows * cols ),
-	  mNormals( rows * cols ),
+	  mPreviousSolution(new D3DXVECTOR3[rows * cols]),
+      mCurrentSolution(new D3DXVECTOR3[rows * cols]),
+      mNormals(new D3DXVECTOR3[rows * cols]),
       mVertexBuffer(),
       mIndexBuffer()
 {
@@ -177,7 +177,7 @@ void WaterMesh::Init(ID3D10Device * pRenderDevice)
  */
 void WaterMesh::Update( float deltaTime )
 {
-	static float t = 0.0f;
+    static float t = 0.0f;
 
 	// Accumulate time
 	t += deltaTime;
@@ -185,68 +185,82 @@ void WaterMesh::Update( float deltaTime )
 	// Only update the simulation at the specified time step
 	if ( t >= mTimeStep )
 	{
-		// Only update interior points; we use zero boundary conditions.
-		for ( unsigned int i = 1; i < mNumRows - 1; ++i )
-		{
-			for ( unsigned int j = 1; j < mNumCols - 1; ++j )
-			{
-				// Note that j indexes x, and i indexes z.  Our +z axis goes "down" which
-				// is to keep consistent with our row indices going down.
-				mPreviousSolution[ i * mNumCols + j ].y =
-					mK1 * mPreviousSolution[ i * mNumCols + j ].y +
-					mK2 * mCurrentSolution[ i * mNumCols + j ].y +
-					mK3 * ( mCurrentSolution[ ( i + 1 ) * mNumCols + j ].y +
-					        mCurrentSolution[ ( i - 1 ) * mNumCols + j ].y +
-							mCurrentSolution[ i * mNumCols + j + 1 ].y +
-							mCurrentSolution[ i * mNumCols + j - 1 ].y );
-			}
-		}
+        UpdateGrid();
 
 		// We just overwrote the previous buffer with our new data, so this data needs to become
 		// the current data, and the current one should become the new previous data.
-		mCurrentSolution.swap( mPreviousSolution );
+		mCurrentSolution.swap(mPreviousSolution);
 
 		t = 0.0f;		// reset time (this is stupid... we should accumulate and store it)
 
-		// Compute normals using finite difference scheme
-		for ( unsigned int i = 1; i < mNumRows - 1; ++i )
-		{
-			for ( unsigned int j = 1; j < mNumCols - 1; ++j )
-			{
-				float l = mCurrentSolution[ i * mNumCols + j - 1 ].y;
-				float r = mCurrentSolution[ i * mNumCols + j + 1 ].y;
-				float t = mCurrentSolution[ (i-1) * mNumCols + j - 1 ].y;
-				float b = mCurrentSolution[ (i-1) * mNumCols + j + 1 ].y;
-
-				mNormals[ i * mNumCols + j ].x = -r + 1.0f;
-				mNormals[ i * mNumCols + j ].y = 2.0f * mSpatialStep;
-				mNormals[ i * mNumCols + j ].z = b - t;
-
-				D3DXVec3Normalize( &mNormals[ i * mNumCols + j ], &mNormals[ i * mNumCols + j ] );
-			}
-		}
-
-		// Update the vertex buffer with the new solution
-		WaterMeshVertex * pVertices = NULL;
-		HRESULT hr = mVertexBuffer->Map( D3D10_MAP_WRITE_DISCARD, 0, (void**) &pVertices );
-
-        if (SUCCEEDED(hr))
-        {
-            for (unsigned int i = 0; i < mCurrentSolution.size(); ++i)
-            {
-                pVertices[i].pos = mCurrentSolution[i];
-                pVertices[i].diffuse = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);
-                pVertices[i].spec = D3DXCOLOR(1.0f, 1.0f, 1.0f, 128.0f);
-                pVertices[i].normal = mNormals[i];
-            }
-        }
-        else
-        {
-            throw new DirectXException(hr, L"Updating water mesh vertex buffer", L"", __FILE__, __LINE__);
-        }
-
-		mVertexBuffer->Unmap();
+        UpdateNormals();
+        UpdateVertexBuffer();
 	}
+}
+
+void WaterMesh::UpdateGrid()
+{
+    // Only update interior points; we use zero boundary conditions.
+    for (unsigned int i = 1; i < mNumRows - 1; ++i)
+    {
+        for (unsigned int j = 1; j < mNumCols - 1; ++j)
+        {
+            // Note that j indexes x, and i indexes z.  Our +z axis goes "down" which
+            // is to keep consistent with our row indices going down.
+            mPreviousSolution[i * mNumCols + j].y =
+                mK1 * mPreviousSolution[i * mNumCols + j].y +
+                mK2 * mCurrentSolution[i * mNumCols + j].y +
+                mK3 * (mCurrentSolution[(i + 1) * mNumCols + j].y +
+                mCurrentSolution[(i - 1) * mNumCols + j].y +
+                mCurrentSolution[i * mNumCols + j + 1].y +
+                mCurrentSolution[i * mNumCols + j - 1].y);
+        }
+    }
+}
+
+void WaterMesh::UpdateNormals()
+{
+    // Compute normals using finite difference scheme
+    for (unsigned int i = 1; i < mNumRows - 1; ++i)
+    {
+        for (unsigned int j = 1; j < mNumCols - 1; ++j)
+        {
+            float l = mCurrentSolution[i * mNumCols + j - 1].y;
+            float r = mCurrentSolution[i * mNumCols + j + 1].y;
+            float t = mCurrentSolution[(i - 1) * mNumCols + j - 1].y;
+            float b = mCurrentSolution[(i - 1) * mNumCols + j + 1].y;
+
+            mNormals[i * mNumCols + j].x = -r + 1.0f;
+            mNormals[i * mNumCols + j].y = 2.0f * mSpatialStep;
+            mNormals[i * mNumCols + j].z = b - t;
+
+            D3DXVec3Normalize(&mNormals[i * mNumCols + j], &mNormals[i * mNumCols + j]);
+        }
+    }
+}
+
+void WaterMesh::UpdateVertexBuffer()
+{
+    // Update the vertex buffer with the new solution
+    WaterMeshVertex * pVertices = NULL;
+    HRESULT hr = mVertexBuffer->Map(D3D10_MAP_WRITE_DISCARD, 0, (void**)&pVertices);
+
+    if (SUCCEEDED(hr))
+    {
+        for (unsigned int i = 0; i < mNumRows * mNumCols; ++i)
+        {
+            pVertices[i].pos = mCurrentSolution[i];
+            pVertices[i].diffuse = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);
+            pVertices[i].spec = D3DXCOLOR(1.0f, 1.0f, 1.0f, 128.0f);
+            pVertices[i].normal = mNormals[i];
+        }
+    }
+    else
+    {
+        throw new DirectXException(hr, L"Updating water mesh vertex buffer", L"", __FILE__, __LINE__);
+    }
+
+    mVertexBuffer->Unmap();
 }
 
 /**

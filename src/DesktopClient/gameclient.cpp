@@ -46,8 +46,8 @@
 /**
  * Game client constructor
  */
-GameClient::GameClient(IWindow *pWindow, DXRenderer *pRenderer)
-    : mWindow(pWindow),
+GameClient::GameClient(std::shared_ptr<IWindow> window, DXRenderer *pRenderer)
+    : mWindow(window),
       mRenderer(pRenderer),
       mDemoScene(),
       mIsGameRunning(false),
@@ -56,7 +56,7 @@ GameClient::GameClient(IWindow *pWindow, DXRenderer *pRenderer)
       mUpdateFrequency(1.0f / 50.0f), // 20ms, 50 times per second
       mMaximumSleepSkew(0.01f)        // 10ms
 {
-    VerifyNotNull(pWindow);
+    VerifyNotNull(window.get());
     VerifyNotNull(pRenderer);
 }
 

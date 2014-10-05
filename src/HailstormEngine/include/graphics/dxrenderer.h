@@ -49,7 +49,7 @@ struct ID3D10RasterizerState;
 class DXRenderer : public IRenderer
 {
 public:
-    explicit DXRenderer(IWindow *pWindow, HWND hwnd);
+    explicit DXRenderer(std::shared_ptr<IWindow> window, HWND hwnd);
     virtual ~DXRenderer();
 
     HRESULT LoadFxFile(const std::wstring& fxFilePath, ID3D10Effect ** ppEffectOut) const;
@@ -105,9 +105,6 @@ private:
 
     /// Flag that is set when frame rendering is underway.
     bool mIsFrameBeingRendered;
-
-    /// Pointer to the main rendering window
-    std::shared_ptr<IWindow> mWindow;
 
     /// Pointer to the D3D 10 device
     Microsoft::WRL::ComPtr<ID3D10Device> mDevice;

@@ -83,7 +83,7 @@ void WaterLandscapeDemoScene::OnUpdate(TimeT currentTime, TimeT deltaTime)
     }
 
     // Make sure the water mesh is kept up to date with ripple animations
-    //mpWaterMesh->Update(deltaTime);
+    mWaterMesh->Update(deltaTime);
 
     // Rotate camera around the landscape
     mEyePos.x = mRadius * cosf(static_cast<float>(0.5 * currentTime));

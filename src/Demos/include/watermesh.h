@@ -68,6 +68,9 @@ public:
 
 private:
     void Init(ID3D10Device * pDevice);
+    void UpdateGrid();
+    void UpdateNormals();
+    void UpdateVertexBuffer();
 	
 private:
 	unsigned int mNumRows;
@@ -84,9 +87,9 @@ private:
 	float mSpatialStep;
 	float mSimulationTime;
 
-	std::vector<D3DXVECTOR3> mPreviousSolution;
-	std::vector<D3DXVECTOR3> mCurrentSolution;
-	std::vector<D3DXVECTOR3> mNormals;
+    std::unique_ptr<D3DXVECTOR3[]> mPreviousSolution;
+    std::unique_ptr<D3DXVECTOR3[]> mCurrentSolution;
+    std::unique_ptr<D3DXVECTOR3[]> mNormals;
 
     Microsoft::WRL::ComPtr<ID3D10Buffer> mVertexBuffer;
     Microsoft::WRL::ComPtr<ID3D10Buffer> mIndexBuffer;
