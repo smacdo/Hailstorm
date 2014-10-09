@@ -194,7 +194,6 @@
     <ClInclude Include="DesktopClient\gui\errordialog.h" />
     <ClInclude Include="DesktopClient\gui\mainwindow.h" />
     <ClInclude Include="DesktopClient\hailstorm_sandbox.h" />
-    <ClInclude Include="DesktopClient\common\platform_windows.h" />
     <ClInclude Include="DesktopClient\Resource.h" />
     <ClInclude Include="DesktopClient\stdafx.h" />
     <ClInclude Include="DesktopClient\targetver.h" />
@@ -207,7 +206,6 @@
     <ClCompile Include="DesktopClient\gui\errordialog.cpp" />
     <ClCompile Include="DesktopClient\gui\mainwindow.cpp" />
     <ClCompile Include="DesktopClient\hailstorm_sandbox.cpp" />
-    <ClCompile Include="DesktopClient\common\platform_windows.cpp" />
     <ClCompile Include="DesktopClient\pragmas.cpp" />
     <ClCompile Include="DesktopClient\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

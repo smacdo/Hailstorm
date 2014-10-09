@@ -22,30 +22,28 @@
 class MainWindow : public IWindow
 {
 public:
-    MainWindow( HINSTANCE hInstance,
-                const std::string& title,
-                unsigned int width,
-                unsigned int height );
+    MainWindow(HINSTANCE hInstance,
+               const std::string& title,
+               unsigned int width,
+               unsigned int height);
     virtual ~MainWindow();
 
-    virtual void create();
-    virtual void show();
-    virtual void exit();
-    
-    virtual bool processMessages();
+    virtual void Create() override;
+    virtual void Show() override;
+    virtual void Exit() override;
 
-    HWND windowHandle() const;
-    HINSTANCE appInstance() const;
+    virtual bool ProcessMessages() override;
 
-    void setWindowHandle( HWND hWnd );
+    HWND WindowHandle() const;
+    HINSTANCE AppInstance() const;
+
+    void SetWindowHandle(HWND hWnd);
 
     // Handles window events that come from Windows
-    LRESULT handleMessage( UINT message, WPARAM wParam, LPARAM lParam );
+    LRESULT HandleMessage(UINT message, WPARAM wParam, LPARAM lParam);
 
     // Show the message box
-    void showAboutBox() const;
-
-protected:
+    void ShowAboutBox() const;
 
 private:
     const std::wstring mAppClassName;

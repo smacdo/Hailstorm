@@ -82,7 +82,7 @@ void GameClient::Run(DemoScene * pDemoScene)
     mDemoScene.reset(pDemoScene);
 
     // Show the main window before we set up our rendering system or load any resources.
-    mWindow->show();
+    mWindow->Show();
 
     // Let the game initialize core systems.
     InitializeClient();
@@ -117,7 +117,7 @@ void GameClient::RunMainGameLoop()
     while (mIsGameRunning && (!mWindow->didUserQuit()))
     {
         // Make sure we process ALL THE MESSAGES (before doing any useful simulation stuffs).
-        mWindow->processMessages();
+        mWindow->ProcessMessages();
 
         // Get the current system time, and then calculate how much time has elapsed since the last graphics update
         // (which we will call frameTime).

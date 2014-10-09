@@ -16,7 +16,7 @@
 #include "stdafx.h"
 #include "assertiondialog.h"
 #include "version.h"
-#include "common/platform_windows.h"
+#include "runtime\StringUtils.h"
 #include "Resource.h"
 
 #include <string>
@@ -26,6 +26,9 @@
 #include <Commctrl.h>
 #include <Shobjidl.h>
 
+#include <wrl\wrappers\corewrappers.h>  // ComPtr.
+#include <wrl\client.h>                 // ComPtr friends.
+
 /**
  * Default constructor. The assertion dialog will try to guess the instance
  * and handle of the main window
@@ -34,17 +37,17 @@
  * \param  filename    Name of the file where the assertion was raised
  * \param  lineNumber  The line number where the assertion was raised
  */
-AssertionDialog::AssertionDialog( const std::string& expression,
-                                  const std::string& filename,
-                                  unsigned int lineNumber )
-    : mAppInstance( GetModuleHandle(NULL) ),
-      mWindowHandle( GetActiveWindow() ),
-      mExpression( expression ),
-      mFilename( filename ),
-      mLineNumber( lineNumber ),
-      mMessage()
+AssertionDialog::AssertionDialog(const std::wstring& expression,
+                                 const std::wstring& filename,
+                                 unsigned int lineNumber)
+    : mAppInstance(GetModuleHandle(NULL)),
+      mWindowHandle(GetActiveWindow()),
+      mMessage(),
+      mExpression(expression),
+      mFilename(filename),
+      mLineNumber(lineNumber)
 {
-    mMessage = getAssertionMessage( "The assertion was raised" );
+    mMessage = FormatMessage(L"The assertion was raised");
 }
 
 /**
@@ -52,16 +55,15 @@ AssertionDialog::AssertionDialog( const std::string& expression,
  */
 AssertionDialog::~AssertionDialog()
 {
-
 }
 
 /**
  * Sets a custom message that is displayed alongside the normal assertion
  * details
  */
-void AssertionDialog::setMessage( const std::string& message )
+void AssertionDialog::SetMessage(const std::wstring& message)
 {
-    if ( message.size() > 0 )
+    if (message.size() > 0)
     {
         mMessage = message;
     }
@@ -75,24 +77,23 @@ void AssertionDialog::setMessage( const std::string& message )
  * \return             True if the user wants to start debugging, or false
  *                     if they selected the option to quit
  */
-bool AssertionDialog::show() const
+bool AssertionDialog::Show() const
 {
     AssertionDialog::EUserAction userAction;
     bool shouldStartDebugging = false;
 
-    // Keep the dialog window up until the user has successfully saved the
-    // report, or chosen another action
+    // Keep the dialog window up until the user has successfully saved the report, or chosen another action.
     bool keepGoing = true;
 
-    while ( keepGoing )
+    while (keepGoing)
     {
-        userAction = showDialog();
-        
-        if ( userAction == EUSERACTION_SAVE )
+        userAction = ShowDialog();
+
+        if (userAction == EUSERACTION_SAVE)
         {
-            keepGoing = (! saveCrashDump() );
+            keepGoing = (!SaveCrashDump());
         }
-        else if ( userAction == EUSERACTION_DEBUG )
+        else if (userAction == EUSERACTION_DEBUG)
         {
             keepGoing = false;
             shouldStartDebugging = true;
@@ -111,12 +112,8 @@ bool AssertionDialog::show() const
  * Presents the user with the assertion failed dialog box, and returns the
  * action that the user chose to perform
  */
-AssertionDialog::EUserAction AssertionDialog::showDialog() const
+AssertionDialog::EUserAction AssertionDialog::ShowDialog() const
 {
-    // Convert our string parameters to window's wstring format
-    std::wstring expression = WinApp::ToWideString( mExpression );
-    std::wstring message    = WinApp::ToWideString( mMessage );
-
     // The buttons that will appear on the assertion dialog
     const TASKDIALOG_BUTTON cb[] =
     {
@@ -132,43 +129,47 @@ AssertionDialog::EUserAction AssertionDialog::showDialog() const
     // its options
     TASKDIALOGCONFIG tc = { 0 };
 
-    tc.cbSize         = sizeof( tc );
-    tc.hwndParent     = mWindowHandle;
-    tc.hInstance      = mAppInstance;
-    tc.dwFlags        = TDF_USE_HICON_MAIN | TDF_USE_HICON_FOOTER |
-                        TDF_EXPAND_FOOTER_AREA | TDF_USE_COMMAND_LINKS;
+    tc.cbSize = sizeof(tc);
+    tc.hwndParent = mWindowHandle;
+    tc.hInstance = mAppInstance;
+    tc.dwFlags = TDF_USE_HICON_MAIN | TDF_USE_HICON_FOOTER | TDF_EXPAND_FOOTER_AREA | TDF_USE_COMMAND_LINKS;
 
-    LoadIconWithScaleDown( NULL, MAKEINTRESOURCE(IDI_ERROR),  /*IDI_ERROR,*/
+    LoadIconWithScaleDown(
+        NULL,
+        MAKEINTRESOURCE(IDI_ERROR),  /*IDI_ERROR,*/
         GetSystemMetrics(SM_CXICON),
         GetSystemMetrics(SM_CYICON),
-        &tc.hMainIcon );
-    LoadIconWithScaleDown( NULL, IDI_INFORMATION,
+        &tc.hMainIcon);
+
+    LoadIconWithScaleDown(
+        NULL,
+        IDI_INFORMATION,
         GetSystemMetrics(SM_CXSMICON),
         GetSystemMetrics(SM_CYSMICON),
         &tc.hFooterIcon);
 
-    tc.pszWindowTitle     = L"Application Assertion";
-    tc.pszContent         = message.c_str();
+    tc.pszWindowTitle = L"Application Assertion";
+    tc.pszContent = mMessage.c_str();
     tc.pszMainInstruction = L"An internal assertion check has failed";
-    tc.pszFooter          = expression.c_str();
-    
-    tc.cButtons           = ARRAYSIZE( cb );
-    tc.pButtons           = cb;
-    tc.nDefaultButton     = 0;
+    tc.pszFooter = mExpression.c_str();
 
-    // After all that tedious set up work, we can finally show off our fancy
-    // shmancy assertion dialog!
-    int buttonPressed        = 0;
-    int commandPressed       = 0;
+    tc.cButtons = ARRAYSIZE(cb);
+    tc.pButtons = cb;
+    tc.nDefaultButton = 0;
+
+    // After all that tedious set up work, we can finally show off our fancy shmancy assertion dialog!
+    int buttonPressed = 0;
+    int commandPressed = 0;
     BOOL verificationChecked = false;
 
-    HRESULT result = TaskDialogIndirect( &tc,
-                                         &buttonPressed,
-                                         &commandPressed,
-                                         &verificationChecked );
+    TaskDialogIndirect(
+        &tc,
+        &buttonPressed,
+        &commandPressed,
+        &verificationChecked);
 
     // Return which action was selected
-    switch ( buttonPressed )
+    switch (buttonPressed)
     {
         case 0:
             return EUSERACTION_SAVE;
@@ -188,19 +189,15 @@ AssertionDialog::EUserAction AssertionDialog::showDialog() const
  *
  * \return  True if the user saved the file, false if they aborted the action
  */
-bool AssertionDialog::saveCrashDump() const
+bool AssertionDialog::SaveCrashDump() const
 {
-    HRESULT result;
     bool didSaveFile = false;
 
     // Create the file save as dialog
-    IFileDialog *pFileDialog = NULL;
-    result = CoCreateInstance( CLSID_FileSaveDialog, 
-                               NULL,
-                               CLSCTX_INPROC_SERVER,
-                               IID_PPV_ARGS( &pFileDialog ) );
+    Microsoft::WRL::ComPtr<IFileDialog> fileDialog;
+    HRESULT hr = CoCreateInstance(CLSID_FileSaveDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
 
-    if (! SUCCEEDED(result) )
+    if (!SUCCEEDED(hr))
     {
         return false;
     }
@@ -209,55 +206,55 @@ bool AssertionDialog::saveCrashDump() const
     COMDLG_FILTERSPEC filters[] = { { L"Text Files", L"*.txt" } };
 
     // Configure the save dialog with useful defaults
-    pFileDialog->SetTitle( L"Save crash dump to a file" );
-    pFileDialog->SetFileTypes( ARRAYSIZE(filters), filters );
-    pFileDialog->SetDefaultExtension(L"*.txt");
-    pFileDialog->SetFileName( L"crash details.txt" );
+    fileDialog->SetTitle(L"Save crash dump to a file");
+    fileDialog->SetFileTypes(ARRAYSIZE(filters), filters);
+    fileDialog->SetDefaultExtension(L"*.txt");
+    fileDialog->SetFileName(L"crash details.txt");
 
     // Show the file save as dialog
-    pFileDialog->Show(NULL);
+    fileDialog->Show(mWindowHandle);
 
     // Find the name of the file they want to save the assertion report to.
     // If the user didn't give an appropriate response, simply leave the filename
     // to be null
-    IShellItem *pDialogResult = NULL;
-    PWSTR       pFilePath     = NULL;
+    Microsoft::WRL::ComPtr<IShellItem> dialogResult;
+    PWSTR filepath = nullptr;
 
-    pFileDialog->GetResult( &pDialogResult );
+    hr = fileDialog->GetResult(&dialogResult);
 
-    if ( pDialogResult != NULL )
+    if (SUCCEEDED(hr))
     {
-        pDialogResult->GetDisplayName( SIGDN_FILESYSPATH, &pFilePath );
+        HRESULT hr = dialogResult->GetDisplayName(SIGDN_FILESYSPATH, &filepath);
+
+        if (SUCCEEDED(hr))
+        {
+            std::string fileContents = Utils::ConvertWideStringToUtf8(GetFileReportString());
+
+            // First we have to create the file
+            HANDLE fileHandle = CreateFile(
+                filepath,
+                GENERIC_WRITE,
+                0,
+                nullptr,
+                CREATE_ALWAYS,
+                FILE_ATTRIBUTE_NORMAL,
+                nullptr);
+
+            // Convert the text file to UTF8 and then write the string to disk.
+            WriteFile(
+                fileHandle,
+                fileContents.c_str(),
+                static_cast<DWORD>(fileContents.size()),
+                nullptr,
+                nullptr);
+
+            // Remember that we wrote the file out
+            didSaveFile = true;
+        }
     }
 
-    if ( pFilePath != NULL )
-    {
-        std::string fileContents = getFileReportString();
-
-        // First we have to create the file
-        HANDLE fileHandle = CreateFile( pFilePath,
-                                        GENERIC_WRITE,
-                                        0,
-                                        NULL,
-                                        CREATE_ALWAYS,
-                                        FILE_ATTRIBUTE_NORMAL,
-                                        NULL );
-
-        // Now we can write the assertion details out to disk
-        DWORD numBytesWritten = 0;
-
-        WriteFile( fileHandle,
-                   fileContents.c_str(),
-                   static_cast<DWORD>( fileContents.size() ),
-                   &numBytesWritten,
-                   NULL );
-
-        // Remember that we wrote the file out
-        didSaveFile = true;
-    }
-
-    // Now clean up. Release the dialog window and close the file stream
-    pFileDialog->Release();
+    // Now clean up. Release the dialog window and close the file stream.
+    CoTaskMemFree(filepath);
     return didSaveFile;
 }
 
@@ -269,16 +266,17 @@ bool AssertionDialog::saveCrashDump() const
  * \param   intro  Text to introduce the error
  * \return  A formatted assertion message to display the user
  */
-std::string AssertionDialog::getAssertionMessage( const std::string& intro ) const
+std::wstring AssertionDialog::FormatMessage(const std::wstring& intro) const
 {
     // Create a string stream and format the message
     //  typedef basic_ostringstream<wchar_t>
-    std::ostringstream ss;
+    std::wostringstream ss;
 
-    ss << intro       << " in "
-       << mFilename   << " on line "
-       << mLineNumber << ". The failed expression was:\n"
-       << mExpression;
+    ss
+        << intro       << " in "
+        << mFilename   << " on line "
+        << mLineNumber << ". The failed expression was:\n"
+        << mExpression;
 
     return ss.str();
 }
@@ -287,23 +285,23 @@ std::string AssertionDialog::getAssertionMessage( const std::string& intro ) con
  * Creates the assertion report string that should be written out to a file
  * and presented to the developer
  */
-std::string AssertionDialog::getFileReportString() const
+std::wstring AssertionDialog::GetFileReportString() const
 {
-    std::ostringstream ss;
+    std::wostringstream ss;
 
-    ss << "# Application assertion report data"             << "\r\n"
-       << "APPLICATION: "       << Version::APP_NAME        << "\r\n"
-       << "VERSION    : "       << Version::VERSION_STRING  << "\r\n"
-       << "BUILDSTRING: "       << Version::BUILD_STRING    << "\r\n"
+    ss << L"# Application assertion report data" << std::endl
+       << L"APPLICATION: " << Version::APP_NAME << std::endl
+       << L"LVERSION    : " << Version::VERSION_STRING << std::endl
+       << L"BUILDSTRING: " << Version::BUILD_STRING << std::endl
 #ifdef _WIN64
-       << "PLATFORM   : "       << "WIN64 (x64)"            << "\r\n"
+       << L"PLATFORM   : " << "WIN64 (x64)" << std::endl
 #else
-       << "PLATFORM   : "       << "WIN32 (x86)"            << "\r\n"
+       << L"PLATFORM   : " << "WIN32 (x86)" << std::endl
 #endif
-       << "MESSAGE    : "       << mMessage                 << "\r\n"
-       << "EXPRESSION : "       << mExpression              << "\r\n"
-       << "SOURCEFILE : "       << mFilename                << "\r\n"
-       << "LINENUMBER : "       << mLineNumber              << std::endl;
+       << L"EXPRESSION : " << mExpression << std::endl
+       << L"SOURCEFILE : " << mFilename << std::endl
+       << L"LINENUMBER : " << mLineNumber << std::endl
+       << L"MESSAGE    : " << mMessage << std::endl;
 
     return ss.str();
 }

@@ -17,8 +17,8 @@
 #include "gui/mainwindow.h"
 #include "gui/aboutbox.h"
 #include "gui/errordialog.h"
-#include "common/platform_windows.h"
 #include "runtime/logging.h"
+#include "runtime/StringUtils.h"
 #include "resource.h"
 
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -30,12 +30,11 @@ MainWindow::MainWindow( HINSTANCE hInstance,
                         const std::string& title,
                         unsigned int width,
                         unsigned int height )
-    : IWindow( title, width, height ),
-      mAppClassName( L"HailstormMainRenderWindow" ),
-      mAppInstance( hInstance ),
-      mWindowHandle( 0 )
+    : IWindow(title, width, height),
+      mAppClassName(L"HailstormMainRenderWindow"),
+      mAppInstance(hInstance),
+      mWindowHandle(0)
 {
-
 }
 
 /**
@@ -43,13 +42,12 @@ MainWindow::MainWindow( HINSTANCE hInstance,
  */
 MainWindow::~MainWindow()
 {
-
 }
 
 /**
  * Sets up the window description and have windows create it for us.
  */
-void MainWindow::create()
+void MainWindow::Create()
 {
     LOG_DEBUG("GUI") << "Creating the renderer main window";
     WNDCLASSEX wcex;
@@ -57,32 +55,33 @@ void MainWindow::create()
     // Configure the window description struct
     wcex.cbSize = sizeof(WNDCLASSEX);
 
-    wcex.style			= CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc	= WndProc;
-    wcex.cbClsExtra		= 0;
-    wcex.cbWndExtra		= 0;
-    wcex.hInstance		= mAppInstance;
-    wcex.hIcon			= LoadIcon(mAppInstance, MAKEINTRESOURCE(IDI_DIRECTX));
-    wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_DIRECTX);
-    wcex.lpszClassName	= mAppClassName.c_str();
-    wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = mAppInstance;
+    wcex.hIcon = LoadIcon(mAppInstance, MAKEINTRESOURCE(IDI_DIRECTX));
+    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = MAKEINTRESOURCE(IDC_DIRECTX);
+    wcex.lpszClassName = mAppClassName.c_str();
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     // Register the window class description
     ATOM result = RegisterClassEx(&wcex);
-    assert( result != 0 );
+    assert(result != 0);
 
     // Convert the UTF8 window title to Window's UTF16s
-    std::wstring wideWindowTitle = WinApp::ToWideString( windowTitle() );
+    std::wstring wideWindowTitle = Utils::ConvertUtf8ToWideString(windowTitle());
 
     // Need to find out how big to make the window, depending on the size of the
     // back buffer
     RECT windowRect = { 200, 200, 200 + width(), 200 + height() };
-    AdjustWindowRectEx( &windowRect, WS_OVERLAPPEDWINDOW, TRUE, WS_EX_OVERLAPPEDWINDOW );
+    AdjustWindowRectEx(&windowRect, WS_OVERLAPPEDWINDOW, TRUE, WS_EX_OVERLAPPEDWINDOW);
 
     // Now create the window
-    HWND tempHwnd = CreateWindowEx( WS_EX_OVERLAPPEDWINDOW,
+    HWND tempHwnd = CreateWindowEx(
+        WS_EX_OVERLAPPEDWINDOW,
         mAppClassName.c_str(),
         wideWindowTitle.c_str(),
         WS_OVERLAPPEDWINDOW,
@@ -93,49 +92,51 @@ void MainWindow::create()
         NULL,
         NULL,
         mAppInstance,
-        this
-        );
+        this);
 
     // Verify that the window was created
-    assert( mWindowHandle == tempHwnd );
-    assert( mWindowHandle != NULL );
+    assert(mWindowHandle == tempHwnd);
+    assert(mWindowHandle != NULL);
 }
 
 /**
  * Show the window
  */
-void MainWindow::show()
+void MainWindow::Show()
 {
     LOG_DEBUG("GUI") << "Showing the main window";
-    assert( mWindowHandle != 0 );
+    assert(mWindowHandle != 0);
 
-    ShowWindow( mWindowHandle, SW_RESTORE );
-    UpdateWindow( mWindowHandle );
+    ShowWindow(mWindowHandle, SW_RESTORE);
+    UpdateWindow(mWindowHandle);
 }
 
 /**
  * Starts the application exit process
  */
-void MainWindow::exit()
+void MainWindow::Exit()
 {
     LOG_DEBUG("GUI") << "MainWindow::exit() has been called";
     setUserQuit();
-    DestroyWindow( mWindowHandle );
+    DestroyWindow(mWindowHandle);
 }
+
+
+#include "assertiondialog.h"
 
 /**
  * Show the about application message box
  */
-void MainWindow::showAboutBox() const
+void MainWindow::ShowAboutBox() const
 {
-    AboutBox about(appInstance(), windowHandle());
+    AboutBox about(AppInstance(), WindowHandle());
     about.Show();
 }
 
 /**
  * Return the handle of the main window
  */
-HWND MainWindow::windowHandle() const
+HWND MainWindow::WindowHandle() const
 {
     return mWindowHandle;
 }
@@ -143,7 +144,7 @@ HWND MainWindow::windowHandle() const
 /**
  * Sets the window handle that represents the main window
  */
-void MainWindow::setWindowHandle( HWND hWnd )
+void MainWindow::SetWindowHandle( HWND hWnd )
 {
     mWindowHandle = hWnd;
 }
@@ -151,7 +152,7 @@ void MainWindow::setWindowHandle( HWND hWnd )
 /**
  * Returns the application instance that owns the main window
  */
-HINSTANCE MainWindow::appInstance() const
+HINSTANCE MainWindow::AppInstance() const
 {
     return mAppInstance;
 }
@@ -159,7 +160,7 @@ HINSTANCE MainWindow::appInstance() const
 /**
  * Process any incoming window messages
  */
-bool MainWindow::processMessages()
+bool MainWindow::ProcessMessages()
 {
     MSG message;
     bool keepGoing = true;
@@ -183,9 +184,9 @@ bool MainWindow::processMessages()
 /**
  * Message loop handler
  */
-LRESULT MainWindow::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT MainWindow::HandleMessage( UINT message, WPARAM wParam, LPARAM lParam )
 {
-    HWND hWnd = windowHandle();
+    HWND hWnd = WindowHandle();
     int wmId, wmEvent;
 
     switch ( message )
@@ -198,10 +199,10 @@ LRESULT MainWindow::handleMessage( UINT message, WPARAM wParam, LPARAM lParam )
             switch ( wmId )
             {
                 case IDM_ABOUT:
-                    showAboutBox();
+                    ShowAboutBox();
                     break;
                 case IDM_EXIT:
-                    this->exit();
+                    this->Exit();
                     break;
                 default:
                     return DefWindowProc( hWnd, message, wParam, lParam );
@@ -304,11 +305,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     MainWindow * pMainWindow = NULL;
 
-    //
     // Grab a pointer to the Window* instance that is sending this message.
     //  Either a window was created, in which case we need to save the pointer,
     //  or we need to look up the saved value
-    //
     if (message == WM_NCCREATE)
     {
         // We need to intercept the WM_NCCREATE message, since it is the first
@@ -326,7 +325,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             reinterpret_cast<LONG_PTR>(pMainWindow));
 
         // Also store the assigned HWND value
-        pMainWindow->setWindowHandle(hWnd);
+        pMainWindow->SetWindowHandle(hWnd);
     }
     else
     {
@@ -340,7 +339,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     // the instance, then just let windows perform a default action
     if (pMainWindow != NULL)
     {
-        return pMainWindow->handleMessage(message, wParam, lParam);
+        return pMainWindow->HandleMessage(message, wParam, lParam);
     }
     else
     {

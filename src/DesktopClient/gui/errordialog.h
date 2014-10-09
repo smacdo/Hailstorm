@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,26 @@
 class ErrorDialog
 {
 public:
-    ErrorDialog( const std::string& message );
-    ErrorDialog( const std::string& message, const std::string& details );
+    ErrorDialog(const std::wstring& message);
+    ErrorDialog(const std::wstring& message, const std::wstring& details);
     ErrorDialog(const ErrorDialog&) = delete;
     ~ErrorDialog();
 
     ErrorDialog& operator =(const ErrorDialog&) = delete;
 
-    void setIsFatal( bool isFatal );
-    bool isFatal() const;
+    void SetIsFatal(bool isFatal);
+    bool IsFatal() const;
 
-    void show();
-    bool didUserPressQuit() const;
+    void Show();
+    bool DidUserPressQuit() const;
 
 protected:
     HINSTANCE mAppInstance;
     HWND mWindowHandle;
-    std::string mTitle;
-    std::string mMainMessage;
-    std::string mDetails;
-    std::string mVerificationText;
+    std::wstring mTitle;
+    std::wstring mMainMessage;
+    std::wstring mDetails;
+    std::wstring mVerificationText;
     bool mIsFatal;
     bool mDidUserPressQuit;
     BOOL mIsVerifyChecked;

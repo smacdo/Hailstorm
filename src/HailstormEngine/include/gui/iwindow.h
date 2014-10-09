@@ -34,10 +34,10 @@ public:
 
     IWindow& operator = (const IWindow&) = delete;
 
-    virtual void create() = 0;
-    virtual void show() = 0;
-    virtual bool processMessages() = 0;
-    virtual void exit() = 0;
+    virtual void Create() = 0;
+    virtual void Show() = 0;
+    virtual bool ProcessMessages() = 0;
+    virtual void Exit() = 0;
 
     bool didUserQuit() const;
     bool isPaused() const;

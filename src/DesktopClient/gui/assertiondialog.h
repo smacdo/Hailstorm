@@ -30,16 +30,17 @@
 class AssertionDialog
 {
 public:
-    AssertionDialog( const std::string& expression,
-                     const std::string& filename,
-                     unsigned int lineNumber );
+    AssertionDialog(
+        const std::wstring& expression,
+        const std::wstring& filename,
+        unsigned int lineNumber);
     AssertionDialog(const AssertionDialog&) = delete;
     ~AssertionDialog();
 
     AssertionDialog& operator =(const AssertionDialog&) = delete;
 
-    void setMessage( const std::string& message );
-    bool show() const;
+    void SetMessage(const std::wstring& message);
+    bool Show() const;
 
 private:
     enum EUserAction
@@ -50,19 +51,19 @@ private:
     };
 
 protected:
-    EUserAction showDialog() const;
-    bool saveCrashDump() const;
+    EUserAction ShowDialog() const;
+    bool SaveCrashDump() const;
 
-    std::string getAssertionMessage( const std::string& intro ) const;
-    std::string getFileReportString() const;
+    std::wstring FormatMessage(const std::wstring& intro) const;
+    std::wstring GetFileReportString() const;
 
 private:
     HINSTANCE mAppInstance;
     HWND mWindowHandle;
-    std::string mExpression;
-    std::string mFilename;
+    std::wstring mMessage;
+    std::wstring mExpression;
+    std::wstring mFilename;
     unsigned int mLineNumber;
-    std::string mMessage;
 };
 
 #endif

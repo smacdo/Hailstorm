@@ -15,7 +15,7 @@
  */
 #include "stdafx.h"
 #include "gui/errordialog.h"
-#include "common/platform_windows.h"
+#include "runtime/StringUtils.h"
 
 #include "Resource.h"
 
@@ -24,57 +24,52 @@
 #include <Commctrl.h>
 #include <Shobjidl.h>
 
-ErrorDialog::ErrorDialog( const std::string& message )
-    : mAppInstance( GetModuleHandle(NULL) ),
-      mWindowHandle( GetActiveWindow() ),
-      mTitle( "Hailstorm Engine" ),
-      mMainMessage( message ),
+ErrorDialog::ErrorDialog(const std::wstring& message)
+    : mAppInstance(GetModuleHandle(NULL)),
+      mWindowHandle(GetActiveWindow()),
+      mTitle(L"Hailstorm Engine"),
+      mMainMessage(message),
       mDetails(),
       mVerificationText(),
-      mIsFatal( false ),
-      mDidUserPressQuit( false ),
-      mIsVerifyChecked( false )
+      mIsFatal(false),
+      mDidUserPressQuit(false),
+      mIsVerifyChecked(false)
 {
 }
 
-ErrorDialog::ErrorDialog( const std::string& message, const std::string& details )
-    : mAppInstance( GetModuleHandle(NULL) ),
-      mWindowHandle( GetActiveWindow() ),
-      mTitle( "Hailstorm Engine" ),
-      mMainMessage( message ),
-      mDetails( details ),
-      mIsFatal( false ),
-      mDidUserPressQuit( false ),
-      mIsVerifyChecked( false )
+ErrorDialog::ErrorDialog(const std::wstring& message, const std::wstring& details)
+    : mAppInstance(GetModuleHandle(NULL)),
+      mWindowHandle(GetActiveWindow()),
+      mTitle(L"Hailstorm Engine"),
+      mMainMessage(message),
+      mDetails(details),
+      mIsFatal(false),
+      mDidUserPressQuit(false),
+      mIsVerifyChecked(false)
 {
 }
 
 ErrorDialog::~ErrorDialog()
 {
-
 }
 
-void ErrorDialog::setIsFatal( bool isFatal )
+void ErrorDialog::SetIsFatal( bool isFatal )
 {
     mIsFatal = isFatal;
 }
 
-bool ErrorDialog::isFatal() const
+bool ErrorDialog::IsFatal() const
 {
     return mIsFatal;
 }
 
-bool ErrorDialog::didUserPressQuit() const
+bool ErrorDialog::DidUserPressQuit() const
 {
     return mDidUserPressQuit;
 }
 
-void ErrorDialog::show()
+void ErrorDialog::Show()
 {
-    std::wstring title       = WinApp::ToWideString( mTitle );
-    std::wstring mainMessage = WinApp::ToWideString( mMainMessage );
-    std::wstring details     = WinApp::ToWideString( mDetails );
-
     // The buttons that will appear on the assertion dialog
     const TASKDIALOG_BUTTON cb[] =
     {
@@ -86,74 +81,79 @@ void ErrorDialog::show()
     // its options
     TASKDIALOGCONFIG tc = { 0 };
 
-    tc.cbSize         = sizeof( tc );
-    tc.hwndParent     = mWindowHandle;
-    tc.hInstance      = mAppInstance;
+    tc.cbSize = sizeof(tc);
+    tc.hwndParent = mWindowHandle;
+    tc.hInstance = mAppInstance;
 
     // Dialog flags
-    tc.dwFlags        = TDF_USE_HICON_MAIN;
+    tc.dwFlags = TDF_USE_HICON_MAIN;
 
-    if (! mIsFatal )
+    if (!mIsFatal)
     {
         tc.dwFlags |= TDF_ALLOW_DIALOG_CANCELLATION;
     }
 
     // Load the appropriate icon for the dialog
-    if ( mIsFatal )
+    if (mIsFatal)
     {
-        LoadIconWithScaleDown( NULL, MAKEINTRESOURCE(IDI_ERROR),  /*IDI_ERROR,*/
+        LoadIconWithScaleDown(
+            NULL,
+            MAKEINTRESOURCE(IDI_ERROR),  /*IDI_ERROR,*/
             GetSystemMetrics(SM_CXICON),
             GetSystemMetrics(SM_CYICON),
-            &tc.hMainIcon );
+            &tc.hMainIcon);
     }
     else
     {
-        LoadIconWithScaleDown( NULL, MAKEINTRESOURCE(IDI_WARNING),  /*IDI_ERROR,*/
+        LoadIconWithScaleDown(
+            NULL,
+            MAKEINTRESOURCE(IDI_WARNING),  /*IDI_ERROR,*/
             GetSystemMetrics(SM_CXICON),
             GetSystemMetrics(SM_CYICON),
-            &tc.hMainIcon );
+            &tc.hMainIcon);
     }
 
     // Set up dialog buttons
-    if ( mIsFatal )
+    if (mIsFatal)
     {
-        tc.cButtons           = 1;
-        tc.pButtons           = &cb[1];
-        tc.nDefaultButton     = 0;
+        tc.cButtons = 1;
+        tc.pButtons = &cb[1];
+        tc.nDefaultButton = 0;
     }
     else
     {
-        tc.cButtons           = 2;
-        tc.pButtons           = &cb[0];
-        tc.nDefaultButton     = 0;
+        tc.cButtons = 2;
+        tc.pButtons = &cb[0];
+        tc.nDefaultButton = 0;
     }
 
     // Set up the error text and make sure it is presented to the user in
     // a nice way
-    tc.pszWindowTitle     = title.c_str();
+    tc.pszWindowTitle = mTitle.c_str();
 
-    if ( details.empty() )
+    if (mDetails.empty())
     {
         tc.pszMainInstruction = L"An error has occurred";
-        tc.pszContent         = mainMessage.c_str();
+        tc.pszContent = mMainMessage.c_str();
     }
     else
     {
-        tc.pszMainInstruction = mainMessage.c_str();
-        tc.pszContent         = details.c_str();
+        tc.pszMainInstruction = mMainMessage.c_str();
+        tc.pszContent = mDetails.c_str();
     }
 
     // Try displaying the assertion dialog
-    int buttonPressed        = 0;
-    int commandPressed       = 0;
+    int buttonPressed = 0;
+    int commandPressed = 0;
 
-    HRESULT result = TaskDialogIndirect( &tc,
+    TaskDialogIndirect(
+        &tc,
         &buttonPressed,
         &commandPressed,
-        &mIsVerifyChecked );
+        &mIsVerifyChecked);
 
     // Did the user press the quit button?
-    if ( commandPressed == 1 )
+    if (commandPressed == 1)
     {
         mDidUserPressQuit = true;
     }

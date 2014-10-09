@@ -30,9 +30,6 @@
     <ClCompile Include="DesktopClient\gui\mainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DesktopClient\common\platform_windows.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DesktopClient\pragmas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,9 +54,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DesktopClient\gui\mainwindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DesktopClient\common\platform_windows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DesktopClient\Resource.h">

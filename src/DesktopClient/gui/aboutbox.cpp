@@ -15,7 +15,6 @@
  */
 #include "stdafx.h"
 #include "gui/aboutbox.h"
-#include "common/platform_windows.h"
 #include "resource.h"
 
 #include <cassert>

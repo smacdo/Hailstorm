@@ -70,8 +70,8 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
     LOG_NOTICE("WinMain") << "Application has started";
     LOG_NOTICE("WinMain") << "Creating main application window";
 
-    std::shared_ptr<MainWindow> mainWindow( new MainWindow(hInstance, "Hailstorm Tech Demo", 800u, 600u));
-    mainWindow->create();
+    std::shared_ptr<MainWindow> mainWindow(new MainWindow(hInstance, "Hailstorm Tech Demo", 800u, 600u));
+    mainWindow->Create();
     
     // Create the game client
     LOG_NOTICE("WinMain") << "Creating the game client";
@@ -82,7 +82,7 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
             new DXRenderer(
                 camera,
                 mainWindow,
-                mainWindow->windowHandle())));
+                mainWindow->WindowHandle())));
 
     // Run the game
     LOG_NOTICE("WinMain") << "Starting the game";
