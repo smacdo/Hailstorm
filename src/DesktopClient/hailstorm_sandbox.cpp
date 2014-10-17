@@ -23,16 +23,10 @@
 
 #include "demos/WaterLandscapeDemoScene.h"
 
-// For console
-#include <fcntl.h>
-#include <io.h>
-
 // Let VC++ know we are compiling for Windows Vista and newer
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT   0x0600 // Vista
 #endif
-
-void CreateConsoleWindow(bool redirectStdout);
 
 /////////////////////////////////////////////////////////////////////////////
 // Application entry point
@@ -55,9 +49,6 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
 
     _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
 
-    // We need a console window
-    CreateConsoleWindow(true);
-
     // A camra is important! We can't see without one, and what kind of graphics demo would this be if we couldn't
     // see anything??
     std::shared_ptr<RotationalCamera> camera(new RotationalCamera());
@@ -70,80 +61,21 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
     LOG_NOTICE("WinMain") << "Application has started";
     LOG_NOTICE("WinMain") << "Creating main application window";
 
-    std::shared_ptr<MainWindow> mainWindow(new MainWindow(hInstance, "Hailstorm Tech Demo", 800u, 600u));
+    std::shared_ptr<MainWindow> mainWindow(new MainWindow(hInstance, L"Hailstorm Tech Demo", 800u, 600u));
     mainWindow->Create();
-    
+    mainWindow->Show();
+   
+    // Create the DirectX renderer.
+    LOG_NOTICE("WinMain") << "Creating DirectX renderer.";
+    std::unique_ptr<DXRenderer> renderer(new DXRenderer(camera, mainWindow));
+
     // Create the game client
     LOG_NOTICE("WinMain") << "Creating the game client";
-    std::unique_ptr<GameClient> game(
-        new GameClient(
-            camera,
-            mainWindow, 
-            new DXRenderer(
-                camera,
-                mainWindow,
-                mainWindow->WindowHandle())));
+    std::unique_ptr<GameClient> game(new GameClient(camera, mainWindow, std::move(renderer)));
 
     // Run the game
     LOG_NOTICE("WinMain") << "Starting the game";
     game->Run(new WaterLandscapeDemoScene(camera));
 
     return EXIT_SUCCESS;
-}
-
-/**
-* Creates the a console window using the Windows API, and optionally
-* redirects standard output/input to this console window
-*/
-void CreateConsoleWindow(bool redirectStdout)
-{
-    // --- I think we should break all this out into a separate class ---
-    const int MAX_CONSOLE_LINES = 4096;
-    //        const int CONSOLE_COLS      = 100;
-
-    intptr_t stdHandle = 0;
-    int consoleHandle = 0;
-    FILE * pFile = NULL;
-
-    // Create the console window
-    AllocConsole();
-
-    SetConsoleTitleW(L"Application Console");
-
-    // Set up the screen buffer to be big enough that we can scroll the text
-    // area
-    CONSOLE_SCREEN_BUFFER_INFOEX consoleInfo;
-    GetConsoleScreenBufferInfoEx(GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo);
-
-    //        consoleInfo.dwSize.X = CONSOLE_COLS;
-    consoleInfo.dwSize.Y = MAX_CONSOLE_LINES;
-
-    SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), consoleInfo.dwSize);
-
-    // Redirect unbuffered STDOUT to the console window
-    stdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_OUTPUT_HANDLE));
-    consoleHandle = _open_osfhandle(stdHandle, _O_TEXT);
-    pFile = _fdopen(consoleHandle, "w");
-
-    *stdout = *pFile;
-    setvbuf(stdout, NULL, _IOLBF, 4096);  // is this large enough?
-
-    // Redirect unbuffered STDIN to the console
-    stdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_INPUT_HANDLE));
-    consoleHandle = _open_osfhandle(stdHandle, _O_TEXT);
-    pFile = _fdopen(consoleHandle, "r");
-
-    *stdin = *pFile;
-    setvbuf(stdin, NULL, _IONBF, 0);
-
-    // Redirect unbuffered STDERR to the console
-    stdHandle = reinterpret_cast<intptr_t>(GetStdHandle(STD_ERROR_HANDLE));
-    consoleHandle = _open_osfhandle(stdHandle, _O_TEXT);
-    pFile = _fdopen(consoleHandle, "w");
-
-    *stderr = *pFile;
-    setvbuf(stderr, NULL, _IONBF, 0);
-
-    // Sync C++ cout/cin/cerr/clog with the new handles
-    std::ios::sync_with_stdio();
 }

@@ -15,7 +15,7 @@
  */
 #include "stdafx.h"
 #include "gameclient.h"
-#include "gui/iwindow.h"
+#include "host/RenderingWindow.h"
 #include "graphics/dxrenderer.h"
 #include "graphics/DemoScene.h"
 #include "camera/Camera.h"
@@ -49,10 +49,10 @@
  */
 GameClient::GameClient(
     std::shared_ptr<Camera> camera,
-    std::shared_ptr<IWindow> window,
-    DXRenderer *pRenderer)
+    std::shared_ptr<RenderingWindow> window,
+    std::unique_ptr<DXRenderer> renderer)
     : mWindow(window),
-      mRenderer(pRenderer),
+      mRenderer(std::move(renderer)),
       mCamera(camera),
       mDemoScene(),
       mIsGameRunning(false),
@@ -61,8 +61,6 @@ GameClient::GameClient(
       mUpdateFrequency(1.0f / 50.0f), // 20ms, 50 times per second
       mMaximumSleepSkew(0.01f)        // 10ms
 {
-    VerifyNotNull(window.get());
-    VerifyNotNull(pRenderer);
 }
 
 /**
@@ -80,9 +78,6 @@ void GameClient::Run(DemoScene * pDemoScene)
 {
     VerifyNotNull(pDemoScene);
     mDemoScene.reset(pDemoScene);
-
-    // Show the main window before we set up our rendering system or load any resources.
-    mWindow->Show();
 
     // Let the game initialize core systems.
     InitializeClient();
@@ -114,7 +109,7 @@ void GameClient::RunMainGameLoop()
     TimeT accumulatedTime = 0.0f;
 
     // This is where it all starts!
-    while (mIsGameRunning && (!mWindow->didUserQuit()))
+    while (mIsGameRunning && (!mWindow->IsClosing()))
     {
         // Make sure we process ALL THE MESSAGES (before doing any useful simulation stuffs).
         mWindow->ProcessMessages();
@@ -187,7 +182,7 @@ void GameClient::InitializeClient()
 {
     // We need to find the internal tick rate before using time.
     mTimerFrequency = CalculateSystemTimerFrequency();
-    mRenderer->initialize();
+    mRenderer->Initialize();
 }
 
 /**

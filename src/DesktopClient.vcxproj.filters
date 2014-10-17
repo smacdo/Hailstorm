@@ -27,13 +27,16 @@
     <ClCompile Include="DesktopClient\hailstorm_sandbox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DesktopClient\gui\mainwindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DesktopClient\pragmas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DesktopClient\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DesktopClient\gui\mainwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DesktopClient\gui\DesktopConsole.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,9 +56,6 @@
     <ClInclude Include="DesktopClient\hailstorm_sandbox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DesktopClient\gui\mainwindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DesktopClient\Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -66,6 +66,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DesktopClient\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DesktopClient\gui\mainwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DesktopClient\gui\DesktopConsole.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -14,26 +14,39 @@
  * limitations under the License.
  */
 #include "stdafx.h"
+#include "HailstormRuntime.h"
+#include "runtime/StringUtils.h"
+
+#include "gui/DesktopConsole.h"
 #include "gui/mainwindow.h"
 #include "gui/aboutbox.h"
 #include "gui/errordialog.h"
-#include "runtime/logging.h"
-#include "runtime/StringUtils.h"
+
 #include "resource.h"
 
-LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
+#include <string>
+#include <memory>
+
+static const std::wstring MainWindowClassName = L"HailstormMainRenderWindow";
 
 /**
  * Constructor
  */
-MainWindow::MainWindow( HINSTANCE hInstance,
-                        const std::string& title,
-                        unsigned int width,
-                        unsigned int height )
-    : IWindow(title, width, height),
-      mAppClassName(L"HailstormMainRenderWindow"),
+MainWindow::MainWindow(HINSTANCE hInstance,
+                       const std::wstring& title,
+                       unsigned int width,
+                       unsigned int height)
+    : mWindowTitle(title),
       mAppInstance(hInstance),
-      mWindowHandle(0)
+      mWindowHandle(nullptr),
+      mWindowWidth(width),
+      mWindowHeight(height),
+      mIsPaused(false),
+      mIsResizing(false),
+      mWasResized(false),
+      mUserRequestedQuit(false),
+      mIsMinimized(false),
+      mConsole(new DesktopConsole(L"Hailstorm Debug Console", true))
 {
 }
 
@@ -45,14 +58,14 @@ MainWindow::~MainWindow()
 }
 
 /**
- * Sets up the window description and have windows create it for us.
+ * Create and show the main window. This should be called immediately after constructing the instance.
  */
 void MainWindow::Create()
 {
     LOG_DEBUG("GUI") << "Creating the renderer main window";
-    WNDCLASSEX wcex;
 
-    // Configure the window description struct
+    // Describe the window we want to create.
+    WNDCLASSEX wcex;
     wcex.cbSize = sizeof(WNDCLASSEX);
 
     wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -64,39 +77,38 @@ void MainWindow::Create()
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = MAKEINTRESOURCE(IDC_DIRECTX);
-    wcex.lpszClassName = mAppClassName.c_str();
+    wcex.lpszClassName = MainWindowClassName.c_str();
     wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     // Register the window class description
     ATOM result = RegisterClassEx(&wcex);
     assert(result != 0);
 
-    // Convert the UTF8 window title to Window's UTF16s
-    std::wstring wideWindowTitle = Utils::ConvertUtf8ToWideString(windowTitle());
-
-    // Need to find out how big to make the window, depending on the size of the
-    // back buffer
-    RECT windowRect = { 200, 200, 200 + width(), 200 + height() };
+    // Need to find out how big to make the window, depending on the size of the back buffer.
+    RECT windowRect = { 200, 200, 200 + Width(), 200 + Height() };
     AdjustWindowRectEx(&windowRect, WS_OVERLAPPEDWINDOW, TRUE, WS_EX_OVERLAPPEDWINDOW);
 
-    // Now create the window
+    // Actually create the window.
     HWND tempHwnd = CreateWindowEx(
-        WS_EX_OVERLAPPEDWINDOW,
-        mAppClassName.c_str(),
-        wideWindowTitle.c_str(),
-        WS_OVERLAPPEDWINDOW,
-        windowRect.left,
-        windowRect.top,
-        windowRect.right - windowRect.left,
-        windowRect.bottom - windowRect.top,
-        NULL,
-        NULL,
-        mAppInstance,
-        this);
+        WS_EX_OVERLAPPEDWINDOW,             // Window style: Overlapped window.
+        MainWindowClassName.c_str(),        // Window class name.
+        mWindowTitle.c_str(),               // Window caption.
+        WS_OVERLAPPEDWINDOW,                // Overlapped window style.
+        windowRect.left,                    // Window top left x position.
+        windowRect.top,                     // Window top left yposition.
+        windowRect.right - windowRect.left, // Window width.
+        windowRect.bottom - windowRect.top, // Window height.
+        nullptr,                            // This window does not have a parent window.
+        nullptr,                            // Do not associate a menu with the window.
+        mAppInstance,                       // Application instance.
+        this);                              // Pass address of this class in creation event message (advanced).
 
-    // Verify that the window was created
+    // Verify that the window was created.
     assert(mWindowHandle == tempHwnd);
-    assert(mWindowHandle != NULL);
+    assert(mWindowHandle != nullptr);
+
+    // Show the window.
+    Show();
 }
 
 /**
@@ -104,41 +116,31 @@ void MainWindow::Create()
  */
 void MainWindow::Show()
 {
-    LOG_DEBUG("GUI") << "Showing the main window";
-    assert(mWindowHandle != 0);
+    LOG_DEBUG("GUI") << "Showing the main rendering window";
+    Verify(mWindowHandle != 0);
 
     ShowWindow(mWindowHandle, SW_RESTORE);
     UpdateWindow(mWindowHandle);
 }
 
 /**
- * Starts the application exit process
+ *  Performs clean up work prior to exiting the main window. Called by the main window event handler.
  */
 void MainWindow::Exit()
 {
-    LOG_DEBUG("GUI") << "MainWindow::exit() has been called";
-    setUserQuit();
+    LOG_DEBUG("GUI") << "Closing the main rendering window";
+
+    mUserRequestedQuit = true;
     DestroyWindow(mWindowHandle);
 }
-
-
-#include "assertiondialog.h"
 
 /**
  * Show the about application message box
  */
 void MainWindow::ShowAboutBox() const
 {
-    AboutBox about(AppInstance(), WindowHandle());
+    AboutBox about(mAppInstance, mWindowHandle);
     about.Show();
-}
-
-/**
- * Return the handle of the main window
- */
-HWND MainWindow::WindowHandle() const
-{
-    return mWindowHandle;
 }
 
 /**
@@ -150,53 +152,92 @@ void MainWindow::SetWindowHandle( HWND hWnd )
 }
 
 /**
- * Returns the application instance that owns the main window
+ * Set if the window is in a paused state or not.
  */
-HINSTANCE MainWindow::AppInstance() const
+void MainWindow::SetPaused(bool isPaused)
 {
-    return mAppInstance;
+    LOG_NOTICE("GUI") << "Main rendering window has been " << (isPaused ? "paused" : "unpaused");
+    mIsPaused = isPaused;
 }
 
 /**
- * Process any incoming window messages
+ * Set if the window is minimized or not.
+ */
+void MainWindow::SetMinimized(bool isMinimized)
+{
+    LOG_NOTICE("GUI") << "Main rendering window has been " << (isMinimized ? "minimized" : "un-minimized");
+    mIsMinimized = isMinimized;
+}
+
+/**
+ * Set if the window is being resized.
+ */
+void MainWindow::SetIsWindowResizing(bool isResizing)
+{
+    if (mIsResizing != isResizing)
+    {
+        LOG_NOTICE("GUI") << "Main rendering window is " << (isResizing ? "resizing" : "no longer resizing");
+        mIsResizing = isResizing;
+    }
+}
+
+/**
+ * Set if the window is in a resizing state or not.
+ *  \param windowSize The current size of the window.
+ */
+void MainWindow::SetWindowResized(const Size& windowSize)
+{
+    LOG_NOTICE("GUI") << "Main window is was resized to " << windowSize.width << "x" << windowSize.height;
+    Verify(windowSize.width > 0);           // TODO: Replace these with real exceptions.
+    Verify(windowSize.height > 0);
+
+    mWasResized = true;
+    mWindowWidth = windowSize.width;
+    mWindowHeight = windowSize.height;
+}
+
+/**
+ * Pumps the windows event handler for any messages sent to this main window. Dispatches and processes those
+ * messages. This method should be called at least once per update cycle by the game loop to maintain client ui
+ * responsiveness.
  */
 bool MainWindow::ProcessMessages()
 {
     MSG message;
     bool keepGoing = true;
 
-    while ( keepGoing && PeekMessage( &message, mWindowHandle, 0, 0, PM_REMOVE ) == TRUE )
+    while (keepGoing && PeekMessage(&message, mWindowHandle, 0, 0, PM_REMOVE) == TRUE)
     {
-        if ( message.message == WM_QUIT )
+        if (message.message == WM_QUIT)
         {
-            LOG_NOTICE("GUI") << "Quit received. Application is going to exit";
+            LOG_NOTICE("GUI") << "Quit event received.";
             keepGoing = false;
-            setUserQuit();
+            mUserRequestedQuit = true;
         }
 
-        TranslateMessage( &message );
-        DispatchMessage( &message );
+        TranslateMessage(&message);
+        DispatchMessage(&message);
     }
 
     return keepGoing;
 }
 
 /**
- * Message loop handler
+ * Handles window events that come from Windows.
  */
-LRESULT MainWindow::HandleMessage( UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT MainWindow::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam)
 {
     HWND hWnd = WindowHandle();
-    int wmId, wmEvent;
+    int wmId = 0, wmEvent = 0;
 
-    switch ( message )
+    switch (message)
     {
         case WM_COMMAND:
-            wmId    = LOWORD( wParam );
-            wmEvent = HIWORD( wParam );
+            wmId = LOWORD(wParam);
+            wmEvent = HIWORD(wParam);
 
             // Parse the menu selections:
-            switch ( wmId )
+            switch (wmId)
             {
                 case IDM_ABOUT:
                     ShowAboutBox();
@@ -205,59 +246,52 @@ LRESULT MainWindow::HandleMessage( UINT message, WPARAM wParam, LPARAM lParam )
                     this->Exit();
                     break;
                 default:
-                    return DefWindowProc( hWnd, message, wParam, lParam );
+                    return DefWindowProc(hWnd, message, wParam, lParam);
             }
             break;
 
         case WM_ACTIVATE:
-            if ( LOWORD(wParam) == WA_INACTIVE )
-            {
-                setPaused( true );
-            }
-            else
-            {
-                setPaused( false );
-            }
+            SetPaused(LOWORD(wParam) == WA_INACTIVE);
             break;
 
         case WM_SIZE:
-            if ( wParam == SIZE_MINIMIZED )
+            if (wParam == SIZE_MINIMIZED)
             {
-                setPaused( true );
-                setMinimized( true );
+                SetPaused(true);
+                SetMinimized(true);
             }
-            else if ( wParam == SIZE_MAXIMIZED )
+            else if (wParam == SIZE_MAXIMIZED)
             {
                 // Unpause if we are coming out of a minimize
-                if ( isMinimized() )
+                if (IsMinimized())
                 {
-                    setPaused( false );
-                    setMinimized( false );
+                    SetPaused(false);
+                    SetMinimized(false);
                 }
 
-                setResized( true, LOWORD(lParam), HIWORD(lParam) );
+                SetWindowResized(Size{ LOWORD(lParam), HIWORD(lParam) });
             }
             else
             {
                 // Unpause if we are coming out of a minimize
-                if ( isMinimized() )
+                if (IsMinimized())
                 {
-                    setPaused( false );
-                    setMinimized( false );
+                    SetPaused(false);
+                    SetMinimized(false);
                 }
 
-                setResized( true, LOWORD(lParam), HIWORD(lParam) );
+                SetWindowResized(Size{ LOWORD(lParam), HIWORD(lParam) });
             }
             break;
 
         case WM_POWERBROADCAST:
-            if ( wParam == PBT_APMQUERYSUSPEND )
+            if (wParam == PBT_APMQUERYSUSPEND)
             {
                 // The application is about to be suspended. We should prepare for
                 // this event by saving any data and then pausing the game loop
                 // until we come out of suspension
             }
-            else if ( wParam == PBT_APMRESUMESUSPEND )
+            else if (wParam == PBT_APMRESUMESUSPEND)
             {
                 // The application is being resumed from suspension. We should
                 // reload any saved data and unpause the game loop
@@ -265,34 +299,34 @@ LRESULT MainWindow::HandleMessage( UINT message, WPARAM wParam, LPARAM lParam )
 
         case WM_ENTERMENULOOP:
             // Pause while user is in menu
-            setPaused( true );
+            SetPaused(true);
             break;
 
         case WM_EXITMENULOOP:
             // Unpause after user has exited menu
-            setPaused( false );
+            SetPaused(false);
             break;
 
         case WM_ENTERSIZEMOVE:
-            setResizing( true );
-            setPaused( true );
+            SetIsWindowResizing(true);
+            SetPaused(true);
             break;
 
         case WM_EXITSIZEMOVE:
-            setResizing( false );
-            setPaused( false );
+            SetIsWindowResizing(false);
+            SetPaused(false);
             break;
 
         case WM_CLOSE:
-            PostQuitMessage( 0 );
+            PostQuitMessage(0);
             break;
 
         case WM_DESTROY:
-            PostQuitMessage( 0 );
+            PostQuitMessage(0);
             break;
 
         default:
-            return DefWindowProc( hWnd, message, wParam, lParam );
+            return DefWindowProc(hWnd, message, wParam, lParam);
     }
 
     return 0;
@@ -301,42 +335,38 @@ LRESULT MainWindow::HandleMessage( UINT message, WPARAM wParam, LPARAM lParam )
 /////////////////////////////////////////////////////////////////////////////
 // Application message loop
 /////////////////////////////////////////////////////////////////////////////
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    MainWindow * pMainWindow = NULL;
+    MainWindow * pMainWindow = nullptr;
 
-    // Grab a pointer to the Window* instance that is sending this message.
-    //  Either a window was created, in which case we need to save the pointer,
-    //  or we need to look up the saved value
+    // Grab a pointer to the Window* instance that is sending this message. Either a window was created, in which case
+    // we need to save the pointer, or we need to look up the saved value.
     if (message == WM_NCCREATE)
     {
-        // We need to intercept the WM_NCCREATE message, since it is the first
-        // message that a newly create window will send.  Once we get it, we will
-        // grab the encoded Window* pointer and use SetWindowLong to save it for
-        // future use
+        // We need to intercept the WM_NCCREATE message, since it is the first message that a newly created window will
+        // send.  Once we get it, grab the encoded Window* pointer and use SetWindowLong to save it for future use.
         LPCREATESTRUCT cs = reinterpret_cast<LPCREATESTRUCT>(lParam);
         pMainWindow = reinterpret_cast<MainWindow*>(cs->lpCreateParams);
-        assert(pMainWindow != NULL && "Failed to find window pointer");
+        Assert(pMainWindow != nullptr && "Failed to find window pointer");
 
-        // Store the window pointer
+        // Store the window pointer.
         ::SetWindowLongPtr(
             hWnd,
             GWLP_USERDATA,
             reinterpret_cast<LONG_PTR>(pMainWindow));
 
-        // Also store the assigned HWND value
+        // Also store the assigned HWND value.
         pMainWindow->SetWindowHandle(hWnd);
     }
     else
     {
-        // Try to look up the pointer that is stored in the window's userdata
-        // field
+        // Try to look up the pointer that is stored in the window's userdata field.
         pMainWindow =
             reinterpret_cast<MainWindow*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
     }
 
-    // Route the message to the correct window instance. If we could not decipher
-    // the instance, then just let windows perform a default action
+    // Route the message to the correct window instance. If we could not decipher the instance, then just let windows
+    // perform a default action.
     if (pMainWindow != NULL)
     {
         return pMainWindow->HandleMessage(message, wParam, lParam);

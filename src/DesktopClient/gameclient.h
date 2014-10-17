@@ -19,7 +19,7 @@
 #include "runtime/gametime.h"
 #include <memory>               // Smart pointer.
 
-class IWindow;
+class RenderingWindow;
 class DXRenderer;
 class DemoScene;
 class Camera;
@@ -33,8 +33,8 @@ class GameClient
 public:
     GameClient(
         std::shared_ptr<Camera> camera,
-        std::shared_ptr<IWindow> window,
-        DXRenderer *pRenderer);
+        std::shared_ptr<RenderingWindow> window,
+        std::unique_ptr<DXRenderer> renderer);
     virtual ~GameClient();
 
     void Run(DemoScene *pDemoScene);
@@ -58,10 +58,10 @@ private:
 
 private:
     /// Pointer to the main rendering window
-    std::shared_ptr<IWindow> mWindow;
+    std::shared_ptr<RenderingWindow> mWindow;
 
     /// Pointer to the graphics renderer
-    std::shared_ptr<DXRenderer> mRenderer;
+    std::unique_ptr<DXRenderer> mRenderer;
 
     /// Pointer to active camera.
     std::shared_ptr<Camera> mCamera;

@@ -16,7 +16,8 @@
 #ifndef SCOTT_HAILSTORM_GRAPHICS_DXRENDERER_H
 #define SCOTT_HAILSTORM_GRAPHICS_DXRENDERER_H
 
-#include "graphics/irenderer.h"
+#include "bases/Initializable.h"
+#include "runtime/gametime.h"
 #include <string>
 
 #include <memory>                       // Shared pointers.
@@ -24,12 +25,13 @@
 #include <wrl\client.h>                 // ComPtr friends.
 
 // Forward declarations
-class MainWindow;
+class RenderingWindow;
 class DemoScene;
 class GraphicsContentManager;
 class LandscapeMesh;
 class WaterMesh;
 class Camera;
+struct Size;
 
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
@@ -44,16 +46,25 @@ struct ID3D10EffectMatrixVariable;
 struct ID3D10RasterizerState;
 
 /**
- * This is the DirectX implementation of the abstract renderer
+ * DirectX renderer.
+ * TODO: Describe class better.
+ *
+ * TODO: Remove HWND and DXGI creation from this class. Calling code should generate these values and pass it in to the
+ *       Initialization method. This will make it easier to add Windows store app support.
  */
-class DXRenderer : public IRenderer
+class DXRenderer : public Initializable
 {
 public:
-    explicit DXRenderer(
+    DXRenderer(
         std::shared_ptr<Camera> camera,
-        std::shared_ptr<IWindow> window,
-        HWND hwnd);
+        std::shared_ptr<RenderingWindow> window);
     virtual ~DXRenderer();
+
+    void Initialize();
+
+    // TODO: Don't pass scene here. Add a method for DXRenderer called "AttachScene". Update should call
+    //       Scene::Update() and Scene::Render() at the appropriate time.
+    void Update(const DemoScene& scene, TimeT currentTime, TimeT deltaTime);
 
     HRESULT LoadFxFile(const std::wstring& fxFilePath, ID3D10Effect ** ppEffectOut) const;
     void SetDefaultRendering();
@@ -70,13 +81,14 @@ public:
         ID3DX10Font ** ppFontOut) const;
 
 protected:
-    virtual void OnStartRenderer() override;
-    virtual void OnStopRenderer() override;
-    virtual void OnRenderFrame(const DemoScene& scene, TimeT currentTime, TimeT deltaTime) override;
-    virtual void OnWindowResized(const Size& screenSize) override;
+    HRESULT StartRenderingFrame(TimeT currentTime, TimeT deltaTime);
+    HRESULT RenderFrame(const DemoScene& scene, TimeT currentTime, TimeT deltaTime);
+    void FinishRenderingFrame(TimeT currentTime, TimeT deltaTime);
+
+    void OnWindowResized(const Size& screenSize);
 
 private:
-    HRESULT CreateRenderDevice(ID3D10Device **ppDeviceOut, IDXGISwapChain **ppSwapChainOut) const;
+    HRESULT CreateRenderDevice(HWND hwnd, ID3D10Device **ppDeviceOut, IDXGISwapChain **ppSwapChainOut) const;
     HRESULT CreateDefaultRasterizerState(ID3D10Device *pDevice, ID3D10RasterizerState **ppRasterStateOut) const;
     HRESULT CreateWireframeRasterizerrState(ID3D10Device *pDevice, ID3D10RasterizerState **ppRasterStateOut) const;
     
@@ -96,12 +108,12 @@ private:
 
     void ReleaseDeviceViews();
 
-    HRESULT OnStartRenderFrame(TimeT currentTime, TimeT deltaTime);
-    HRESULT OnFinishRenderFrame(TimeT currentTime, TimeT deltaTime);
-
 private:
-    /// Handle to render window.
-    HWND mHwnd;
+    /// Main rendering window.
+    std::shared_ptr<RenderingWindow> mWindow;
+
+    /// Player camera.
+    std::shared_ptr<Camera> mCamera;
 
     /// Flag that is set when frame rendering is underway.
     bool mIsFrameBeingRendered;
@@ -138,7 +150,6 @@ private:
 	
     /// The currently running graphics content manager
     std::unique_ptr<GraphicsContentManager> mContentManager;
-    std::shared_ptr<Camera> mCamera;
 };
 
 #endif

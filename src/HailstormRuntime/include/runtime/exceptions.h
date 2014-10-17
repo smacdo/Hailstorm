@@ -52,7 +52,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// Assertion failed.
+// Assertion exceptions.
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 class AssertionFailedException : public HailstormException
 {
@@ -88,6 +88,24 @@ public:
         const char * expression,
         const char * fileName,
         unsigned int lineNumber);
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Windows API exceptions.
+///////////////////////////////////////////////////////////////////////////////////////////////////
+class WindowsApiException : public HailstormException
+{
+public:
+    WindowsApiException(
+        unsigned long windowsErrorCode,
+        const std::wstring& context,
+        const char * fileName,
+        unsigned int lineNumber);
+
+    unsigned long ErrorCode() const { return mErrorCode; }
+
+protected:
+    unsigned long mErrorCode;
 };
 
 #endif

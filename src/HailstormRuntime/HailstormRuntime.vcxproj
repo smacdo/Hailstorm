@@ -127,6 +127,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\bases\Initializable.h" />
     <ClInclude Include="include\HailstormRuntime.h" />
     <ClInclude Include="include\runtime\debugging.h" />
     <ClInclude Include="include\runtime\delete.h" />
@@ -144,6 +145,7 @@
     <ClCompile Include="include\runtime\logging.cpp" />
     <ClCompile Include="include\runtime\logstream.cpp" />
     <ClCompile Include="src\exceptions.cpp" />
+    <ClCompile Include="src\Initializable.cpp" />
     <ClCompile Include="src\StringUtils.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

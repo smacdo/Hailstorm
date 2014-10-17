@@ -191,6 +191,7 @@
     <ClInclude Include="DesktopClient\gameclient.h" />
     <ClInclude Include="DesktopClient\gui\aboutbox.h" />
     <ClInclude Include="DesktopClient\gui\assertiondialog.h" />
+    <ClInclude Include="DesktopClient\gui\DesktopConsole.h" />
     <ClInclude Include="DesktopClient\gui\errordialog.h" />
     <ClInclude Include="DesktopClient\gui\mainwindow.h" />
     <ClInclude Include="DesktopClient\hailstorm_sandbox.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="DesktopClient\gameclient.cpp" />
     <ClCompile Include="DesktopClient\gui\aboutbox.cpp" />
     <ClCompile Include="DesktopClient\gui\assertiondialog.cpp" />
+    <ClCompile Include="DesktopClient\gui\DesktopConsole.cpp" />
     <ClCompile Include="DesktopClient\gui\errordialog.cpp" />
     <ClCompile Include="DesktopClient\gui\mainwindow.cpp" />
     <ClCompile Include="DesktopClient\hailstorm_sandbox.cpp" />

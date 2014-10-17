@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SCOTT_STRING_UTILS_H
-#define SCOTT_STRING_UTILS_H
+#pragma once
 
 #include <string>
 
-namespace Utils
+/**
+ * Wrapper implementation of the class Windows console.
+ *  NOTE: You can only create one instance of this class, otherwise bad things will happen. (Windows limitation).
+ */
+class DesktopConsole
 {
-    std::wstring ConvertUtf8ToWideString(const std::string& text);
-    std::string ConvertWideStringToUtf8(const std::wstring& text);
-    std::wstring GetWinApiErrorText(unsigned long errorCode);
-    std::wstring GetHResultErrorText(unsigned long errorCode);
-}
+public:
+    DesktopConsole(
+        const std::wstring& windowTitle,
+        bool redirectStandardInputAndOutput);
+    ~DesktopConsole();
 
-#endif
+private:
+    void Initialize(
+        const std::wstring& windowTitle,
+        bool redirectStandardInputAndOutput);
+
+    void FreeConsole();
+};

@@ -69,7 +69,7 @@ HailstormException::HailstormException(
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// Assertion failed.
+// Assertion exceptions.
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 AssertionFailedException::AssertionFailedException(
     const char * expression,
@@ -113,6 +113,24 @@ IsNotNullAssertionFailedException::IsNotNullAssertionFailedException(
         L"Expression was expected to be null, but was not",
         expression,
         fileName,
+        lineNumber)
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Windows API exceptions.
+///////////////////////////////////////////////////////////////////////////////////////////////////
+WindowsApiException::WindowsApiException(
+    unsigned long windowsErrorCode,
+    const std::wstring& context,
+    const char * fileName,
+    unsigned int lineNumber)
+    : mErrorCode(windowsErrorCode),
+      HailstormException(
+        L"Windows API Exception",
+        Utils::GetWinApiErrorText(windowsErrorCode),
+        context,
+        Utils::ConvertUtf8ToWideString(fileName),
         lineNumber)
 {
 }

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 #include "stdafx.h"
+#include "HailstormRuntime.h"
 #include "graphics/dxrenderer.h"
 #include "graphics/graphicscontentmanager.h"
-#include "gui/iwindow.h"
-#include "runtime/logging.h"
-#include "runtime/Size.h"
+#include "host/renderingwindow.h"
 #include "graphics/DirectXExceptions.h"
 #include "graphics/DemoScene.h"
 #include "camera/RotationalCamera.h"
@@ -36,10 +35,10 @@
  */
 DXRenderer::DXRenderer(
     std::shared_ptr<Camera> camera,
-    std::shared_ptr<IWindow> window,
-    HWND hwnd)
-    : IRenderer(window),
-      mHwnd(hwnd),
+    std::shared_ptr<RenderingWindow> window)
+    : Initializable(),
+      mWindow(window),
+      mCamera(camera),
       mIsFrameBeingRendered(false),
       mDevice(),
       mSwapChain(),
@@ -51,10 +50,8 @@ DXRenderer::DXRenderer(
       mMultisampleCount(4),
       mMultisampleQuality(1),
       mWindowedMode(true),
-      mContentManager(),
-      mCamera(camera)
+      mContentManager()
 {
-    assert(mHwnd != nullptr);    // We need to have a valid window handle
 }
 
 /**
@@ -67,13 +64,17 @@ DXRenderer::~DXRenderer()
 }
 
 /**
- * Called at the start of the program, and allows the renderer to create itself
- * and then set up all needed configuration and resources
+ * Start up the DirectX renderer.
  */
-void DXRenderer::OnStartRenderer()
+void DXRenderer::Initialize()
 {
+    HWND hwnd = mWindow->WindowHandle();
+
+    // Let the renderer perform any needed start up code
+    LOG_INFO("Renderer") << "Initializing the DirectX renderer";
+
     // Create our device and swap chain
-    HRESULT hr = CreateRenderDevice(&mDevice, &mSwapChain);
+    HRESULT hr = CreateRenderDevice(hwnd, &mDevice, &mSwapChain);
 
     // Create the back buffer and the depth stencil buffer object
     if (SUCCEEDED(hr))
@@ -90,7 +91,7 @@ void DXRenderer::OnStartRenderer()
                 mDevice.Get(),
                 mRenderTargetView.Get(),
                 mDepthStencilView.Get(),
-                GetWindow()->Size());
+                mWindow->WindowSize());
         }
     }
 
@@ -123,13 +124,14 @@ void DXRenderer::OnStartRenderer()
     {
         throw new DirectXException(hr, L"Window was resized", L"", __FILE__, __LINE__);
     }
-}
 
+    SetIsInitialized();
+}
 
 /**
  * Creates the Direct3D render device and DXGI swap chain.
  */
-HRESULT DXRenderer::CreateRenderDevice(ID3D10Device **ppDeviceOut, IDXGISwapChain **ppSwapChainOut) const
+HRESULT DXRenderer::CreateRenderDevice(HWND hwnd, ID3D10Device **ppDeviceOut, IDXGISwapChain **ppSwapChainOut) const
 {
     LOG_DEBUG("Renderer") << "Creating DirectX device and swap chain";
     VerifyNotNull(ppDeviceOut);
@@ -143,11 +145,11 @@ HRESULT DXRenderer::CreateRenderDevice(ID3D10Device **ppDeviceOut, IDXGISwapChai
     ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
 
     scd.BufferCount = 1;                 // One back buffer plz.
-    scd.BufferDesc.Width = GetWindow()->width();
-    scd.BufferDesc.Height = GetWindow()->height();
+    scd.BufferDesc.Width = mWindow->Width();
+    scd.BufferDesc.Height = mWindow->Height();
     scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // 32 bit color
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    scd.OutputWindow = mHwnd;
+    scd.OutputWindow = hwnd;
     scd.SampleDesc.Count = 1;                 // TODO: mMultisampleCount;
     scd.SampleDesc.Quality = 0;                 // TODO: mMultisampleQuality;
     scd.Windowed = true;
@@ -230,8 +232,8 @@ HRESULT DXRenderer::CreateDeviceViews(
         D3D10_TEXTURE2D_DESC depthStencilDesc;
         ZeroMemory(&depthStencilDesc, sizeof(D3D10_TEXTURE2D_DESC));
 
-        depthStencilDesc.Width = GetWindow()->width();
-        depthStencilDesc.Height = GetWindow()->height();
+        depthStencilDesc.Width = mWindow->Width();
+        depthStencilDesc.Height = mWindow->Height();
         depthStencilDesc.MipLevels = 1;
         depthStencilDesc.ArraySize = 1;
         depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -404,11 +406,48 @@ void DXRenderer::SetViewport(ID3D10Device *pDevice, const Size& viewportSize)
     pDevice->RSSetViewports(1, &viewport);
 }
 
-/**
- * Called when the renderer stops.
- */
-void DXRenderer::OnStopRenderer()
+void DXRenderer::Update(const DemoScene& scene, TimeT currentTime, TimeT deltaTime)
 {
+    if (!IsInitialized()) { throw new NotInitializedException(L"DXRenderer", __FILE__, __LINE__); }
+
+    // Was the window resized? Make sure to let give the renderer a chance to intercept this event before we start the
+    // next frame.
+    if (mWindow->WasResized() && (!mWindow->IsResizing()) && (!mWindow->IsPaused()))
+    {
+        LOG_NOTICE("Renderer") << "Renderer resized to " << mWindow->Width() << " x " << mWindow->Height();
+
+        // Raise the onResize event which will let a derived renderer handle this
+        // event
+        Assert(mWindow->Width() > 0);
+        Assert(mWindow->Height() > 0);
+
+        OnWindowResized(Size { mWindow->Width(), mWindow->Height() });
+
+        // Clear the resize flag so we do not constantly resize
+        mWindow->ClearResizedFlag();
+    }
+
+    // Always draw a frame during an update cycle.
+    //  TODO: Don't always draw a frame. Store the time the last frame was rendered, and render after that time is
+    //        passed.
+    //  TODO: Add a "uncapped" flag that allows the user to tell us never throttle rendering.
+    HRESULT hr = StartRenderingFrame(currentTime, deltaTime);
+    
+    if (SUCCEEDED(hr))
+    {
+        hr = RenderFrame(scene, currentTime, deltaTime);
+
+        if (FAILED(hr))
+        {
+            throw new DirectXException(hr, L"Failed to render frame", L"DXRenderer::Update", __FILE__, __LINE__);
+        }
+
+        FinishRenderingFrame(currentTime, deltaTime);
+    }
+    else
+    {
+        throw new DirectXException(hr, L"Failed to start rendering frame", L"DXRenderer::Update", __FILE__, __LINE__);
+    }
 }
 
 /**
@@ -416,6 +455,8 @@ void DXRenderer::OnStopRenderer()
  */
 void DXRenderer::OnWindowResized(const Size& screenSize)
 {
+    if (!IsInitialized()) { throw new NotInitializedException(L"DXRenderer", __FILE__, __LINE__); }
+
     // Before we can resize the render window we must release the old device views as they hold references to the
     // buffers we shall be destroying
     ReleaseDeviceViews();
@@ -444,7 +485,7 @@ void DXRenderer::OnWindowResized(const Size& screenSize)
                 mDevice.Get(),
                 mRenderTargetView.Get(),
                 mDepthStencilView.Get(),
-                GetWindow()->Size());
+                mWindow->WindowSize());
 
             // Reset our aspect ratio and the perspective matrix
             //  TODO: Clean this up, use constants and explain what is going on.
@@ -461,10 +502,11 @@ void DXRenderer::OnWindowResized(const Size& screenSize)
     }
 }
 
-HRESULT DXRenderer::OnStartRenderFrame(TimeT currentTime, TimeT deltaTime)
+HRESULT DXRenderer::StartRenderingFrame(TimeT currentTime, TimeT deltaTime)
 {
-    // Clear the back buffer and the depth stencil view before doing doing any
-    // rendering
+    mIsFrameBeingRendered = true;
+
+    // Clear the back buffer and the depth stencil view before doing doing any rendering.
     mDevice->ClearRenderTargetView(
         mRenderTargetView.Get(),
         D3DXCOLOR(0.f, 0.2f, 0.4f, 1.0f));
@@ -488,11 +530,9 @@ HRESULT DXRenderer::OnStartRenderFrame(TimeT currentTime, TimeT deltaTime)
 /**
  * Called when the renderer should produce a frame.
  */
-void DXRenderer::OnRenderFrame(const DemoScene& scene, TimeT currentTime, TimeT deltaTime)
+HRESULT DXRenderer::RenderFrame(const DemoScene& scene, TimeT currentTime, TimeT deltaTime)
 {
-    mIsFrameBeingRendered = true;
-    OnStartRenderFrame(currentTime, deltaTime);
-
+    // Render the attached scene.
     scene.Render(*this, currentTime, deltaTime);
 
     // Draw some text
@@ -500,17 +540,23 @@ void DXRenderer::OnRenderFrame(const DemoScene& scene, TimeT currentTime, TimeT 
     RECT R = { 5, 5, 0, 0 };
 
     mRendererFont->DrawTextW(0, L"Hello world", -1, &R, DT_NOCLIP, BLACK);
-
-    OnFinishRenderFrame(currentTime, deltaTime);   
-    mIsFrameBeingRendered = false;
+    return S_OK;
 }
 
 /**
 * Called when the renderer is finished producing the frame.
 */
-HRESULT DXRenderer::OnFinishRenderFrame(TimeT currentTime, TimeT deltaTime)
+void DXRenderer::FinishRenderingFrame(TimeT currentTime, TimeT deltaTime)
 {
-    return mSwapChain->Present(0, 0);      // TODO: Enable vsync.
+    HRESULT hr = mSwapChain->Present(0, 0);      // TODO: Enable vsync.
+    
+    // Make sure we presented the frame correctly.
+    if (FAILED(hr))
+    {
+        throw new DirectXException(hr, L"Failed to present the swap chain", L"Finish rendering frame", __FILE__, __LINE__);
+    }
+    
+    mIsFrameBeingRendered = false;
 }
 
 /**
@@ -519,6 +565,7 @@ HRESULT DXRenderer::OnFinishRenderFrame(TimeT currentTime, TimeT deltaTime)
  */
 void DXRenderer::ReleaseDeviceViews()
 {
+    if (!IsInitialized()) { throw new NotInitializedException(L"DXRenderer", __FILE__, __LINE__); }
     LOG_DEBUG("Renderer") << "Releasing the device views (backbuffer, depth+stencil)";
 
     // Make DirectX happy by binding null views before we go ahead and release everything
@@ -537,6 +584,7 @@ HRESULT DXRenderer::LoadFxFile(
     const std::wstring& fxFilePath,
     ID3D10Effect ** ppEffectOut) const
 {
+    if (!IsInitialized()) { throw new NotInitializedException(L"DXRenderer", __FILE__, __LINE__); }
     VerifyNotNull(ppEffectOut);
     *ppEffectOut = nullptr;
 

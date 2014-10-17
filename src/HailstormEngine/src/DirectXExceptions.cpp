@@ -60,40 +60,7 @@ DirectXException::DirectXException(
 
 std::wstring DirectXException::ErrorCodeToString(unsigned long errorCode)
 {
-    LPTSTR errorText = nullptr;
-    std::wstring output;
-
-    DWORD result = FormatMessage(
-        FORMAT_MESSAGE_FROM_SYSTEM		    // Look at system message definitions when looking up this error code.
-        | FORMAT_MESSAGE_ALLOCATE_BUFFER	// Allocate a string buffer for us. TODO: Don't use this because WinRT. 
-        | FORMAT_MESSAGE_IGNORE_INSERTS,	// Don't use FormatMessage inserts. No point, and difficult to get right.
-        nullptr,                            // No source for message definition, since it is a system code.
-        errorCode,                          // The actual error code to look up.
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),  // Use the system default language.
-        (LPTSTR)&errorText,                 // String that receives the error message.
-        0,									// Allow windows to create a string buffer for us.
-        nullptr);							// No message formatting parameters.
-
-    if (result == 0)
-    {
-        DWORD formatMessageError = GetLastError();
-        output = L"*** FAILED TO LOOK UP ERROR CODE (Non-zero error returned) ***";
-    }
-    else if (errorText == nullptr)
-    {
-        output = L"*** FAILED TO LOOK UP ERROR CODE (Message was null) ***";
-    }
-    else if (errorText != nullptr)
-    {
-        // Copy temporary buffer allocate by windows into the output string, and then release the windows
-        // allocated string buffer.
-        output = std::wstring(errorText);
-
-        LocalFree(errorText);
-        errorText = nullptr;
-    }
-
-    return output;
+    return Utils::GetHResultErrorText(errorCode);
 }
 
 ShaderCompileFailedException::ShaderCompileFailedException(
