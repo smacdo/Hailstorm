@@ -21,13 +21,18 @@
  * Wrapper implementation of the class Windows console.
  *  NOTE: You can only create one instance of this class, otherwise bad things will happen. (Windows limitation).
  */
-class DesktopConsole
+class DesktopConsole final
 {
 public:
     DesktopConsole(
         const std::wstring& windowTitle,
         bool redirectStandardInputAndOutput);
+    DesktopConsole(const DesktopConsole&);
+
     ~DesktopConsole();
+
+    DesktopConsole& operator =(const DesktopConsole&);
+
 
 private:
     void Initialize(

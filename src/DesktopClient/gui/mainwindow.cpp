@@ -65,16 +65,14 @@ void MainWindow::Create()
     LOG_DEBUG("GUI") << "Creating the renderer main window";
 
     // Describe the window we want to create.
-    WNDCLASSEX wcex;
-    wcex.cbSize = sizeof(WNDCLASSEX);
+    WNDCLASSEX wcex = { 0 };
 
+    wcex.cbSize = sizeof(WNDCLASSEX);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = WndProc;
-    wcex.cbClsExtra = 0;
-    wcex.cbWndExtra = 0;
     wcex.hInstance = mAppInstance;
     wcex.hIcon = LoadIcon(mAppInstance, MAKEINTRESOURCE(IDI_DIRECTX));
-    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = MAKEINTRESOURCE(IDC_DIRECTX);
     wcex.lpszClassName = MainWindowClassName.c_str();
@@ -93,7 +91,7 @@ void MainWindow::Create()
         WS_EX_OVERLAPPEDWINDOW,             // Window style: Overlapped window.
         MainWindowClassName.c_str(),        // Window class name.
         mWindowTitle.c_str(),               // Window caption.
-        WS_OVERLAPPEDWINDOW,                // Overlapped window style.
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE,   // Overlapped window style and is initially visible.
         windowRect.left,                    // Window top left x position.
         windowRect.top,                     // Window top left yposition.
         windowRect.right - windowRect.left, // Window width.
@@ -104,11 +102,8 @@ void MainWindow::Create()
         this);                              // Pass address of this class in creation event message (advanced).
 
     // Verify that the window was created.
-    assert(mWindowHandle == tempHwnd);
-    assert(mWindowHandle != nullptr);
-
-    // Show the window.
-    Show();
+    AssertNotNull(mWindowHandle);
+    Assert(mWindowHandle == tempHwnd);
 }
 
 /**
@@ -335,7 +330,7 @@ LRESULT MainWindow::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam)
 /////////////////////////////////////////////////////////////////////////////
 // Application message loop
 /////////////////////////////////////////////////////////////////////////////
-LRESULT CALLBACK MainWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWindow::WndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
     MainWindow * pMainWindow = nullptr;
 
@@ -345,34 +340,35 @@ LRESULT CALLBACK MainWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPA
     {
         // We need to intercept the WM_NCCREATE message, since it is the first message that a newly created window will
         // send.  Once we get it, grab the encoded Window* pointer and use SetWindowLong to save it for future use.
-        LPCREATESTRUCT cs = reinterpret_cast<LPCREATESTRUCT>(lParam);
-        pMainWindow = reinterpret_cast<MainWindow*>(cs->lpCreateParams);
-        Assert(pMainWindow != nullptr && "Failed to find window pointer");
+        CREATESTRUCT * pCreateStruct = reinterpret_cast<CREATESTRUCT *>(lParam);
+        AssertNotNull(pCreateStruct);
+
+        pMainWindow = static_cast<MainWindow*>(pCreateStruct->lpCreateParams);
+        AssertNotNull(pMainWindow);
 
         // Store the window pointer.
         ::SetWindowLongPtr(
-            hWnd,
+            window,
             GWLP_USERDATA,
             reinterpret_cast<LONG_PTR>(pMainWindow));
 
         // Also store the assigned HWND value.
-        pMainWindow->SetWindowHandle(hWnd);
+        pMainWindow->SetWindowHandle(window);
     }
     else
     {
         // Try to look up the pointer that is stored in the window's userdata field.
-        pMainWindow =
-            reinterpret_cast<MainWindow*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        pMainWindow = reinterpret_cast<MainWindow*>(::GetWindowLongPtr(window, GWLP_USERDATA));
     }
 
     // Route the message to the correct window instance. If we could not decipher the instance, then just let windows
     // perform a default action.
-    if (pMainWindow != NULL)
+    if (pMainWindow != nullptr)
     {
         return pMainWindow->HandleMessage(message, wParam, lParam);
     }
     else
     {
-        return DefWindowProc(hWnd, message, wParam, lParam);
+        return DefWindowProc(window, message, wParam, lParam);
     }
 }

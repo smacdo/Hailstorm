@@ -24,6 +24,7 @@
 class RenderingWindow
 {
 public:
+    virtual ~RenderingWindow() { };
     virtual HWND WindowHandle() const = 0;
     virtual unsigned int Width() const = 0;
     virtual unsigned int Height() const = 0;

@@ -27,7 +27,7 @@ class DesktopConsole;
  * MainWindow is an implementation of the Win32 desktop gui client. It implements all the work required to show,
  * display and allow the game client to interact with the desktop windows client.
  */
-class MainWindow : public RenderingWindow
+class MainWindow : public RenderingWindow       // TODO: Rename this to be more descriptive, "DesktopWindow"
 {
 public:
     MainWindow(
@@ -35,7 +35,10 @@ public:
         const std::wstring& title,
         unsigned int width,
         unsigned int height);
-    virtual ~MainWindow();
+    MainWindow(const MainWindow&) = delete;
+    virtual ~MainWindow() ;
+
+    MainWindow& operator =(const MainWindow&) = delete;
 
     // Create and show the main window. This should be called immediately after constructing the instance.
     void Create();

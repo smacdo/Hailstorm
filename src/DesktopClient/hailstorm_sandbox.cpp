@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Scott MacDonald
+ * Copyright 2011 - 2014 Scott MacDonald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,8 @@
 /////////////////////////////////////////////////////////////////////////////
 // Application entry point
 /////////////////////////////////////////////////////////////////////////////
-int APIENTRY _tWinMain( HINSTANCE hInstance,
-                        HINSTANCE hPrevInstance,
-                        LPTSTR    lpCmdLine,
-                        int       nCmdShow)
+int APIENTRY _tWinMain(HINSTANCE module, HINSTANCE, PWSTR, int)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
-    UNREFERENCED_PARAMETER(nCmdShow);
-
     // Enable Visual Studio's debug heap and various memory checking features
     int flags = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
 
@@ -49,19 +42,19 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
 
     _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
 
-    // A camra is important! We can't see without one, and what kind of graphics demo would this be if we couldn't
-    // see anything??
-    std::shared_ptr<RotationalCamera> camera(new RotationalCamera());
-
     // Make sure the logging system is initialized first before any of the
     // other critical system services
     GlobalLog::start();
+
+    // A camra is important! We can't see without one, and what kind of graphics demo would this be if we couldn't
+    // see anything??
+    std::shared_ptr<RotationalCamera> camera(new RotationalCamera());
 
     // Create a new window
     LOG_NOTICE("WinMain") << "Application has started";
     LOG_NOTICE("WinMain") << "Creating main application window";
 
-    std::shared_ptr<MainWindow> mainWindow(new MainWindow(hInstance, L"Hailstorm Tech Demo", 800u, 600u));
+    std::shared_ptr<MainWindow> mainWindow(new MainWindow(module, L"Hailstorm Tech Demo", 800u, 600u));
     mainWindow->Create();
     mainWindow->Show();
    
