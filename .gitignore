@@ -18,3 +18,7 @@ ipch/*
 Installer/bin/*
 Installer/obj/*
 game/bin/*
+/HailstormApp/HailstormApp.Windows/Debug
+/HailstormApp/HailstormApp.Windows/x64/Debug
+/HailstormApp/HailstormApp.WindowsPhone/Debug
+/x64/Debug/HailstormApp.Windows
