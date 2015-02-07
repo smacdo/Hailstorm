@@ -15,6 +15,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\StepTimer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scenes\ColoredCubeSceneRenderer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scenes\SceneRenderer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)UserInterface\GameHudRenderer.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)HailstormAppMain.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)HailstormAppMain.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pch.h" />
@@ -25,17 +28,19 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\DeviceResources.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\DirectXHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\StepTimer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Content\SampleFpsTextRenderer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Content\Sample3DSceneRenderer.h" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Content\SampleFpsTextRenderer.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Content\Sample3DSceneRenderer.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Rendering\ShaderStructures.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scenes\ColoredCubeSceneRenderer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scenes\SceneRenderer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)UserInterface\GameHudRenderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Content\SamplePixelShader.hlsl">
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\ColoredCubePixelShader.hlsl">
       <ShaderType>Pixel</ShaderType>
+      <FileType>Document</FileType>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Content\SampleVertexShader.hlsl">
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\ColoredCubeVertexShader.hlsl">
       <ShaderType>Vertex</ShaderType>
+      <FileType>Document</FileType>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

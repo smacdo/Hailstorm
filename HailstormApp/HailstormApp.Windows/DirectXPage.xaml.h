@@ -51,7 +51,7 @@ namespace HailstormApp
 		void OnPointerReleased(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
 
 		// Resources used to render the DirectX content in the XAML page background.
-		std::shared_ptr<DX::DeviceResources> m_deviceResources;
+		std::shared_ptr<Hailstorm::DeviceResources> m_deviceResources;
 		std::unique_ptr<HailstormApp::HailstormAppMain> m_main; 
 		bool m_windowVisible;
 	};

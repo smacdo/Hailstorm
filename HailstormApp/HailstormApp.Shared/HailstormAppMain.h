@@ -2,8 +2,8 @@
 
 #include "Common\StepTimer.h"
 #include "Common\DeviceResources.h"
-#include "Content\Sample3DSceneRenderer.h"
-#include "Content\SampleFpsTextRenderer.h"
+#include "Scenes/SceneRenderer.h"
+#include "UserInterface/GameHudRenderer.h"
 
 #include <memory>
 #include <concrt.h>
@@ -11,19 +11,19 @@
 // Renders Direct2D and 3D content on the screen.
 namespace HailstormApp
 {
-	class HailstormAppMain : public DX::IDeviceNotify
+    class HailstormAppMain : public Hailstorm::IDeviceNotify
 	{
 	public:
-		HailstormAppMain(const std::shared_ptr<DX::DeviceResources>& deviceResources);
+        HailstormAppMain(const std::shared_ptr<Hailstorm::DeviceResources>& deviceResources);
 		~HailstormAppMain();
 		void CreateWindowSizeDependentResources();
-		void StartTracking() { m_sceneRenderer->StartTracking(); }
-		void TrackingUpdate(float positionX) { m_pointerLocationX = positionX; }
-		void StopTracking() { m_sceneRenderer->StopTracking(); }
-		bool IsTracking() { return m_sceneRenderer->IsTracking(); }
+        void StartTracking();
+        void TrackingUpdate(float positionX);
+        void StopTracking();
+        bool IsTracking() const;
 		void StartRenderLoop();
 		void StopRenderLoop();
-		Concurrency::critical_section& GetCriticalSection() { return m_criticalSection; }
+        Concurrency::critical_section& GetCriticalSection();
 
 		// IDeviceNotify
 		virtual void OnDeviceLost();
@@ -35,19 +35,17 @@ namespace HailstormApp
 		bool Render();
 
 		// Cached pointer to device resources.
-		std::shared_ptr<DX::DeviceResources> m_deviceResources;
+        std::shared_ptr<Hailstorm::DeviceResources> mDeviceResources;
+        std::unique_ptr<SceneRenderer> mSceneRenderer;
+		std::unique_ptr<GameHudRenderer> mGameHudRenderer;
 
-		// TODO: Replace with your own content renderers.
-		std::unique_ptr<Sample3DSceneRenderer> m_sceneRenderer;
-		std::unique_ptr<SampleFpsTextRenderer> m_fpsTextRenderer;
-
-		Windows::Foundation::IAsyncAction^ m_renderLoopWorker;
-		Concurrency::critical_section m_criticalSection;
+		Windows::Foundation::IAsyncAction^ mRenderLoopWorker;
+		Concurrency::critical_section mCriticalSection;
 
 		// Rendering loop timer.
-		Hailstorm::StepTimer m_timer;
+		Hailstorm::StepTimer mTimer;
 
 		// Track current input pointer position.
-		float m_pointerLocationX;
+		float mPointerLocationX;
 	};
 }

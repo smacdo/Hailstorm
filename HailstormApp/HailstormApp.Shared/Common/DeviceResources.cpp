@@ -11,6 +11,7 @@ using namespace Windows::Graphics::Display;
 using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Platform;
+using namespace DX;
 
 // Constants used to calculate screen rotations.
 namespace ScreenRotation
@@ -49,7 +50,7 @@ namespace ScreenRotation
 };
 
 // Constructor for DeviceResources.
-DX::DeviceResources::DeviceResources() : 
+Hailstorm::DeviceResources::DeviceResources() : 
 	m_screenViewport(),
 	m_d3dFeatureLevel(D3D_FEATURE_LEVEL_9_1),
 	m_d3dRenderTargetSize(),
@@ -67,7 +68,7 @@ DX::DeviceResources::DeviceResources() :
 }
 
 // Configures resources that don't depend on the Direct3D device.
-void DX::DeviceResources::CreateDeviceIndependentResources()
+void Hailstorm::DeviceResources::CreateDeviceIndependentResources()
 {
 	// Initialize Direct2D resources.
 	D2D1_FACTORY_OPTIONS options;
@@ -109,7 +110,7 @@ void DX::DeviceResources::CreateDeviceIndependentResources()
 }
 
 // Configures the Direct3D device, and stores handles to it and the device context.
-void DX::DeviceResources::CreateDeviceResources() 
+void Hailstorm::DeviceResources::CreateDeviceResources() 
 {
 	// This flag adds support for surfaces with a different color channel ordering
 	// than the API default. It is required for compatibility with Direct2D.
@@ -204,7 +205,7 @@ void DX::DeviceResources::CreateDeviceResources()
 }
 
 // These resources need to be recreated every time the window size is changed.
-void DX::DeviceResources::CreateWindowSizeDependentResources() 
+void Hailstorm::DeviceResources::CreateWindowSizeDependentResources() 
 {
 	// Clear the previous window size specific context.
 	ID3D11RenderTargetView* nullViews[] = {nullptr};
@@ -461,7 +462,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 }
 
 // This method is called when the XAML control is created (or re-created).
-void DX::DeviceResources::SetSwapChainPanel(SwapChainPanel^ panel)
+void Hailstorm::DeviceResources::SetSwapChainPanel(SwapChainPanel^ panel)
 {
 	DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
 
@@ -478,7 +479,7 @@ void DX::DeviceResources::SetSwapChainPanel(SwapChainPanel^ panel)
 }
 
 // This method is called in the event handler for the SizeChanged event.
-void DX::DeviceResources::SetLogicalSize(Windows::Foundation::Size logicalSize)
+void Hailstorm::DeviceResources::SetLogicalSize(Windows::Foundation::Size logicalSize)
 {
 	if (m_logicalSize != logicalSize)
 	{
@@ -488,7 +489,7 @@ void DX::DeviceResources::SetLogicalSize(Windows::Foundation::Size logicalSize)
 }
 
 // This method is called in the event handler for the DpiChanged event.
-void DX::DeviceResources::SetDpi(float dpi)
+void Hailstorm::DeviceResources::SetDpi(float dpi)
 {
 	if (dpi != m_dpi)
 	{
@@ -499,7 +500,7 @@ void DX::DeviceResources::SetDpi(float dpi)
 }
 
 // This method is called in the event handler for the OrientationChanged event.
-void DX::DeviceResources::SetCurrentOrientation(DisplayOrientations currentOrientation)
+void Hailstorm::DeviceResources::SetCurrentOrientation(DisplayOrientations currentOrientation)
 {
 	if (m_currentOrientation != currentOrientation)
 	{
@@ -509,7 +510,7 @@ void DX::DeviceResources::SetCurrentOrientation(DisplayOrientations currentOrien
 }
 
 // This method is called in the event handler for the CompositionScaleChanged event.
-void DX::DeviceResources::SetCompositionScale(float compositionScaleX, float compositionScaleY)
+void Hailstorm::DeviceResources::SetCompositionScale(float compositionScaleX, float compositionScaleY)
 {
 	if (m_compositionScaleX != compositionScaleX ||
 		m_compositionScaleY != compositionScaleY)
@@ -521,7 +522,7 @@ void DX::DeviceResources::SetCompositionScale(float compositionScaleX, float com
 }
 
 // This method is called in the event handler for the DisplayContentsInvalidated event.
-void DX::DeviceResources::ValidateDevice()
+void Hailstorm::DeviceResources::ValidateDevice()
 {
 	// The D3D Device is no longer valid if the default adapter changed since the device
     // was created or if the device has been removed.
@@ -573,7 +574,7 @@ void DX::DeviceResources::ValidateDevice()
 }
 
 // Recreate all device resources and set them back to the current state.
-void DX::DeviceResources::HandleDeviceLost()
+void Hailstorm::DeviceResources::HandleDeviceLost()
 {
 	m_swapChain = nullptr;
 
@@ -593,14 +594,14 @@ void DX::DeviceResources::HandleDeviceLost()
 }
 
 // Register our DeviceNotify to be informed on device lost and creation.
-void DX::DeviceResources::RegisterDeviceNotify(DX::IDeviceNotify* deviceNotify)
+void Hailstorm::DeviceResources::RegisterDeviceNotify(Hailstorm::IDeviceNotify* deviceNotify)
 {
 	m_deviceNotify = deviceNotify;
 }
 
 // Call this method when the app suspends. It provides a hint to the driver that the app 
 // is entering an idle state and that temporary buffers can be reclaimed for use by other apps.
-void DX::DeviceResources::Trim()
+void Hailstorm::DeviceResources::Trim()
 {
 	ComPtr<IDXGIDevice3> dxgiDevice;
 	m_d3dDevice.As(&dxgiDevice);
@@ -609,7 +610,7 @@ void DX::DeviceResources::Trim()
 }
 
 // Present the contents of the swap chain to the screen.
-void DX::DeviceResources::Present() 
+void Hailstorm::DeviceResources::Present() 
 {
 	// The first argument instructs DXGI to block until VSync, putting the application
 	// to sleep until the next VSync. This ensures we don't waste any cycles rendering
@@ -638,7 +639,7 @@ void DX::DeviceResources::Present()
 
 // This method determines the rotation between the display device's native Orientation and the
 // current display orientation.
-DXGI_MODE_ROTATION DX::DeviceResources::ComputeDisplayRotation()
+DXGI_MODE_ROTATION Hailstorm::DeviceResources::ComputeDisplayRotation()
 {
 	DXGI_MODE_ROTATION rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
 

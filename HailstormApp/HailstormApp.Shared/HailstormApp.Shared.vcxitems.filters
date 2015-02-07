@@ -12,11 +12,17 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\DeviceResources.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Content\Sample3DSceneRenderer.h">
-      <Filter>Content</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)UserInterface\GameHudRenderer.h">
+      <Filter>UserInterface</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Content\SampleFpsTextRenderer.h">
-      <Filter>Content</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scenes\SceneRenderer.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Rendering\ShaderStructures.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scenes\ColoredCubeSceneRenderer.h">
+      <Filter>Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -25,21 +31,24 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\DeviceResources.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Content\Sample3DSceneRenderer.cpp">
-      <Filter>Content</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Content\SampleFpsTextRenderer.cpp">
-      <Filter>Content</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\StepTimer.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)UserInterface\GameHudRenderer.cpp">
+      <Filter>UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scenes\SceneRenderer.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scenes\ColoredCubeSceneRenderer.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Content\SamplePixelShader.hlsl">
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\ColoredCubePixelShader.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Content\SampleVertexShader.hlsl">
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\ColoredCubeVertexShader.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
   </ItemGroup>
@@ -49,6 +58,15 @@
     </Filter>
     <Filter Include="Content">
       <UniqueIdentifier>{2cf9f96d-5efd-4d6c-939c-ee1cab4a0513}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UserInterface">
+      <UniqueIdentifier>{d988bb43-e4aa-49cb-9e33-a2e13816c3a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{2368c248-69e8-4ac6-8e3f-5c9f598aa42a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{0cfaa136-7690-4825-8c3a-cffce4759e37}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
