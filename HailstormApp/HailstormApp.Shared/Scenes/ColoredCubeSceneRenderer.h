@@ -1,7 +1,6 @@
 #pragma once
 #include "SceneRenderer.h"
 
-
 // Forward declarations.
 struct ID3D11InputLayout;
 struct ID3D11Buffer;

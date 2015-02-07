@@ -24,6 +24,16 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Scenes\ColoredCubeSceneRenderer.h">
       <Filter>Scenes</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Rendering\Light.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\Camera.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scenes\LandscapeDemoSceneRenderer.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Rendering\WaterMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)HailstormAppMain.cpp" />
@@ -43,6 +53,16 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Scenes\ColoredCubeSceneRenderer.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Rendering\Light.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Common\Camera.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scenes\LandscapeDemoSceneRenderer.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Rendering\WaterMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\ColoredCubePixelShader.hlsl">

@@ -3,7 +3,7 @@
 #include "Common\DirectXHelper.h"
 #include "Common/StepTimer.h"
 #include "UserInterface/GameHudRenderer.h"
-#include "Scenes/ColoredCubeSceneRenderer.h"
+#include "Scenes/LandscapeDemoSceneRenderer.h"
 
 using namespace HailstormApp;
 using namespace Hailstorm;
@@ -24,7 +24,7 @@ HailstormAppMain::HailstormAppMain(const std::shared_ptr<DeviceResources>& devic
     mTimer.SetTargetElapsedSeconds(1.0 / 60);
 
     // Create the 2d user interface and a 3d demo scene.
-    mSceneRenderer = std::unique_ptr<SceneRenderer>(new ColoredCubeSceneRenderer(mDeviceResources));
+    mSceneRenderer = std::unique_ptr<SceneRenderer>(new LandscapeDemoSceneRenderer(mDeviceResources));
     mGameHudRenderer = std::unique_ptr<GameHudRenderer>(new GameHudRenderer(mDeviceResources));
 }
 

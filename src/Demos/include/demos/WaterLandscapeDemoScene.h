@@ -24,6 +24,7 @@
 class LandscapeMesh;
 class WaterMesh;
 
+#include <array>
 #include <memory>                       // Shared pointers.
 #include <wrl\wrappers\corewrappers.h>  // ComPtr.
 #include <wrl\client.h>                 // ComPtr friends.
@@ -64,7 +65,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D10Effect> mLandscapeEffect;
     std::shared_ptr<Camera> mCamera;
 
-    Light mLights[3];
+    std::array<Light, 3> mLights;
     int mLightType;
 
     std::unique_ptr<LandscapeMesh> mTerrainMesh;

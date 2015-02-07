@@ -14,10 +14,15 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Common\Camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\StepTimer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Rendering\Light.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Rendering\WaterMesh.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Scenes\ColoredCubeSceneRenderer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scenes\LandscapeDemoSceneRenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Scenes\SceneRenderer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)UserInterface\GameHudRenderer.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\Camera.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)HailstormAppMain.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)HailstormAppMain.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pch.h" />
@@ -28,8 +33,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\DeviceResources.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\DirectXHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\StepTimer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Rendering\Light.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Rendering\ShaderStructures.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Rendering\WaterMesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Scenes\ColoredCubeSceneRenderer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scenes\LandscapeDemoSceneRenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Scenes\SceneRenderer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)UserInterface\GameHudRenderer.h" />
   </ItemGroup>
