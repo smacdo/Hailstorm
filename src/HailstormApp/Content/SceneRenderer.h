@@ -6,12 +6,14 @@
 
 namespace HailstormApp
 {
-	// This sample renderer instantiates a basic rendering pipeline.
-	class Sample3DSceneRenderer
+    /**
+     * Renders a standard Hailstorm scene.
+     */
+	class SceneRenderer
 	{
 	public:
-		Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
-		~Sample3DSceneRenderer();
+		SceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
+		~SceneRenderer();
 		void CreateDeviceDependentResources();
 		void CreateWindowSizeDependentResources();
 		void Update(DX::StepTimer const& timer);
