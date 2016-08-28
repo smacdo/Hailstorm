@@ -18,3 +18,19 @@ ipch/*
 Installer/bin/*
 Installer/obj/*
 game/bin/*
+*.cso
+*.winmd
+*.xbf
+/Debug/HailstormApp.Windows/AppX/resources.pri
+/Debug/HailstormApp.Windows/AppX/vs.appxrecipe
+/Debug/HailstormApp.Windows/AppxManifest.xml
+*.obj
+*.lastbuildstate
+*.tlog
+*.opendb
+*.resfiles
+*.intermediate
+*.pch
+*.idb
+/HailstormApp/HailstormApp.Windows/Generated Files/App.g.h
+/HailstormApp/HailstormApp.Windows/Generated Files/App.g.hpp
